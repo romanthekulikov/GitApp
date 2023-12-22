@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GitApp</string>
+    <string name="enter_owner_hint">Enter owner</string>
+    <string name="list_repositories_text">List of owner repositories</string>
+</resources>
