@@ -1,14 +1,20 @@
 package com.example.gitapp.retrofit.entities
 
 import com.squareup.moshi.Json
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 data class GitStarredEntity(
     @Json(name = "starred_at")
     var starredTimeString: String,
-    var starredTime: Long,
     @Json(name = "user")
     val starredUser: StarredUser
-)
+) {
+    fun getTime(): Long {
+        return SimpleDateFormat("yyyy-MM-dd", Locale("ru"))
+            .parse(starredTimeString.substring(0, 9))?.time ?: System.currentTimeMillis()
+    }
+}
 
 data class StarredUser(
     @Json(name = "login")

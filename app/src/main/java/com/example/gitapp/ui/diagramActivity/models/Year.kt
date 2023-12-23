@@ -1,18 +1,16 @@
 package com.example.gitapp.ui.diagramActivity.models
 
-import com.example.gitapp.retrofit.entities.GitStarredEntity
-
 data class Year(
-    val december: MutableList<GitStarredEntity> = mutableListOf(),
-    val january: MutableList<GitStarredEntity> = mutableListOf(),
-    val february: MutableList<GitStarredEntity> = mutableListOf(),
-    val march: MutableList<GitStarredEntity> = mutableListOf(),
-    val april: MutableList<GitStarredEntity> = mutableListOf(),
-    val may: MutableList<GitStarredEntity> = mutableListOf(),
-    val june: MutableList<GitStarredEntity> = mutableListOf(),
-    val july: MutableList<GitStarredEntity> = mutableListOf(),
-    val august: MutableList<GitStarredEntity> = mutableListOf(),
-    val september: MutableList<GitStarredEntity> = mutableListOf(),
-    val october: MutableList<GitStarredEntity> = mutableListOf(),
-    val november: MutableList<GitStarredEntity> = mutableListOf(),
+    val december: MutableList<Month> = mutableListOf(),
+    val january: MutableList<Month> = mutableListOf(),
+    val february: MutableList<Month> = mutableListOf(),
+    val march: MutableList<Month> = mutableListOf(),
+    val april: MutableList<Month> = mutableListOf(),
+    val may: MutableList<Month> = mutableListOf(),
+    val june: MutableList<Month> = mutableListOf(),
+    val july: MutableList<Month> = mutableListOf(),
+    val august: MutableList<Month> = mutableListOf(),
+    val september: MutableList<Month> = mutableListOf(),
+    val october: MutableList<Month> = mutableListOf(),
+    val november: MutableList<Month> = mutableListOf()
 )
