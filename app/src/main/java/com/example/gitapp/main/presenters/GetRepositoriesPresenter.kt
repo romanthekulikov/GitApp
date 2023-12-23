@@ -22,12 +22,14 @@ private const val FETCH_REPOSITORY_ERROR = "List is empty"
 @InjectViewState
 class GetRepositoriesPresenter : MvpPresenter<OwnerEditTextView>() {
     private var repositoryList: List<GitRepositoryResponse>? = mutableListOf()
+    private var ownerIcon: Bitmap? = null
 
     fun getRepositories(ownerName: String, listener: RepositoriesAdapter.RepositoryClickListener, context: Context) {
         viewState.changeVisibilityProgressBar(View.VISIBLE)
         val client = GitApiClient
             .apiService
             .fetchOwnerRepositories(ownerName = ownerName)
+
         client.enqueue(object : Callback<List<GitRepositoryResponse>> {
             override fun onResponse(
                 call: Call<List<GitRepositoryResponse>>,
@@ -36,31 +38,7 @@ class GetRepositoriesPresenter : MvpPresenter<OwnerEditTextView>() {
                 repositoryList = response.body()
 
                 try {
-                    //showRepositories(listener = listener, context = context)
-                    val emptyBitmap = Bitmap.createBitmap(30, 30, Bitmap.Config.ARGB_8888)
-                    Glide.with(context)
-                        .asBitmap()
-                        .load(repositoryList!![0].owner.avatarUrl)
-                        .circleCrop()
-                        .into(object : CustomTarget<Bitmap>() {
-                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                                val repositoriesAdapter = RepositoriesAdapter(
-                                    repositoryList = repositoryList!!,
-                                    ownerImage = resource,
-                                    listener = listener
-                                )
-                                viewState.showRepositories(listRepos = repositoryList!!, adapter = repositoriesAdapter)
-                            }
-
-                            override fun onLoadCleared(placeholder: Drawable?) {
-                                val repositoriesAdapter = RepositoriesAdapter(
-                                    repositoryList = repositoryList!!,
-                                    ownerImage = emptyBitmap,
-                                    listener = listener
-                                )
-                                viewState.showRepositories(listRepos = repositoryList!!, adapter = repositoriesAdapter)
-                            }
-                        })
+                    showRepositories(listener = listener, context = context)
                 } catch (ex: NullPointerException) {
                     viewState.showError(FETCH_REPOSITORY_ERROR)
                 } catch (ex: IndexOutOfBoundsException) {
@@ -80,17 +58,19 @@ class GetRepositoriesPresenter : MvpPresenter<OwnerEditTextView>() {
         })
     }
 
-    private fun showRepositories(listener: RepositoriesAdapter.RepositoryClickListener, context: Context) {
-        val emptyBitmap = Bitmap.createBitmap(30, 30, Bitmap.Config.ARGB_8888)
+    fun showRepositories(listener: RepositoriesAdapter.RepositoryClickListener, context: Context) {
+        ownerIcon = Bitmap.createBitmap(30, 30, Bitmap.Config.ARGB_8888)
+        val ownerIconUrl = repositoryList!![0].owner.avatarUrl
         Glide.with(context)
             .asBitmap()
-            .load(repositoryList!![0].owner.avatarUrl)
+            .load(ownerIconUrl)
             .circleCrop()
             .into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    ownerIcon = resource
                     val repositoriesAdapter = RepositoriesAdapter(
                         repositoryList = repositoryList!!,
-                        ownerImage = resource,
+                        ownerImage = ownerIcon!!,
                         listener = listener
                     )
                     viewState.showRepositories(listRepos = repositoryList!!, adapter = repositoriesAdapter)
@@ -99,7 +79,7 @@ class GetRepositoriesPresenter : MvpPresenter<OwnerEditTextView>() {
                 override fun onLoadCleared(placeholder: Drawable?) {
                     val repositoriesAdapter = RepositoriesAdapter(
                         repositoryList = repositoryList!!,
-                        ownerImage = emptyBitmap,
+                        ownerImage = ownerIcon!!,
                         listener = listener
                     )
                     viewState.showRepositories(listRepos = repositoryList!!, adapter = repositoriesAdapter)
