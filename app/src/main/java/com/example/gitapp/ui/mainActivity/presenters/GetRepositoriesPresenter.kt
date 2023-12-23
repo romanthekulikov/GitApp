@@ -1,4 +1,4 @@
-package com.example.gitapp.main.presenters
+package com.example.gitapp.ui.mainActivity.presenters
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -7,10 +7,10 @@ import android.view.View
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.example.gitapp.main.adapters.RepositoriesAdapter
-import com.example.gitapp.main.views.OwnerEditTextView
+import com.example.gitapp.ui.mainActivity.adapters.RepositoriesAdapter
+import com.example.gitapp.ui.mainActivity.views.OwnerEditTextView
 import com.example.gitapp.retrofit.GitApiClient
-import com.example.gitapp.retrofit.GitRepositoryResponse
+import com.example.gitapp.retrofit.entities.GitRepositoryEntity
 import moxy.InjectViewState
 import moxy.MvpPresenter
 import retrofit2.Call
@@ -21,19 +21,19 @@ private const val FETCH_REPOSITORY_ERROR = "List is empty"
 
 @InjectViewState
 class GetRepositoriesPresenter : MvpPresenter<OwnerEditTextView>() {
-    private var repositoryList: List<GitRepositoryResponse>? = mutableListOf()
+    private var repositoryList: List<GitRepositoryEntity>? = mutableListOf()
     private var ownerIcon: Bitmap? = null
 
     fun getRepositories(ownerName: String, listener: RepositoriesAdapter.RepositoryClickListener, context: Context) {
         viewState.changeVisibilityProgressBar(View.VISIBLE)
         val client = GitApiClient
             .apiService
-            .fetchOwnerRepositories(ownerName = ownerName)
+            .fetchOwnerRepositories(ownerName = ownerName, 100)
 
-        client.enqueue(object : Callback<List<GitRepositoryResponse>> {
+        client.enqueue(object : Callback<List<GitRepositoryEntity>> {
             override fun onResponse(
-                call: Call<List<GitRepositoryResponse>>,
-                response: Response<List<GitRepositoryResponse>>
+                call: Call<List<GitRepositoryEntity>>,
+                response: Response<List<GitRepositoryEntity>>
             ) {
                 repositoryList = response.body()
 
@@ -48,7 +48,7 @@ class GetRepositoriesPresenter : MvpPresenter<OwnerEditTextView>() {
                 }
             }
 
-            override fun onFailure(call: Call<List<GitRepositoryResponse>>, t: Throwable) {
+            override fun onFailure(call: Call<List<GitRepositoryEntity>>, t: Throwable) {
                 try {
                     viewState.showError(t.message!!)
                 } catch (_: NullPointerException) {

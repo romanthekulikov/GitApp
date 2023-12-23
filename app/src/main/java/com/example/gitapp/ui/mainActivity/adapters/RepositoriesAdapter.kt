@@ -1,14 +1,14 @@
-package com.example.gitapp.main.adapters
+package com.example.gitapp.ui.mainActivity.adapters
 
 import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gitapp.databinding.ItemRepositoryBinding
-import com.example.gitapp.retrofit.GitRepositoryResponse
+import com.example.gitapp.retrofit.entities.GitRepositoryEntity
 
 class RepositoriesAdapter(
-    private val repositoryList: List<GitRepositoryResponse>,
+    private val repositoryList: List<GitRepositoryEntity>,
     private val ownerImage: Bitmap,
     private val listener: RepositoryClickListener
 ) :
@@ -18,7 +18,7 @@ class RepositoriesAdapter(
         private val binding: ItemRepositoryBinding
     ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: GitRepositoryResponse) {
+        fun bind(item: GitRepositoryEntity) {
             binding.repositoryName.text = item.repositoryName
             binding.ownerIcon.setImageBitmap(ownerImage)
             binding.view.setOnClickListener {
@@ -47,6 +47,6 @@ class RepositoriesAdapter(
     }
 
     interface RepositoryClickListener {
-        fun onRepositoryClick(repository: GitRepositoryResponse)
+        fun onRepositoryClick(repository: GitRepositoryEntity)
     }
 }

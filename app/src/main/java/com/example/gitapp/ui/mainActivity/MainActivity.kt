@@ -1,14 +1,17 @@
-package com.example.gitapp.main
+package com.example.gitapp.ui.mainActivity
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gitapp.databinding.ActivityMainBinding
-import com.example.gitapp.main.adapters.RepositoriesAdapter
-import com.example.gitapp.main.presenters.GetRepositoriesPresenter
-import com.example.gitapp.main.views.OwnerEditTextView
-import com.example.gitapp.retrofit.GitRepositoryResponse
+import com.example.gitapp.ui.mainActivity.adapters.RepositoriesAdapter
+import com.example.gitapp.ui.mainActivity.presenters.GetRepositoriesPresenter
+import com.example.gitapp.ui.mainActivity.views.OwnerEditTextView
+import com.example.gitapp.retrofit.entities.GitRepositoryEntity
+import com.example.gitapp.ui.IntentKeys
+import com.example.gitapp.ui.diagramActivity.DiagramActivity
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
 
@@ -31,7 +34,7 @@ class MainActivity : MvpAppCompatActivity(), OwnerEditTextView,
         }
     }
 
-    override fun showRepositories(listRepos: List<GitRepositoryResponse>, adapter: RepositoriesAdapter) {
+    override fun showRepositories(listRepos: List<GitRepositoryEntity>, adapter: RepositoriesAdapter) {
         binding.repositories.layoutManager = LinearLayoutManager(this@MainActivity)
         binding.repositories.adapter = adapter
     }
@@ -44,7 +47,13 @@ class MainActivity : MvpAppCompatActivity(), OwnerEditTextView,
         Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
     }
 
-    override fun onRepositoryClick(repository: GitRepositoryResponse) {
+    override fun onRepositoryClick(repository: GitRepositoryEntity) {
+        val intent = Intent(this@MainActivity, DiagramActivity::class.java)
+        intent.putExtra(IntentKeys.repositoryName, repository.repositoryName)
+        intent.putExtra(IntentKeys.repositoryOwnerIconUrl, repository.owner.avatarUrl)
+        intent.putExtra(IntentKeys.ownerName, repository.owner.name)
+        intent.putExtra(IntentKeys.stargazersCount, repository.stargazersCount)
 
+        startActivity(intent)
     }
 }
