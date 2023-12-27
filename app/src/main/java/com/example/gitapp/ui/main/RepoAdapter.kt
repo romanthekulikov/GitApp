@@ -1,18 +1,25 @@
-package com.example.gitapp.ui.mainActivity.adapters
+package com.example.gitapp.ui.main
 
 import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gitapp.databinding.ItemRepositoryBinding
-import com.example.gitapp.retrofit.entities.GitRepositoryEntity
+import com.example.gitapp.data.api.entities.GitRepositoryEntity
 
-class RepositoriesAdapter(
+class RepoAdapter(
     private val repositoryList: List<GitRepositoryEntity>,
-    private val ownerImage: Bitmap,
     private val listener: RepositoryClickListener
-) :
-    RecyclerView.Adapter<RepositoriesAdapter.RepositoryViewHolder>() {
+) : RecyclerView.Adapter<RepoAdapter.RepositoryViewHolder>() {
+
+    private var ownerIcon: Bitmap = Bitmap.createBitmap(30, 30, Bitmap.Config.ARGB_8888)
+
+    constructor(repositoryList: List<GitRepositoryEntity>,
+                listener: RepositoryClickListener,
+                ownerIcon: Bitmap
+    ) : this(repositoryList, listener) {
+        this.ownerIcon = ownerIcon
+    }
 
     inner class RepositoryViewHolder(
         private val binding: ItemRepositoryBinding
@@ -20,7 +27,7 @@ class RepositoriesAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: GitRepositoryEntity) {
             binding.repositoryName.text = item.repositoryName
-            binding.ownerIcon.setImageBitmap(ownerImage)
+            binding.ownerIcon.setImageBitmap(ownerIcon)
             binding.view.setOnClickListener {
                 listener.onRepositoryClick(item)
             }

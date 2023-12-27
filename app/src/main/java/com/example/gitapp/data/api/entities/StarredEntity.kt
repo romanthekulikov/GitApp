@@ -1,4 +1,4 @@
-package com.example.gitapp.retrofit.entities
+package com.example.gitapp.data.api.entities
 
 import com.squareup.moshi.Json
 import java.text.SimpleDateFormat

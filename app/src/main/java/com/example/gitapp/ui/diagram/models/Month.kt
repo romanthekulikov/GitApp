@@ -1,4 +1,4 @@
-package com.example.gitapp.ui.diagramActivity.models
+package com.example.gitapp.ui.diagram.models
 
 data class Month(
     val first: MutableList<Weak> = mutableListOf(),

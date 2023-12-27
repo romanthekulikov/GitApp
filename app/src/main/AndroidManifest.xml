@@ -16,10 +16,10 @@
         android:theme="@style/Theme.GitApp"
         tools:targetApi="31">
         <activity
-            android:name=".ui.diagramActivity.DiagramActivity"
+            android:name=".ui.diagram.DiagramActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.mainActivity.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

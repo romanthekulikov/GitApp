@@ -1,12 +1,9 @@
-package com.example.gitapp.ui.diagramActivity.presenters
+package com.example.gitapp.ui.diagram
 
-import android.os.Bundle
 import android.view.View
-import com.example.gitapp.retrofit.GitApiClient
-import com.example.gitapp.retrofit.entities.GitStarredEntity
-import com.example.gitapp.ui.IntentKeys
-import com.example.gitapp.ui.diagramActivity.models.Weak
-import com.example.gitapp.ui.diagramActivity.views.DiagramView
+import com.example.gitapp.data.api.GitApiClient
+import com.example.gitapp.data.api.entities.GitStarredEntity
+import com.example.gitapp.ui.diagram.models.Weak
 import moxy.InjectViewState
 import moxy.MvpPresenter
 import retrofit2.Call
@@ -19,18 +16,20 @@ import java.util.Date
 //const val WEAK = 1
 //const val YEAR = 2
 @InjectViewState
-class DiagramPresenter : MvpPresenter<DiagramView>() {
-    private var ownerName = ""
-    private var repositoryName = ""
+class DiagramPresenter(private val repositoryName: String,
+                       private val ownerName: String,
+                       private val ownerIconUrl: String,
+                       private val stargazersCount: Int) : MvpPresenter<DiagramView>() {
+    init {
+        getAllStarred()
+        displayRepository()
+    }
+
     private var currentPageItemsStarred: MutableList<GitStarredEntity> = mutableListOf()
     private var listPageItemsStarred: MutableList<GitStarredEntity> = mutableListOf()
-    private var stargazersCount = 0
     //private var diagramMode: Int = DAY
     private var wealList = mutableListOf<Weak>()
-    fun getAllStarred(extras: Bundle) {
-        ownerName = extras.getString(IntentKeys.ownerName, "")
-        repositoryName = extras.getString(IntentKeys.repositoryName, "")
-        stargazersCount = extras.getInt(IntentKeys.stargazersCount, 0)
+    private fun getAllStarred() {
         val pageCount: Int = (stargazersCount / 100) + 1
         viewState.changeVisibilityProgressBar(View.VISIBLE)
         for (page in 0..pageCount) {
@@ -54,6 +53,10 @@ class DiagramPresenter : MvpPresenter<DiagramView>() {
 
             })
         }
+    }
+
+    private fun displayRepository() {
+        viewState.displayRepositoryItem(name = repositoryName, ownerIconUrl = ownerIconUrl)
     }
 
     private fun splitPageItemsStarred() {

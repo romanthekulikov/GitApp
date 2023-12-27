@@ -1,4 +1,4 @@
-package com.example.gitapp.ui.diagramActivity.models
+package com.example.gitapp.ui.diagram.models
 
 data class Year(
     val december: MutableList<Month> = mutableListOf(),

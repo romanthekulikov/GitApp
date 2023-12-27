@@ -1,7 +1,7 @@
-package com.example.gitapp.retrofit
+package com.example.gitapp.data.api
 
-import com.example.gitapp.retrofit.entities.GitRepositoryEntity
-import com.example.gitapp.retrofit.entities.GitStarredEntity
+import com.example.gitapp.data.api.entities.GitRepositoryEntity
+import com.example.gitapp.data.api.entities.GitStarredEntity
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Headers

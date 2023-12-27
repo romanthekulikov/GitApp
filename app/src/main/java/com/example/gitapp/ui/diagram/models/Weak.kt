@@ -1,6 +1,6 @@
-package com.example.gitapp.ui.diagramActivity.models
+package com.example.gitapp.ui.diagram.models
 
-import com.example.gitapp.retrofit.entities.GitStarredEntity
+import com.example.gitapp.data.api.entities.GitStarredEntity
 
 data class Weak(
     val monday: MutableList<GitStarredEntity> = mutableListOf(),
