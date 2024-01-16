@@ -6,7 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 object GitApiClient {
-    private val BASE_URL = "https://api.github.com/"
+    private const val BASE_URL = "https://api.github.com/"
     private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)

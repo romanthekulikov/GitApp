@@ -66,4 +66,6 @@ dependencies {
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    //Paging
+    implementation "android.arch.paging:runtime:1.0.1"
 }

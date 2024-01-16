@@ -1,48 +1,63 @@
 package com.example.gitapp.ui.main
 
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.view.View
-import com.example.gitapp.data.api.GitApiClient
+import androidx.lifecycle.LiveData
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
 import com.example.gitapp.data.api.entities.GitRepositoryEntity
+import com.example.gitapp.ui.main.paging.RepoPositionalDataSourceFactory
 import moxy.InjectViewState
 import moxy.MvpPresenter
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import java.util.concurrent.Executors
 
-private const val FETCH_REPOSITORY_ERROR = "List is empty"
+
+const val INTERNET_CONNECTION_ERROR = "No internet connection"
 
 @InjectViewState
 class MainPresenter : MvpPresenter<MainView>() {
-    private var repositoryList: List<GitRepositoryEntity>? = mutableListOf()
+    fun requestGetRepositories(connectivityManager: ConnectivityManager, ownerName: String) {
+        if (hasConnection(connectivityManager)) {
+            viewState.changeVisibilityProgressBar(View.VISIBLE)
+            val dataSourceFactory = RepoPositionalDataSourceFactory(ownerName)
+            val config = PagedList.Config.Builder()
+                .setEnablePlaceholders(false)
+                .setPageSize(100)
+                .build()
 
-    fun requestGetRepositories(ownerName: String) {
-        viewState.changeVisibilityProgressBar(View.VISIBLE)
-        val client = GitApiClient.apiService
-            .fetchOwnerRepositories(ownerName = ownerName, 100)
+            val pagedListLiveData: LiveData<PagedList<GitRepositoryEntity>> = LivePagedListBuilder(dataSourceFactory, config)
+                .setFetchExecutor(Executors.newSingleThreadExecutor())
+                .setBoundaryCallback(object : PagedList.BoundaryCallback<GitRepositoryEntity>() {
+                    override fun onZeroItemsLoaded() {
+                        viewState.showEmptyListRepo()
+                        viewState.changeVisibilityProgressBar(View.GONE)
+                    }
 
-        client.enqueue(object : Callback<List<GitRepositoryEntity>> {
-            override fun onResponse(
-                call: Call<List<GitRepositoryEntity>>,
-                response: Response<List<GitRepositoryEntity>>
-            ) {
-                repositoryList = response.body()
-                try {
-                    viewState.showRepositories(listRepos = repositoryList!!)
-                } catch (ex: NullPointerException) {
-                    viewState.showError(FETCH_REPOSITORY_ERROR)
-                } catch (ex: IndexOutOfBoundsException) {
-                    viewState.showError(FETCH_REPOSITORY_ERROR)
-                } finally {
-                    viewState.changeVisibilityProgressBar(View.GONE)
-                }
+                    override fun onItemAtFrontLoaded(itemAtFront: GitRepositoryEntity) {
+                        viewState.changeVisibilityProgressBar(View.GONE)
+                    }
+                })
+                .build()
+
+            viewState.showRepositories(pagedListLiveData)
+        } else {
+            viewState.showError(INTERNET_CONNECTION_ERROR)
+        }
+    }
+
+    private fun hasConnection(connectivityManager: ConnectivityManager): Boolean {
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        if (capabilities != null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                return true
             }
-
-            override fun onFailure(call: Call<List<GitRepositoryEntity>>, t: Throwable) {
-                try {
-                    viewState.showError(t.message!!)
-                } catch (_: NullPointerException) {}
-            }
-
-        })
+        }
+        return false
     }
 }

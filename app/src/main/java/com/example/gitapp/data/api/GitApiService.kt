@@ -12,8 +12,9 @@ interface GitApiService {
     @GET("/users/{user}/repos")
     fun fetchOwnerRepositories(
         @Path(value = "user") ownerName: String,
-        @Query(value = "per_page") itemInPageCount: Int
-    ): Call<List<GitRepositoryEntity>> //TODO:
+        @Query(value = "page") numberOfPage: Int,
+        @Query(value = "per_page") numberOfItemInPage: Int
+    ): Call<List<GitRepositoryEntity>>
 
     @Headers("Accept: application/vnd.github.v3.star+json")
     @GET("repos/{user}/{repos}/stargazers")

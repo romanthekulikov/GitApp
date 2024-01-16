@@ -81,6 +81,18 @@
         app:layout_constraintTop_toBottomOf="@+id/repo_label"
         tools:listitem="@layout/item_repository" />
 
+    <TextView
+        android:id="@+id/stub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/repo_stub"
+        android:visibility="gone"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/repositories"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/repo_label" />
+
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="wrap_content"
