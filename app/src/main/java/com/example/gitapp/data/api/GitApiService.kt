@@ -1,6 +1,6 @@
 package com.example.gitapp.data.api
 
-import com.example.gitapp.data.api.entities.GitRepositoryEntity
+import com.example.gitapp.data.api.entities.ApiRepo
 import com.example.gitapp.data.api.entities.GitStarredEntity
 import retrofit2.Call
 import retrofit2.http.GET
@@ -10,11 +10,11 @@ import retrofit2.http.Query
 
 interface GitApiService {
     @GET("/users/{user}/repos")
-    fun fetchOwnerRepositories(
+    fun fetchOwnerRepos(
         @Path(value = "user") ownerName: String,
         @Query(value = "page") numberOfPage: Int,
-        @Query(value = "per_page") numberOfItemInPage: Int
-    ): Call<List<GitRepositoryEntity>>
+        @Query(value = "per_page") numberOfItemInPage: Int = 100
+    ): Call<List<ApiRepo>>
 
     @Headers("Accept: application/vnd.github.v3.star+json")
     @GET("repos/{user}/{repos}/stargazers")

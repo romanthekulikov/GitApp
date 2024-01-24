@@ -1,14 +1,14 @@
 package com.example.gitapp.data.database
 
 import androidx.room.Entity
-import com.example.gitapp.data.entity.Owner
-import com.example.gitapp.data.entity.RepoEntity
+import com.example.gitapp.entity.Owner
+import com.example.gitapp.entity.Repo
 
 @Entity
-data class DbRepoEntity(
+data class DbRepo(
     override val id: Int,
-    override val repositoryName: String,
+    override val name: String,
     override val isPrivate: Boolean,
     override val owner: Owner,
     override val stargazersCount: Int
-) : RepoEntity
+) : Repo

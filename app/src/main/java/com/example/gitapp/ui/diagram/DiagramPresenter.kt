@@ -3,9 +3,9 @@ package com.example.gitapp.ui.diagram
 import android.view.View
 import com.example.gitapp.data.api.GitApiClient
 import com.example.gitapp.data.api.entities.GitStarredEntity
+import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.diagram.models.Weak
 import moxy.InjectViewState
-import moxy.MvpPresenter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -19,7 +19,7 @@ import java.util.Date
 class DiagramPresenter(private val repositoryName: String,
                        private val ownerName: String,
                        private val ownerIconUrl: String,
-                       private val stargazersCount: Int) : MvpPresenter<DiagramView>() {
+                       private val stargazersCount: Int) : BasePresenter<DiagramView>() {
     init {
         getAllStarred()
         displayRepository()
@@ -28,7 +28,7 @@ class DiagramPresenter(private val repositoryName: String,
     private var currentPageItemsStarred: MutableList<GitStarredEntity> = mutableListOf()
     private var listPageItemsStarred: MutableList<GitStarredEntity> = mutableListOf()
     //private var diagramMode: Int = DAY
-    private var wealList = mutableListOf<Weak>()
+    private var weakList = mutableListOf<Weak>()
     private fun getAllStarred() {
         val pageCount: Int = (stargazersCount / 100) + 1
         viewState.changeVisibilityProgressBar(View.VISIBLE)
@@ -48,7 +48,7 @@ class DiagramPresenter(private val repositoryName: String,
                 }
 
                 override fun onFailure(call: Call<List<GitStarredEntity>>, t: Throwable) {
-                    t.message?.let { viewState.showError(it) }
+                    t.message?.let { showError(message = it) }
                 }
 
             })
@@ -67,7 +67,7 @@ class DiagramPresenter(private val repositoryName: String,
             calendar.time = Date(listPageItemsStarred[pageIndex].getTime())
             val weakDay = calendar.get(Calendar.DAY_OF_WEEK)
             if (weakDay < lastDay) {
-                wealList.add(weak)
+                weakList.add(weak)
                 weak = Weak()
             }
             lastDay = weakDay
@@ -80,7 +80,7 @@ class DiagramPresenter(private val repositoryName: String,
                 Calendar.SATURDAY -> weak.saturday.add(listPageItemsStarred[pageIndex])
                 Calendar.SUNDAY -> {
                     weak.sunday.add(listPageItemsStarred[pageIndex])
-                    wealList.add(weak)
+                    weakList.add(weak)
                     weak = Weak()
                 }
             }

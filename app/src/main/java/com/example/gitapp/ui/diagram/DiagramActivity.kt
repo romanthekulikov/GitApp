@@ -9,10 +9,10 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.gitapp.databinding.ActivityDiagramBinding
-import com.example.gitapp.ui.base.BaseMvpActivity
+import com.example.gitapp.ui.base.BaseActivity
 import moxy.ktx.moxyPresenter
 
-class DiagramActivity : BaseMvpActivity(), DiagramView {
+class DiagramActivity : BaseActivity(), DiagramView {
     private lateinit var binding: ActivityDiagramBinding
     private val diagramPresenter by moxyPresenter {
         val extras = intent.extras!!
@@ -32,7 +32,7 @@ class DiagramActivity : BaseMvpActivity(), DiagramView {
     }
 
     override fun displayRepositoryItem(name: String, ownerIconUrl: String) {
-        binding.repository.repositoryName.text = name
+        binding.repository.repoName.text = name
         Glide.with(this@DiagramActivity)
             .asBitmap()
             .circleCrop()
@@ -59,14 +59,14 @@ class DiagramActivity : BaseMvpActivity(), DiagramView {
             fromWhomContext: Context,
             repositoryName: String,
             ownerName: String,
-            repositoryOwnerIconUrl: String,
+            ownerIconUrl: String,
             stargazersCount: Int
         ): Intent {
             val intent = Intent(fromWhomContext, DiagramActivity::class.java)
             intent.putExtra(repositoryNameKey, repositoryName)
             intent.putExtra(ownerNameKey, ownerName)
             intent.putExtra(stargazersCountKey, stargazersCount)
-            intent.putExtra(ownerIconUrlKey, repositoryOwnerIconUrl)
+            intent.putExtra(ownerIconUrlKey, ownerIconUrl)
 
             return intent
         }

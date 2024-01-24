@@ -3,4 +3,8 @@
     <string name="enter_owner_hint">Enter owner</string>
     <string name="list_repositories_text">List of owner repositories</string>
     <string name="repo_stub">No repositories found</string>
+    <string name="loading">Loading...</string>
+    <string name="loading_error">Oops, something went wrong</string>
+    <string name="try_again">Try again</string>
+    <string name="stub_name_of_repository">Name of repository</string>
 </resources>

@@ -70,7 +70,7 @@
         app:layout_constraintStart_toStartOf="@+id/guideline_padding_start"
         app:layout_constraintTop_toBottomOf="@+id/owner_edit_text" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.omega_r.libs.omegarecyclerview.OmegaRecyclerView
         android:id="@+id/repositories"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -79,7 +79,7 @@
         app:layout_constraintEnd_toStartOf="@+id/guideline_padding_end"
         app:layout_constraintStart_toStartOf="@+id/guideline_padding_start"
         app:layout_constraintTop_toBottomOf="@+id/repo_label"
-        tools:listitem="@layout/item_repository" />
+        tools:listitem="@layout/item_repo" />
 
     <TextView
         android:id="@+id/stub"
@@ -92,14 +92,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/repo_label" />
-
-    <ProgressBar
-        android:id="@+id/progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
