@@ -7,21 +7,35 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.gitapp.data.api.entities.ApiRepo
+import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.databinding.ActivityMainBinding
 import com.example.gitapp.ui.base.BaseActivity
 import com.example.gitapp.ui.diagram.DiagramActivity
 import com.omega_r.libs.omegarecyclerview.pagination.OnPageRequestListener
 import moxy.ktx.moxyPresenter
+//import java.time.DayOfWeek
+//import java.time.LocalDate
+//import java.time.format.DateTimeFormatter
+//import java.util.Locale
 
+
+//class Main : Application() {
+//    lateinit var appComponent: AppComponent
+//    override fun onCreate() {
+//        super.onCreate()
+//            appComponent = DaggerAppComp
+//    }
+//}
 
 class MainActivity : BaseActivity(), MainView,
     RepoAdapter.RepoRecyclerHelper, OnPageRequestListener {
     private lateinit var binding: ActivityMainBinding
+    //@Inject
     private lateinit var repoAdapter: RepoAdapter
     private var ownerName = ""
     private var pageRepo = 0
 
+    //@Inject
     private val mainPresenter by moxyPresenter { MainPresenter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,8 +1,14 @@
 package com.example.gitapp.ui.diagram.models
 
 data class Month(
-    val first: MutableList<Weak> = mutableListOf(),
-    val second: MutableList<Weak> = mutableListOf(),
-    val third: MutableList<Weak> = mutableListOf(),
-    val fourth: MutableList<Weak> = mutableListOf()
-)
+    val weeks: MutableList<Week> = mutableListOf()
+) : Period {
+    override fun getStargazerCount(): Int {
+        var count = 0
+        for (week in weeks) {
+            count += week.getStargazerCount()
+        }
+        return count
+    }
+
+}

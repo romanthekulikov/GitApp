@@ -5,31 +5,25 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.gitapp.data.api.entities.ApiRepo
+import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.databinding.ItemErrorProgressBinding
 import com.example.gitapp.databinding.ItemProgressBinding
 import com.example.gitapp.databinding.ItemRepoBinding
 import com.omega_r.libs.omegarecyclerview.OmegaRecyclerView
 import com.omega_r.libs.omegarecyclerview.pagination.PaginationViewCreator
+import javax.inject.Inject
 
 
-class RepoAdapter(private val helper: RepoRecyclerHelper) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(),
+class RepoAdapter @Inject constructor(private val helper: RepoRecyclerHelper) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(),
     PaginationViewCreator {
-    private val listRepo = mutableListOf<ApiRepo>()
-    inner class RepoViewHolder(
-        private val binding: ItemRepoBinding
-    ) : OmegaRecyclerView.ViewHolder(binding.root) {
-        fun bind(item: ApiRepo) {
-            Glide.with(this.itemView).load(item.owner.avatarUrl).circleCrop().into(binding.ownerIcon)
-            binding.repoName.text = item.name
-            binding.view.setOnClickListener {
-                helper.onRepoClicked(item)
-            }
-        }
-    }
+    private val repoList = mutableListOf<ApiRepo>()
 
     init {
         setHasStableIds(true)
+    }
+
+    override fun getItemCount(): Int {
+        return repoList.size
     }
 
     override fun getItemId(position: Int): Long {
@@ -46,12 +40,8 @@ class RepoAdapter(private val helper: RepoRecyclerHelper) : OmegaRecyclerView.Ad
         return RepoViewHolder(binding)
     }
 
-    override fun getItemCount(): Int {
-        return listRepo.size
-    }
-
     override fun onBindViewHolder(holder: RepoViewHolder, position: Int) {
-        holder.bind(listRepo[position])
+        holder.bind(repoList[position])
     }
 
     override fun createPaginationView(parent: ViewGroup?, inflater: LayoutInflater?): View {
@@ -67,14 +57,26 @@ class RepoAdapter(private val helper: RepoRecyclerHelper) : OmegaRecyclerView.Ad
     }
 
     fun addValues(listNewRepo: List<ApiRepo>) {
-        listRepo.addAll(listNewRepo)
-        notifyItemInserted(listRepo.size - listNewRepo.size)
+        repoList.addAll(listNewRepo)
+        notifyItemInserted(repoList.size - listNewRepo.size)
     }
 
     fun clear() {
-        val size = listRepo.size
-        listRepo.clear()
+        val size = repoList.size
+        repoList.clear()
         notifyItemRangeRemoved(0, size)
+    }
+
+    inner class RepoViewHolder(
+        private val binding: ItemRepoBinding
+    ) : OmegaRecyclerView.ViewHolder(binding.root) {
+        fun bind(item: ApiRepo) {
+            Glide.with(this.itemView).load(item.owner.avatarUrl).circleCrop().into(binding.ownerIcon)
+            binding.repoName.text = item.name
+            binding.view.setOnClickListener {
+                helper.onRepoClicked(item)
+            }
+        }
     }
 
     interface RepoRecyclerHelper {
