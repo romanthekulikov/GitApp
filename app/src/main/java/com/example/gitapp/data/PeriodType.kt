@@ -1,4 +1,4 @@
-package com.example.gitapp.ui.diagram
+package com.example.gitapp.data
 
 enum class PeriodType {
     WEAK, MONTH, YEAR

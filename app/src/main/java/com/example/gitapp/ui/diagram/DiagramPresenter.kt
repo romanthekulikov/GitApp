@@ -1,6 +1,8 @@
 package com.example.gitapp.ui.diagram
 
+import android.util.Log
 import android.view.View
+import com.example.gitapp.data.PeriodType
 import com.example.gitapp.data.api.GitApiClient
 import com.example.gitapp.data.api.models.ApiStarredData
 import com.example.gitapp.ui.base.BasePresenter
@@ -9,10 +11,13 @@ import com.example.gitapp.utils.PeriodHelper
 import com.example.gitapp.utils.implementation.HistogramPeriodAdapterImpl
 import com.example.gitapp.utils.implementation.PeriodHelperImpl
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moxy.InjectViewState
+import java.lang.RuntimeException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import javax.inject.Inject
@@ -53,17 +58,25 @@ class DiagramPresenter @Inject constructor(
 
     private fun displayHistogramWithLoadData() {
         viewState.changeVisibilityProgressBar(View.VISIBLE)
-        CoroutineScope(Dispatchers.IO).launch {
-            detectDataShortage()
-            while (!enoughData && downloadPage > 0) {
-                try {
-                    loadData()
-                } catch (e: Exception) {
-                    enoughData = true
-                    displayErrorWithDataIfExist()
+        launch {
+            withContext(Dispatchers.IO) {
+                detectDataShortage()
+                while (!enoughData && downloadPage > 0) {
+                    try {
+                        loadData()
+                    } catch (e: Exception) {
+                        enoughData = true
+
+                    } catch (e: UnknownHostException) {
+                        displayErrorWithDataIfExist(e.message ?: "No internet")
+                    } catch (e: RuntimeException) {
+                        displayErrorWithDataIfExist(e.message ?: "Timed out")
+                    } catch (e: SocketTimeoutException) {
+                        displayErrorWithDataIfExist(e.message ?: "Github is shutdown")
+                    }
                 }
             }
-            CoroutineScope(Dispatchers.Main).launch {
+            withContext(Dispatchers.Main) {
                 displayHistogram()
             }
         }
@@ -82,12 +95,11 @@ class DiagramPresenter @Inject constructor(
         }
     }
 
-    private fun loadData() {
+    private suspend fun loadData() {
         val starClient = GitApiClient
             .apiService
             .fetchRepositoriesStarred(ownerName, repositoryName, 100, downloadPage)
-        val starredList = starClient.execute().body()
-        listPageItemsStargazers = (starredList!! + listPageItemsStargazers).toMutableList()
+        listPageItemsStargazers = (starClient + listPageItemsStargazers).toMutableList()
         val lastDateLoadedStargazer = listPageItemsStargazers[listPageItemsStargazers.size - 1].getLocalDate()
         firstDateLoadedStargazer = listPageItemsStargazers[0].getLocalDate()
 
@@ -96,16 +108,17 @@ class DiagramPresenter @Inject constructor(
             endPeriod = lastDateLoadedStargazer.with(DayOfWeek.SUNDAY)
         }
 
-        if (lastDateLoadedStargazer >= startPeriod || (starredList.size < 100 && downloadPage == 1)) { //Gradual data loading
+        if (firstDateLoadedStargazer < startPeriod || (starClient.size < 100 && downloadPage == 1)) { //Gradual data loading
             enoughData = true
         }
 
         downloadPage--
     }
 
-    private fun displayErrorWithDataIfExist() {
-        CoroutineScope(Dispatchers.Main).launch {
+    private suspend fun displayErrorWithDataIfExist(message: String) {
+        withContext(Dispatchers.Main) {
             viewState.showError("Fetch stargazers error")
+            Log.e("api_retrofit", message)
             if (listPageItemsStargazers.isNotEmpty()) {
                 displayHistogram()
             }
@@ -120,9 +133,11 @@ class DiagramPresenter @Inject constructor(
             PeriodType.WEAK -> {
                 displayWeakDiagram()
             }
+
             PeriodType.MONTH -> {
                 displayMonthDiagram()
             }
+
             PeriodType.YEAR -> {
                 displayYearDiagram()
             }
@@ -154,10 +169,12 @@ class DiagramPresenter @Inject constructor(
                 startPeriod = now.with(DayOfWeek.MONDAY)
                 endPeriod = now.with(DayOfWeek.SUNDAY)
             }
+
             PeriodType.MONTH -> {
                 startPeriod = now.withDayOfMonth(1)
                 endPeriod = now.withDayOfMonth(now.lengthOfMonth())
             }
+
             PeriodType.YEAR -> {
                 startPeriod = now.withDayOfYear(1)
                 endPeriod = now.withDayOfYear(now.lengthOfYear())
@@ -173,10 +190,12 @@ class DiagramPresenter @Inject constructor(
                 startPeriod = startPeriod.plusWeeks(1)
                 endPeriod = endPeriod.plusWeeks(1)
             }
+
             PeriodType.MONTH -> {
                 startPeriod = startPeriod.plusMonths(1)
                 endPeriod = endPeriod.plusMonths(1)
             }
+
             PeriodType.YEAR -> {
                 startPeriod = startPeriod.plusYears(1)
                 endPeriod = endPeriod.plusYears(1)
@@ -190,10 +209,12 @@ class DiagramPresenter @Inject constructor(
                 startPeriod = startPeriod.minusWeeks(1)
                 endPeriod = endPeriod.minusWeeks(1)
             }
+
             PeriodType.MONTH -> {
                 startPeriod = startPeriod.minusMonths(1)
                 endPeriod = endPeriod.minusMonths(1)
             }
+
             PeriodType.YEAR -> {
                 startPeriod = startPeriod.minusYears(1)
                 endPeriod = endPeriod.minusYears(1)

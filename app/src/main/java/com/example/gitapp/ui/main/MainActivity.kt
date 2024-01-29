@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.databinding.ActivityMainBinding
@@ -13,6 +12,7 @@ import com.example.gitapp.ui.base.BaseActivity
 import com.example.gitapp.ui.diagram.DiagramActivity
 import com.omega_r.libs.omegarecyclerview.pagination.OnPageRequestListener
 import moxy.ktx.moxyPresenter
+
 //import java.time.DayOfWeek
 //import java.time.LocalDate
 //import java.time.format.DateTimeFormatter
@@ -30,6 +30,7 @@ import moxy.ktx.moxyPresenter
 class MainActivity : BaseActivity(), MainView,
     RepoAdapter.RepoRecyclerHelper, OnPageRequestListener {
     private lateinit var binding: ActivityMainBinding
+
     //@Inject
     private lateinit var repoAdapter: RepoAdapter
     private var ownerName = ""
@@ -51,6 +52,21 @@ class MainActivity : BaseActivity(), MainView,
         }
 
         initRecyclerView()
+    }
+
+    private fun android.widget.EditText.setOnEnterClickListener(action: () -> Unit) {
+        this.setOnKeyListener { _, keyCode, event ->
+            if (event != null) {
+                if ((event.action == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    action()
+                    this.clearFocus()
+                    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+                }
+            }
+
+            false
+        }
     }
 
     private fun showRepo() {
@@ -85,7 +101,7 @@ class MainActivity : BaseActivity(), MainView,
         binding.repositories.showErrorPagination()
     }
 
-    override fun showEmptyListNotification() {
+    override fun showEmptyNotificationList() {
         binding.repositories.visibility = View.GONE
         binding.stub.visibility = View.VISIBLE
         binding.repositories.hidePagination()
@@ -108,30 +124,10 @@ class MainActivity : BaseActivity(), MainView,
         mainPresenter.requestGetRepo(ownerName = ownerName, page = pageRepo)
     }
 
-    private fun android.widget.EditText.setOnEnterClickListener(action: () -> Unit) {
-        this.setOnKeyListener { _, keyCode, event ->
-            if (event != null) {
-                if ((event.action == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    action()
-                    this.clearFocus()
-                    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
-                }
-            }
-
-            false
-        }
-    }
-
     override fun onPageRequest(page: Int) {
         pageRepo = page
         if (page > 0) { //Zero and first page are equal
-            try {
-                mainPresenter.requestGetRepo(ownerName = ownerName, page = pageRepo)
-            } catch (e: Exception) {
-                Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-                binding.repositories.showErrorPagination()
-            }
+            mainPresenter.requestGetRepo(ownerName = ownerName, page = pageRepo)
         }
     }
 

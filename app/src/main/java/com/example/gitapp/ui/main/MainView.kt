@@ -9,5 +9,5 @@ import moxy.viewstate.strategy.StateStrategyType
 interface MainView : BaseView {
     fun showRepositories(listRepo: List<ApiRepo>)
     fun showRecyclerError()
-    fun showEmptyListNotification()
+    fun showEmptyNotificationList()
 }

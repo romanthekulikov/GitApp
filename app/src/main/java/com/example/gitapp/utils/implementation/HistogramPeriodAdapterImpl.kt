@@ -2,7 +2,7 @@ package com.example.gitapp.utils.implementation
 
 import com.example.gitapp.ui.diagram.models.Month
 import com.example.gitapp.ui.diagram.models.Period
-import com.example.gitapp.ui.diagram.PeriodType
+import com.example.gitapp.data.PeriodType
 import com.example.gitapp.ui.diagram.models.Week
 import com.example.gitapp.ui.diagram.models.Year
 import com.example.gitapp.utils.HistogramPeriodAdapter

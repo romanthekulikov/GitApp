@@ -4,25 +4,33 @@ import android.util.Log
 import com.example.gitapp.data.api.GitApiClient
 import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.ui.base.BasePresenter
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moxy.InjectViewState
-import javax.inject.Inject
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 @InjectViewState
-class MainPresenter @Inject constructor() : BasePresenter<MainView>() {
+class MainPresenter : BasePresenter<MainView>() {
     fun requestGetRepo(ownerName: String, page: Int) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val api = GitApiClient.apiService
-                val repoList = api.fetchOwnerRepos(ownerName = ownerName, numberOfPage = page).execute().body()
-                CoroutineScope(Dispatchers.Main).launch {
-                    showList(repoList.orEmpty())
-
+        launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    while (true) {
+                        val api = GitApiClient.apiService
+                        val repoList = api.fetchOwnerRepos(ownerName = ownerName, numberOfPage = page)
+                        withContext(Dispatchers.Main) {
+                            showList(repoList)
+                        }
+                    }
+                } catch (e: UnknownHostException) {
+                    showLoadError(e.message ?: "No internet")
+                } catch (e: RuntimeException) {
+                    showLoadError(e.message ?: "Timed out")
+                } catch (e: SocketTimeoutException) {
+                    showLoadError(e.message ?: "Github is shutdown")
                 }
-            } catch (e: Exception) {
-                showRecyclerError(e.message ?: "Empty body")
             }
         }
     }
@@ -31,13 +39,13 @@ class MainPresenter @Inject constructor() : BasePresenter<MainView>() {
         if (repoList.isNotEmpty()) {
             viewState.showRepositories(repoList)
         } else {
-            viewState.showEmptyListNotification()
+            viewState.showEmptyNotificationList()
         }
     }
 
-    private fun showRecyclerError(message: String) {
+    private suspend fun showLoadError(message: String) {
         Log.e("api_retrofit", message)
-        CoroutineScope(Dispatchers.Main).launch {
+        withContext(Dispatchers.Main) {
             viewState.showRecyclerError()
         }
     }

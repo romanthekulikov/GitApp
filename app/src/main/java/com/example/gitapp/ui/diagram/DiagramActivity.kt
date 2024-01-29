@@ -8,6 +8,7 @@ import android.os.Bundle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.example.gitapp.data.PeriodType
 import com.example.gitapp.databinding.ActivityDiagramBinding
 import com.example.gitapp.ui.base.BaseActivity
 import com.github.mikephil.charting.charts.BarChart
@@ -54,6 +55,7 @@ class DiagramActivity : BaseActivity(), DiagramView {
                     else -> diagramPresenter.requestChangeDiagramMode(PeriodType.WEAK)
                 }
             }
+
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
@@ -69,6 +71,7 @@ class DiagramActivity : BaseActivity(), DiagramView {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     binding.repository.ownerIcon.setImageBitmap(resource)
                 }
+
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
     }
