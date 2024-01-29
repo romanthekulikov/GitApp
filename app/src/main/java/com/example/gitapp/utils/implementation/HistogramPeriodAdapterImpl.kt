@@ -13,7 +13,7 @@ import com.github.mikephil.charting.data.BarEntry
 class HistogramPeriodAdapterImpl : HistogramPeriodAdapter {
     override fun periodToBarData(period: Period, periodType: PeriodType, periodText: String): BarData {
         return when (periodType) {
-            PeriodType.WEAK -> weakToBarData(period as Week, periodText)
+            PeriodType.WEEK -> weakToBarData(period as Week, periodText)
             PeriodType.MONTH -> monthToBarData(period as Month, periodText)
             PeriodType.YEAR -> yearToBarData(period as Year, periodText)
         }

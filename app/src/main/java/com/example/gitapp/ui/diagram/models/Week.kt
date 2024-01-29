@@ -18,5 +18,4 @@ data class Week(
         }
         return count
     }
-
 }

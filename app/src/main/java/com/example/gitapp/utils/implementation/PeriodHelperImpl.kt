@@ -1,7 +1,9 @@
 package com.example.gitapp.utils.implementation
 
+import com.example.gitapp.data.PeriodType
 import com.example.gitapp.data.api.models.ApiStarredData
 import com.example.gitapp.ui.diagram.models.Month
+import com.example.gitapp.ui.diagram.models.Period
 import com.example.gitapp.ui.diagram.models.Week
 import com.example.gitapp.ui.diagram.models.Year
 import com.example.gitapp.utils.PeriodHelper
@@ -45,7 +47,7 @@ class PeriodHelperImpl : PeriodHelper {
             if (lastDayWeek > endPeriod) {//Last weak on the month
                 lastDayWeek = endPeriod
             }
-            val week = getWeekStargazerByStringPeriod(startPeriod.toString(), lastDayWeek.toString(), listPageItemsStargazers)
+            val week = getWeekStargazerByStringPeriod(firstDayWeek.toString(), lastDayWeek.toString(), listPageItemsStargazers)
             month.weeks.add(week)
             firstDayWeek = firstDayWeek.plusWeeks(1).with(DayOfWeek.MONDAY)
         }
@@ -76,5 +78,43 @@ class PeriodHelperImpl : PeriodHelper {
             firstDayMonth = firstDayMonth.plusMonths(1)
         }
         return year
+    }
+
+    override fun getPartStargazersData(part: Int, period: Period, periodType: PeriodType): Pair<List<ApiStarredData>, String> {
+        val partData =  when (periodType) {
+            PeriodType.WEEK -> {
+                period as Week
+                period.weekDays[part]
+            }
+            PeriodType.MONTH -> {
+                period as Month
+                period.getStargazersFromWeek(weekNumber = part)
+            }
+            PeriodType.YEAR -> {
+                period as Year
+                period.getStargazersFromMonth(monthNumber = part)
+            }
+        }
+        val periodPart = getPeriodPartByPartData(partData, periodType)
+
+        return Pair(partData, periodPart)
+    }
+
+    private fun getPeriodPartByPartData(partData: List<ApiStarredData>, periodType: PeriodType): String {
+        val startPeriodPart = partData[0].time
+        val startPeriodPartLocalDate = LocalDate.parse(startPeriodPart)
+        return when (periodType) {
+            PeriodType.WEEK -> {
+                startPeriodPart //Just one day
+            }
+            PeriodType.MONTH -> {
+                val endPeriodPart = startPeriodPartLocalDate.with(DayOfWeek.SUNDAY).toString()
+                "$startPeriodPart <-> $endPeriodPart"
+            }
+            PeriodType.YEAR -> {
+                val endPeriodPart = startPeriodPartLocalDate.withDayOfMonth(startPeriodPartLocalDate.lengthOfMonth())
+                "$startPeriodPart <-> $endPeriodPart"
+            }
+        }
     }
 }

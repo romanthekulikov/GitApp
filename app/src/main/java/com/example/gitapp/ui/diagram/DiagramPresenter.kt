@@ -6,6 +6,9 @@ import com.example.gitapp.data.PeriodType
 import com.example.gitapp.data.api.GitApiClient
 import com.example.gitapp.data.api.models.ApiStarredData
 import com.example.gitapp.ui.base.BasePresenter
+import com.example.gitapp.ui.diagram.models.Month
+import com.example.gitapp.ui.diagram.models.Week
+import com.example.gitapp.ui.diagram.models.Year
 import com.example.gitapp.utils.HistogramPeriodAdapter
 import com.example.gitapp.utils.PeriodHelper
 import com.example.gitapp.utils.implementation.HistogramPeriodAdapterImpl
@@ -15,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.InjectViewState
-import java.lang.RuntimeException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.DayOfWeek
@@ -32,28 +34,33 @@ class DiagramPresenter @Inject constructor(
     init {
         resetPresenter()
         displayHistogramWithLoadData()
-        displayRepository()
+        displayRepo()
         viewState.changeNextButtonVisibility(View.GONE)
     }
 
     private val weakDay = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     private val yearMonth = arrayOf("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D")
-    private var listPageItemsStargazers: MutableList<ApiStarredData> = mutableListOf()
+    private var currentStargazersWeek = Week()
+    private var currentStargazersMonth = Month()
+    private var currentStargazersYear = Year()
+    private var stargazersPageItemsList: MutableList<ApiStarredData> = mutableListOf()
     private var downloadPage = (stargazersCount / 100) + 1
     private var enoughData = false
-    private var firstDateLoadedStargazer = LocalDate.now().with(DayOfWeek.MONDAY)
-    private var startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)
-    private var endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)
-    private var diagramMode = PeriodType.WEAK
+    private var firstLoadedStargazerDate = LocalDate.now().with(DayOfWeek.MONDAY)
+    private var diagramMode = PeriodType.WEEK
+    private var startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)!!
+    private var endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)!!
+    private val periodHelper: PeriodHelper = PeriodHelperImpl()
+    private val histogramPeriodAdapter: HistogramPeriodAdapter = HistogramPeriodAdapterImpl()
 
     private fun resetPresenter() {
         downloadPage = (stargazersCount / 100) + 1
         enoughData = false
         startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)
         endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)
-        diagramMode = PeriodType.WEAK
-        listPageItemsStargazers = mutableListOf()
-        firstDateLoadedStargazer = LocalDate.now().with(DayOfWeek.MONDAY)
+        diagramMode = PeriodType.WEEK
+        stargazersPageItemsList = mutableListOf()
+        firstLoadedStargazerDate = LocalDate.now().with(DayOfWeek.MONDAY)
     }
 
     private fun displayHistogramWithLoadData() {
@@ -64,14 +71,14 @@ class DiagramPresenter @Inject constructor(
                 while (!enoughData && downloadPage > 0) {
                     try {
                         loadData()
-                    } catch (e: Exception) {
-                        enoughData = true
-
                     } catch (e: UnknownHostException) {
+                        enoughData = true
                         displayErrorWithDataIfExist(e.message ?: "No internet")
                     } catch (e: RuntimeException) {
+                        enoughData = true
                         displayErrorWithDataIfExist(e.message ?: "Timed out")
                     } catch (e: SocketTimeoutException) {
+                        enoughData = true
                         displayErrorWithDataIfExist(e.message ?: "Github is shutdown")
                     }
                 }
@@ -82,15 +89,15 @@ class DiagramPresenter @Inject constructor(
         }
     }
 
-    private fun displayRepository() {
+    private fun displayRepo() {
         viewState.displayRepositoryItem(name = repositoryName, ownerIconUrl = ownerIconUrl)
     }
 
     private fun detectDataShortage() {
-        if (firstDateLoadedStargazer == null) {
+        if (firstLoadedStargazerDate == null) {
             return
         }
-        if (firstDateLoadedStargazer >= startPeriod) {
+        if (firstLoadedStargazerDate >= startPeriod) {
             enoughData = false
         }
     }
@@ -99,16 +106,16 @@ class DiagramPresenter @Inject constructor(
         val starClient = GitApiClient
             .apiService
             .fetchRepositoriesStarred(ownerName, repositoryName, 100, downloadPage)
-        listPageItemsStargazers = (starClient + listPageItemsStargazers).toMutableList()
-        val lastDateLoadedStargazer = listPageItemsStargazers[listPageItemsStargazers.size - 1].getLocalDate()
-        firstDateLoadedStargazer = listPageItemsStargazers[0].getLocalDate()
+        stargazersPageItemsList = (starClient + stargazersPageItemsList).toMutableList()
+        val lastDateLoadedStargazer = stargazersPageItemsList[stargazersPageItemsList.size - 1].getLocalDate()
+        firstLoadedStargazerDate = stargazersPageItemsList[0].getLocalDate()
 
-        if (startPeriod > lastDateLoadedStargazer) {//If repo don't have a star on the current weak
+        if (startPeriod > lastDateLoadedStargazer) {//If repo don't have a star on the current period
             startPeriod = lastDateLoadedStargazer.with(DayOfWeek.MONDAY)
             endPeriod = lastDateLoadedStargazer.with(DayOfWeek.SUNDAY)
         }
 
-        if (firstDateLoadedStargazer < startPeriod || (starClient.size < 100 && downloadPage == 1)) { //Gradual data loading
+        if (firstLoadedStargazerDate < startPeriod || (starClient.size < 100 && downloadPage == 1)) { //Gradual data loading
             enoughData = true
         }
         downloadPage--
@@ -118,28 +125,20 @@ class DiagramPresenter @Inject constructor(
         withContext(Dispatchers.Main) {
             viewState.showError("Fetch stargazers error")
             Log.e("api_retrofit", message)
-            if (listPageItemsStargazers.isNotEmpty()) {
+            if (stargazersPageItemsList.isNotEmpty()) {
                 displayHistogram()
             }
         }
     }
 
     private fun displayHistogram() {
-        if (downloadPage == 0 && startPeriod < firstDateLoadedStargazer) {
+        if (downloadPage == 0 && startPeriod < firstLoadedStargazerDate) {
             viewState.changePreviousButtonVisibility(View.GONE)
         }
         when (diagramMode) {
-            PeriodType.WEAK -> {
-                displayWeakDiagram()
-            }
-
-            PeriodType.MONTH -> {
-                displayMonthDiagram()
-            }
-
-            PeriodType.YEAR -> {
-                displayYearDiagram()
-            }
+            PeriodType.WEEK -> displayWeakDiagram()
+            PeriodType.MONTH -> displayMonthDiagram()
+            PeriodType.YEAR -> displayYearDiagram()
         }
 
         viewState.changeVisibilityProgressBar(View.GONE)
@@ -164,7 +163,7 @@ class DiagramPresenter @Inject constructor(
         diagramMode = mode
         val now = LocalDate.now()
         when (diagramMode) {
-            PeriodType.WEAK -> {
+            PeriodType.WEEK -> {
                 startPeriod = now.with(DayOfWeek.MONDAY)
                 endPeriod = now.with(DayOfWeek.SUNDAY)
             }
@@ -183,9 +182,17 @@ class DiagramPresenter @Inject constructor(
         displayHistogramWithLoadData()
     }
 
+    fun requestPartPeriodData(part: Int): Pair<List<ApiStarredData>, String> {
+        return when (diagramMode) {
+            PeriodType.WEEK -> periodHelper.getPartStargazersData(part, currentStargazersWeek, diagramMode)
+            PeriodType.MONTH -> periodHelper.getPartStargazersData(part, currentStargazersMonth, diagramMode)
+            PeriodType.YEAR -> periodHelper.getPartStargazersData(part, currentStargazersYear, diagramMode)
+        }
+    }
+
     private fun moveBackPeriod() {
         when (diagramMode) {
-            PeriodType.WEAK -> {
+            PeriodType.WEEK -> {
                 startPeriod = startPeriod.plusWeeks(1)
                 endPeriod = endPeriod.plusWeeks(1)
             }
@@ -204,7 +211,7 @@ class DiagramPresenter @Inject constructor(
 
     private fun moveForwardPeriod() {
         when (diagramMode) {
-            PeriodType.WEAK -> {
+            PeriodType.WEEK -> {
                 startPeriod = startPeriod.minusWeeks(1)
                 endPeriod = endPeriod.minusWeeks(1)
             }
@@ -222,20 +229,18 @@ class DiagramPresenter @Inject constructor(
     }
 
     private fun displayWeakDiagram() {
-        val periodHelper: PeriodHelper = PeriodHelperImpl()
-        val histogramPeriodAdapter: HistogramPeriodAdapter = HistogramPeriodAdapterImpl()
-        val weak = periodHelper.getWeekStargazerByPeriod(startPeriod, endPeriod, listPageItemsStargazers)
+        val week = periodHelper.getWeekStargazerByPeriod(startPeriod, endPeriod, stargazersPageItemsList)
+        currentStargazersWeek = week
         val periodText = "[$startPeriod]  <->  [$endPeriod]"
-        val barData = histogramPeriodAdapter.periodToBarData(weak, diagramMode, periodText)
+        val barData = histogramPeriodAdapter.periodToBarData(week, diagramMode, periodText)
         val valueFormatter = IndexAxisValueFormatter(weakDay)
 
         viewState.displayData(barData, valueFormatter)
     }
 
     private fun displayMonthDiagram() {
-        val periodHelper: PeriodHelper = PeriodHelperImpl()
-        val histogramPeriodAdapter: HistogramPeriodAdapter = HistogramPeriodAdapterImpl()
-        val month = periodHelper.getMonthStargazerByPeriod(startPeriod, endPeriod, listPageItemsStargazers)
+        val month = periodHelper.getMonthStargazerByPeriod(startPeriod, endPeriod, stargazersPageItemsList)
+        currentStargazersMonth = month
         val periodText = "[$startPeriod]  <->  [$endPeriod]"
         val barData = histogramPeriodAdapter.periodToBarData(month, diagramMode, periodText)
         val valueFormatter = IndexAxisValueFormatter()
@@ -244,9 +249,8 @@ class DiagramPresenter @Inject constructor(
     }
 
     private fun displayYearDiagram() {
-        val periodHelper: PeriodHelper = PeriodHelperImpl()
-        val histogramPeriodAdapter: HistogramPeriodAdapter = HistogramPeriodAdapterImpl()
-        val year = periodHelper.getYearStargazerByStartYear(startPeriod, listPageItemsStargazers)
+        val year = periodHelper.getYearStargazerByStartYear(startPeriod, stargazersPageItemsList)
+        currentStargazersYear = year
         val periodText = "[$startPeriod]  <->  [$endPeriod]"
         val barData = histogramPeriodAdapter.periodToBarData(year, diagramMode, periodText)
         val valueFormatter = IndexAxisValueFormatter(yearMonth)
