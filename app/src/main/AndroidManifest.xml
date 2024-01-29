@@ -16,6 +16,9 @@
         android:theme="@style/Theme.GitApp"
         tools:targetApi="31">
         <activity
+            android:name=".ui.stargazers.StargazersActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.diagram.DiagramActivity"
             android:exported="false" />
         <activity

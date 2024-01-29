@@ -17,12 +17,10 @@ class MainPresenter : BasePresenter<MainView>() {
         launch {
             withContext(Dispatchers.IO) {
                 try {
-                    while (true) {
-                        val api = GitApiClient.apiService
-                        val repoList = api.fetchOwnerRepos(ownerName = ownerName, numberOfPage = page)
-                        withContext(Dispatchers.Main) {
-                            showList(repoList)
-                        }
+                    val api = GitApiClient.apiService
+                    val repoList = api.fetchOwnerRepos(ownerName = ownerName, numberOfPage = page)
+                    withContext(Dispatchers.Main) {
+                        showList(repoList)
                     }
                 } catch (e: UnknownHostException) {
                     showLoadError(e.message ?: "No internet")

@@ -1,5 +1,7 @@
 package com.example.gitapp.ui.diagram.models
 
-interface Period {
+import java.io.Serializable
+
+interface Period: Serializable {
     fun getStargazerCount(): Int
 }

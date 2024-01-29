@@ -8,14 +8,14 @@ import java.time.LocalDate
 
 interface PeriodHelper {
     fun getWeekStargazerByPeriod(
-        startWeek: LocalDate,
-        endWeek: LocalDate,
+        startPeriod: LocalDate,
+        endPeriod: LocalDate,
         listPageItemsStargazers: MutableList<ApiStarredData>
     ): Week
 
     fun getMonthStargazerByPeriod(
-        startMonth: LocalDate,
-        endMonth: LocalDate,
+        startPeriod: LocalDate,
+        endPeriod: LocalDate,
         listPageItemsStargazers: MutableList<ApiStarredData>
     ): Month
 

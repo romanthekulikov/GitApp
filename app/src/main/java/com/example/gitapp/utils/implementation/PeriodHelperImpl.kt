@@ -10,15 +10,15 @@ import java.time.LocalDate
 
 class PeriodHelperImpl : PeriodHelper {
     override fun getWeekStargazerByPeriod(
-        startWeek: LocalDate,
-        endWeek: LocalDate,
+        startPeriod: LocalDate,
+        endPeriod: LocalDate,
         listPageItemsStargazers: MutableList<ApiStarredData>
     ): Week {
         val week = Week()
         for (i in listPageItemsStargazers.indices) {
             val stargazer = listPageItemsStargazers[i]
             val stargazerDate = stargazer.getLocalDate()
-            if (stargazerDate in startWeek..endWeek) {
+            if (stargazerDate in startPeriod..endPeriod) {
                 when (stargazerDate.dayOfWeek) {
                     DayOfWeek.TUESDAY -> week.weekDays[1].add(stargazer)
                     DayOfWeek.WEDNESDAY -> week.weekDays[2].add(stargazer)
@@ -34,29 +34,43 @@ class PeriodHelperImpl : PeriodHelper {
     }
 
     override fun getMonthStargazerByPeriod(
-        startMonth: LocalDate,
-        endMonth: LocalDate,
+        startPeriod: LocalDate,
+        endPeriod: LocalDate,
         listPageItemsStargazers: MutableList<ApiStarredData>
     ): Month {
         val month = Month()
-        var firstDayWeek = startMonth
-        while (firstDayWeek < endMonth) {
+        var firstDayWeek = startPeriod
+        while (firstDayWeek < endPeriod) {
             var lastDayWeek = firstDayWeek.with(DayOfWeek.SUNDAY)
-            if (lastDayWeek > endMonth) {//Last weak on the month
-                lastDayWeek = endMonth
+            if (lastDayWeek > endPeriod) {//Last weak on the month
+                lastDayWeek = endPeriod
             }
-            val week = getWeekStargazerByPeriod(firstDayWeek, lastDayWeek, listPageItemsStargazers)
+            val week = getWeekStargazerByStringPeriod(startPeriod.toString(), lastDayWeek.toString(), listPageItemsStargazers)
             month.weeks.add(week)
             firstDayWeek = firstDayWeek.plusWeeks(1).with(DayOfWeek.MONDAY)
         }
         return month
     }
 
+    private fun getWeekStargazerByStringPeriod(
+        startPeriod: String,
+        endPeriod: String,
+        listPageItemsStargazers: MutableList<ApiStarredData>
+    ): Week {
+        val week = Week()
+        for (stargazer in listPageItemsStargazers) {
+            if (stargazer.time in startPeriod..endPeriod) {
+                week.weekDays[0].add(stargazer)
+            }
+        }
+        return week
+    }
+
     override fun getYearStargazerByStartYear(startYear: LocalDate, listPageItemsStargazers: MutableList<ApiStarredData>): Year {
         val year = Year()
         var firstDayMonth = startYear
         for (i in 1..12) {
-            val lastDayMonth = firstDayMonth.withDayOfMonth(firstDayMonth.lengthOfMonth())
+            val lastDayMonth = firstDayMonth.plusMonths(1).minusDays(1)
             val month = getMonthStargazerByPeriod(firstDayMonth, lastDayMonth, listPageItemsStargazers)
             year.months.add(month)
             firstDayMonth = firstDayMonth.plusMonths(1)

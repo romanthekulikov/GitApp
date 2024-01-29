@@ -111,7 +111,6 @@ class DiagramPresenter @Inject constructor(
         if (firstDateLoadedStargazer < startPeriod || (starClient.size < 100 && downloadPage == 1)) { //Gradual data loading
             enoughData = true
         }
-
         downloadPage--
     }
 
