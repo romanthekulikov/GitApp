@@ -44,35 +44,20 @@ class MainActivity : BaseActivity(), MainView,
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.repositories.layoutManager = LinearLayoutManager(this@MainActivity)
-        binding.ownerEditText.setOnEnterClickListener {
+        binding.inputOwner.setOnEnterClickListener {
             showRepo()
         }
-        binding.enter.setOnClickListener {
+        binding.imageEnter.setOnClickListener {
             showRepo()
         }
 
         initRecyclerView()
     }
 
-    private fun android.widget.EditText.setOnEnterClickListener(action: () -> Unit) {
-        this.setOnKeyListener { _, keyCode, event ->
-            if (event != null) {
-                if ((event.action == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    action()
-                    this.clearFocus()
-                    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
-                }
-            }
-
-            false
-        }
-    }
-
     private fun showRepo() {
-        val currentOwnerName = binding.ownerEditText.text.toString()
+        val currentOwnerName = binding.inputOwner.text.toString()
         if (currentOwnerName != ownerName) {
-            binding.stub.visibility = View.GONE
+            binding.textStub.visibility = View.GONE
             binding.repositories.visibility = View.VISIBLE
             ownerName = currentOwnerName
             repoAdapter.clear()
@@ -87,7 +72,7 @@ class MainActivity : BaseActivity(), MainView,
         binding.repositories.setPaginationCallback(this)
         binding.repositories.adapter = adapter
         binding.repositories.visibility = View.VISIBLE
-        binding.stub.visibility = View.GONE
+        binding.textStub.visibility = View.GONE
     }
 
     override fun showRepositories(listRepo: List<ApiRepo>) {
@@ -103,12 +88,12 @@ class MainActivity : BaseActivity(), MainView,
 
     override fun showEmptyNotificationList() {
         binding.repositories.visibility = View.GONE
-        binding.stub.visibility = View.VISIBLE
+        binding.textStub.visibility = View.VISIBLE
         binding.repositories.hidePagination()
     }
 
     override fun onRepoClicked(repo: ApiRepo) {
-        val intent = DiagramActivity.getIntent(
+        val intent = DiagramActivity.createIntent(
             fromWhomContext = this@MainActivity,
             repositoryName = repo.name,
             ownerName = repo.owner.name,
@@ -133,5 +118,21 @@ class MainActivity : BaseActivity(), MainView,
 
     override fun getPagePreventionForEnd(): Int {
         return 10
+    }
+
+    private fun android.widget.EditText.setOnEnterClickListener(action: () -> Unit) {
+        this.setOnKeyListener { _, keyCode, event ->
+            if (event != null) {
+                if ((event.action == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    action()
+                    this.clearFocus()
+                    val inputMethodManager =
+                        context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+                }
+            }
+
+            false
+        }
     }
 }

@@ -44,7 +44,7 @@ class PeriodHelperImpl : PeriodHelper {
         var firstDayWeek = startPeriod
         while (firstDayWeek < endPeriod) {
             var lastDayWeek = firstDayWeek.with(DayOfWeek.SUNDAY)
-            if (lastDayWeek > endPeriod) {//Last weak on the month
+            if (lastDayWeek > endPeriod) { // Last weak on the month
                 lastDayWeek = endPeriod
             }
             val week = getWeekStargazerByStringPeriod(firstDayWeek.toString(), lastDayWeek.toString(), listPageItemsStargazers)
@@ -101,18 +101,20 @@ class PeriodHelperImpl : PeriodHelper {
     }
 
     private fun getPeriodPartByPartData(partData: List<ApiStarredData>, periodType: PeriodType): String {
-        val startPeriodPart = partData[0].time
+        var startPeriodPart = partData[0].time
         val startPeriodPartLocalDate = LocalDate.parse(startPeriodPart)
         return when (periodType) {
             PeriodType.WEEK -> {
                 startPeriodPart //Just one day
             }
             PeriodType.MONTH -> {
-                val endPeriodPart = startPeriodPartLocalDate.with(DayOfWeek.SUNDAY).toString()
-                "$startPeriodPart <-> $endPeriodPart"
+                val endPeriodPartLocalDate = startPeriodPartLocalDate.with(DayOfWeek.SUNDAY)
+                startPeriodPart = endPeriodPartLocalDate.with(DayOfWeek.MONDAY).toString()
+                "$startPeriodPart <-> $endPeriodPartLocalDate"
             }
             PeriodType.YEAR -> {
                 val endPeriodPart = startPeriodPartLocalDate.withDayOfMonth(startPeriodPartLocalDate.lengthOfMonth())
+                startPeriodPart = endPeriodPart.withDayOfMonth(1).toString()
                 "$startPeriodPart <-> $endPeriodPart"
             }
         }

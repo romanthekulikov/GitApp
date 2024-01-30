@@ -14,39 +14,39 @@
         app:layout_constraintGuide_percent="0.05" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_padding_start"
+        android:id="@+id/guideline_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.1" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_padding_end"
+        android:id="@+id/guideline_end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.9" />
 
     <TextView
-        android:id="@+id/period"
+        android:id="@+id/text_period"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/period_stub_label"
         android:textSize="22sp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_padding_end"
-        app:layout_constraintStart_toStartOf="@+id/guideline_padding_start"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+        app:layout_constraintStart_toStartOf="@+id/guideline_start"
         app:layout_constraintTop_toTopOf="@+id/guideline_top" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/stargazers"
+        android:id="@+id/recyclerview_stargazers"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_padding_end"
-        app:layout_constraintStart_toStartOf="@+id/guideline_padding_start"
-        app:layout_constraintTop_toBottomOf="@+id/period"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+        app:layout_constraintStart_toStartOf="@+id/guideline_start"
+        app:layout_constraintTop_toBottomOf="@+id/text_period"
         tools:listitem="@layout/item_stargazer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

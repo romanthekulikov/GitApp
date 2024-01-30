@@ -9,34 +9,35 @@ import com.example.gitapp.data.api.models.ApiStarredData
 import com.example.gitapp.databinding.ActivityStargazersBinding
 
 class StargazersActivity : AppCompatActivity() {
+    object StargazersIntent {
+        const val PERIOD_KEY = "period"
+        const val STARGAZERS_KEY = "stargazers"
+
+        fun createIntent(fromWhomContext: Context, period: String, stargazers: ArrayList<ApiStarredData>): Intent {
+            val intent = Intent(fromWhomContext, StargazersActivity::class.java)
+            intent.putExtra(PERIOD_KEY, period)
+            intent.putParcelableArrayListExtra(STARGAZERS_KEY, stargazers)
+
+            return intent
+        }
+    }
+
     private lateinit var binding: ActivityStargazersBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityStargazersBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.period.text = intent.extras?.getString(StargazersIntent.periodKey) ?: ""
+        binding.textPeriod.text = intent.extras?.getString(StargazersIntent.PERIOD_KEY) ?: ""
 
         initRecyclerView()
     }
 
     private fun initRecyclerView() {
-        val stargazers = intent.extras?.getParcelableArrayList(StargazersIntent.stargazersKey, ApiStarredData::class.java)
+        val stargazers =
+            intent.extras?.getParcelableArrayList(StargazersIntent.STARGAZERS_KEY, ApiStarredData::class.java)
         val adapter = StargazersAdapter(stargazers!!)
         val layoutManager = LinearLayoutManager(this)
-        binding.stargazers.layoutManager = layoutManager
-        binding.stargazers.adapter = adapter
-    }
-
-    object StargazersIntent {
-        const val periodKey = "period"
-        const val stargazersKey = "stargazers"
-
-        fun getIntent(fromWhomContext: Context, period: String, stargazers: ArrayList<ApiStarredData>): Intent {
-            val intent = Intent(fromWhomContext, StargazersActivity::class.java)
-            intent.putExtra(periodKey, period)
-            intent.putParcelableArrayListExtra(stargazersKey, stargazers)
-
-            return intent
-        }
+        binding.recyclerviewStargazers.layoutManager = layoutManager
+        binding.recyclerviewStargazers.adapter = adapter
     }
 }

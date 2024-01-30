@@ -14,8 +14,9 @@ import com.omega_r.libs.omegarecyclerview.pagination.PaginationViewCreator
 import javax.inject.Inject
 
 
-class RepoAdapter @Inject constructor(private val helper: RepoRecyclerHelper) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(),
-    PaginationViewCreator {
+class RepoAdapter @Inject constructor(
+    private val helper: RepoRecyclerHelper
+) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(), PaginationViewCreator {
     private val repoList = mutableListOf<ApiRepo>()
 
     init {
@@ -50,7 +51,7 @@ class RepoAdapter @Inject constructor(private val helper: RepoRecyclerHelper) : 
 
     override fun createPaginationErrorView(parent: ViewGroup?, inflater: LayoutInflater?): View {
         val binding = ItemErrorProgressBinding.inflate(inflater!!, parent, false)
-        binding.againButton.setOnClickListener {
+        binding.buttonAgain.setOnClickListener {
             helper.onRetryClicked()
         }
         return binding.root
@@ -71,8 +72,8 @@ class RepoAdapter @Inject constructor(private val helper: RepoRecyclerHelper) : 
         private val binding: ItemRepoBinding
     ) : OmegaRecyclerView.ViewHolder(binding.root) {
         fun bind(item: ApiRepo) {
-            Glide.with(this.itemView).load(item.owner.avatarUrl).circleCrop().into(binding.ownerIcon)
-            binding.repoName.text = item.name
+            Glide.with(this.itemView).load(item.owner.avatarUrl).circleCrop().into(binding.imageOwner)
+            binding.textRepoName.text = item.name
             binding.view.setOnClickListener {
                 helper.onRepoClicked(item)
             }

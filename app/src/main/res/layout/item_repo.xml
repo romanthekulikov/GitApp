@@ -7,16 +7,16 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/owner_icon"
+        android:id="@+id/image_owner"
         android:layout_width="40dp"
         android:layout_height="40dp"
         app:srcCompat="@drawable/ic_owner"
-        app:layout_constraintBottom_toBottomOf="@+id/repo_name"
+        app:layout_constraintBottom_toBottomOf="@+id/text_repo_name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/repo_name" />
+        app:layout_constraintTop_toTopOf="@+id/text_repo_name" />
 
     <TextView
-        android:id="@+id/repo_name"
+        android:id="@+id/text_repo_name"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_marginStart="15dp"
@@ -24,19 +24,19 @@
         android:layout_marginEnd="15dp"
         android:text="@string/stub_name_of_repository"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/favorite"
-        app:layout_constraintStart_toEndOf="@+id/owner_icon"
+        app:layout_constraintEnd_toStartOf="@+id/checkbox_star"
+        app:layout_constraintStart_toEndOf="@+id/image_owner"
         app:layout_constraintTop_toTopOf="parent" />
 
     <CheckBox
-        android:id="@+id/favorite"
+        android:id="@+id/checkbox_star"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:button="@color/transparent"
-        android:background="@drawable/checkbox_favorite"
+        android:background="@drawable/checkbox_star"
         android:checked="false"
-        app:layout_constraintBottom_toBottomOf="@+id/repo_name"
+        app:layout_constraintBottom_toBottomOf="@+id/text_repo_name"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/repo_name" />
+        app:layout_constraintTop_toTopOf="@+id/text_repo_name" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

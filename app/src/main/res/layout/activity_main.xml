@@ -16,29 +16,29 @@
         app:layout_constraintGuide_percent="0.1" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_padding_start"
+        android:id="@+id/guideline_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.02" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_padding_end"
+        android:id="@+id/guideline_end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.98" />
 
     <ImageView
-        android:id="@+id/github_icon"
+        android:id="@+id/image_github"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:layout_constraintStart_toStartOf="@+id/guideline_padding_start"
+        app:layout_constraintStart_toStartOf="@+id/guideline_start"
         app:layout_constraintTop_toTopOf="@+id/guideline_top"
         app:srcCompat="@drawable/ic_github" />
 
     <EditText
-        android:id="@+id/owner_edit_text"
+        android:id="@+id/input_owner"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="10dp"
@@ -46,29 +46,29 @@
         android:autofillHints="username"
         android:hint="@string/enter_owner_hint"
         android:inputType="text"
-        app:layout_constraintEnd_toStartOf="@+id/enter"
-        app:layout_constraintStart_toEndOf="@+id/github_icon"
+        app:layout_constraintEnd_toStartOf="@+id/image_enter"
+        app:layout_constraintStart_toEndOf="@+id/image_github"
         app:layout_constraintTop_toTopOf="@+id/guideline_top" />
 
     <ImageView
-        android:id="@+id/enter"
+        android:id="@+id/image_enter"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:background="@color/trans_gray"
-        app:layout_constraintBottom_toBottomOf="@+id/owner_edit_text"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_padding_end"
-        app:layout_constraintTop_toTopOf="@+id/owner_edit_text"
+        app:layout_constraintBottom_toBottomOf="@+id/input_owner"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+        app:layout_constraintTop_toTopOf="@+id/input_owner"
         app:srcCompat="@drawable/ic_enter" />
 
     <TextView
-        android:id="@+id/repo_label"
+        android:id="@+id/text_repo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="@string/list_repositories_text"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_padding_end"
-        app:layout_constraintStart_toStartOf="@+id/guideline_padding_start"
-        app:layout_constraintTop_toBottomOf="@+id/owner_edit_text" />
+        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+        app:layout_constraintStart_toStartOf="@+id/guideline_start"
+        app:layout_constraintTop_toBottomOf="@+id/input_owner" />
 
     <com.omega_r.libs.omegarecyclerview.OmegaRecyclerView
         android:id="@+id/repositories"
@@ -76,13 +76,13 @@
         android:layout_height="0dp"
         android:layout_marginTop="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_padding_end"
-        app:layout_constraintStart_toStartOf="@+id/guideline_padding_start"
-        app:layout_constraintTop_toBottomOf="@+id/repo_label"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+        app:layout_constraintStart_toStartOf="@+id/guideline_start"
+        app:layout_constraintTop_toBottomOf="@+id/text_repo"
         tools:listitem="@layout/item_repo" />
 
     <TextView
-        android:id="@+id/stub"
+        android:id="@+id/text_stub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/repo_stub"
@@ -91,5 +91,5 @@
         app:layout_constraintBottom_toBottomOf="@+id/repositories"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/repo_label" />
+        app:layout_constraintTop_toBottomOf="@+id/text_repo" />
 </androidx.constraintlayout.widget.ConstraintLayout>

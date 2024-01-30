@@ -22,21 +22,43 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.google.android.material.tabs.TabLayout
 import moxy.ktx.moxyPresenter
-import java.lang.NullPointerException
 
 const val MONTH_TAB_POSITION = 1
 const val YEAR_TAB_POSITION = 2
+const val MESSAGE_EMPTY_PART = "Empty part selected"
 
 class DiagramActivity : BaseActivity(), DiagramView {
+    companion object DiagramIntent {
+        const val REPO_NAME_KEY = "repository_name_key"
+        const val OWNER_NAME_KAY = "owner_name_key"
+        const val STARGAZERS_COUNT_KEY = "stargazers_count_key"
+        const val OWNER_ICON_URL_KEY = "repository_owner_icon_url_key"
+        fun createIntent(
+            fromWhomContext: Context,
+            repositoryName: String,
+            ownerName: String,
+            ownerIconUrl: String,
+            stargazersCount: Int
+        ): Intent {
+            val intent = Intent(fromWhomContext, DiagramActivity::class.java)
+            intent.putExtra(REPO_NAME_KEY, repositoryName)
+            intent.putExtra(OWNER_NAME_KAY, ownerName)
+            intent.putExtra(STARGAZERS_COUNT_KEY, stargazersCount)
+            intent.putExtra(OWNER_ICON_URL_KEY, ownerIconUrl)
+
+            return intent
+        }
+    }
+
     private lateinit var binding: ActivityDiagramBinding
-    private lateinit var histogram: BarChart
+    private lateinit var histogramView: BarChart
     private val diagramPresenter by moxyPresenter {
         val extras = intent.extras!!
         DiagramPresenter(
-            repositoryName = extras.getString(repositoryNameKey, ""),
-            ownerName = extras.getString(ownerNameKey, ""),
-            ownerIconUrl = extras.getString(ownerIconUrlKey, ""),
-            stargazersCount = extras.getInt(stargazersCountKey, 0)
+            repositoryName = extras.getString(REPO_NAME_KEY, ""),
+            ownerName = extras.getString(OWNER_NAME_KAY, ""),
+            ownerIconUrl = extras.getString(OWNER_ICON_URL_KEY, ""),
+            stargazersCount = extras.getInt(STARGAZERS_COUNT_KEY, 0)
         )
     }
 
@@ -45,11 +67,11 @@ class DiagramActivity : BaseActivity(), DiagramView {
         binding = ActivityDiagramBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.progress.isActivated = true
-        binding.nextButton.setOnClickListener {
+        binding.progressBar.isActivated = true
+        binding.imageNextButton.setOnClickListener {
             diagramPresenter.requestMoveToNextHistogramPage()
         }
-        binding.previousButton.setOnClickListener {
+        binding.imagePreviousButton.setOnClickListener {
             diagramPresenter.requestMoveToPreviousHistogramPage()
         }
 
@@ -58,20 +80,20 @@ class DiagramActivity : BaseActivity(), DiagramView {
     }
 
     private fun diagramInit() {
-        histogram = binding.histogram
-        histogram.isScaleYEnabled = false
-        histogram.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+        histogramView = binding.barChartHistogram
+        histogramView.isScaleYEnabled = false
+        histogramView.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry?, h: Highlight?) {
                 try {
                     val stargazersData = diagramPresenter.requestPartPeriodData(e!!.x.toInt())
-                    val intent = StargazersActivity.StargazersIntent.getIntent(
+                    val intent = StargazersActivity.StargazersIntent.createIntent(
                         fromWhomContext = this@DiagramActivity,
                         stargazers = stargazersData.first as ArrayList<ApiStarredData>,
                         period = stargazersData.second
                     )
                     startActivity(intent)
-                } catch (e: NullPointerException) {
-                    Toast.makeText(this@DiagramActivity, "Empty part selected", Toast.LENGTH_LONG).show()
+                } catch (e: IndexOutOfBoundsException) {
+                    Toast.makeText(this@DiagramActivity, MESSAGE_EMPTY_PART, Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -80,7 +102,7 @@ class DiagramActivity : BaseActivity(), DiagramView {
     }
 
     private fun periodTabInit() {
-        binding.periodTab.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        binding.tabLayoutPeriod.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 when (tab?.position) {
                     MONTH_TAB_POSITION -> diagramPresenter.requestChangeDiagramMode(PeriodType.MONTH)
@@ -95,14 +117,14 @@ class DiagramActivity : BaseActivity(), DiagramView {
     }
 
     override fun displayRepositoryItem(name: String, ownerIconUrl: String) {
-        binding.repository.repoName.text = name
+        binding.repository.textRepoName.text = name
         Glide.with(this@DiagramActivity)
             .asBitmap()
             .circleCrop()
             .load(ownerIconUrl)
             .into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    binding.repository.ownerIcon.setImageBitmap(resource)
+                    binding.repository.imageOwner.setImageBitmap(resource)
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) {}
@@ -110,44 +132,18 @@ class DiagramActivity : BaseActivity(), DiagramView {
     }
 
     override fun displayData(data: BarData, valueFormatter: ValueFormatter) {
-        histogram.data = data
-        histogram.notifyDataSetChanged()
-        histogram.invalidate()
-        histogram.xAxis.valueFormatter = valueFormatter
-        histogram.isActivated = true
-    }
-
-    override fun changeNextButtonVisibility(visibility: Int) {
-        binding.nextButton.visibility = visibility
+        histogramView.data = data
+        histogramView.notifyDataSetChanged()
+        histogramView.invalidate()
+        histogramView.xAxis.valueFormatter = valueFormatter
+        histogramView.isActivated = true
     }
 
     override fun changePreviousButtonVisibility(visibility: Int) {
-        binding.previousButton.visibility = visibility
+        binding.imagePreviousButton.visibility = visibility
     }
 
     override fun changeVisibilityProgressBar(visibility: Int) {
-        binding.progress.visibility = visibility
-    }
-
-    companion object DiagramIntent {
-        const val repositoryNameKey = "repository_name_key"
-        const val ownerNameKey = "owner_name_key"
-        const val stargazersCountKey = "stargazers_count_key"
-        const val ownerIconUrlKey = "repository_owner_icon_url_key"
-        fun getIntent(
-            fromWhomContext: Context,
-            repositoryName: String,
-            ownerName: String,
-            ownerIconUrl: String,
-            stargazersCount: Int
-        ): Intent {
-            val intent = Intent(fromWhomContext, DiagramActivity::class.java)
-            intent.putExtra(repositoryNameKey, repositoryName)
-            intent.putExtra(ownerNameKey, ownerName)
-            intent.putExtra(stargazersCountKey, stargazersCount)
-            intent.putExtra(ownerIconUrlKey, ownerIconUrl)
-
-            return intent
-        }
+        binding.progressBar.visibility = visibility
     }
 }
