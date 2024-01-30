@@ -4,6 +4,9 @@ import android.util.Log
 import com.example.gitapp.data.api.GitApiClient
 import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.ui.base.BasePresenter
+import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
+import com.example.gitapp.ui.base.ERROR_NO_INTERNET
+import com.example.gitapp.ui.base.ERROR_TIMED_OUT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -23,11 +26,11 @@ class MainPresenter : BasePresenter<MainView>() {
                         showList(repoList)
                     }
                 } catch (e: UnknownHostException) {
-                    showLoadError(e.message ?: "No internet")
+                    showLoadError(e.message ?: ERROR_NO_INTERNET)
                 } catch (e: RuntimeException) {
-                    showLoadError(e.message ?: "Timed out")
+                    showLoadError(e.message ?: ERROR_TIMED_OUT)
                 } catch (e: SocketTimeoutException) {
-                    showLoadError(e.message ?: "Github is shutdown")
+                    showLoadError(e.message ?: ERROR_GITHUB_IS_SHUTDOWN)
                 }
             }
         }

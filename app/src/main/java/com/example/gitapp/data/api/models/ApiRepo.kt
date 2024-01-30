@@ -1,15 +1,14 @@
 package com.example.gitapp.data.api.models
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+//import androidx.room.Entity
+//import androidx.room.PrimaryKey
 import com.example.gitapp.entity.Repo
 import com.squareup.moshi.Json
-import javax.inject.Inject
 
-@Entity
-data class ApiRepo @Inject constructor(
+//@Entity
+data class ApiRepo(
     @Json(name = "id")
-    @PrimaryKey(autoGenerate = true)
+    //@PrimaryKey(autoGenerate = true)
     override val id: Int,
 
     @Json(name = "name")

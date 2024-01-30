@@ -1,5 +1,6 @@
 package com.example.gitapp.ui.main
 
+import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
@@ -8,24 +9,20 @@ import android.view.inputmethod.InputMethodManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.databinding.ActivityMainBinding
+import com.example.gitapp.injection.AppComponent
+import com.example.gitapp.injection.DaggerAppComponent
 import com.example.gitapp.ui.base.BaseActivity
 import com.example.gitapp.ui.diagram.DiagramActivity
 import com.omega_r.libs.omegarecyclerview.pagination.OnPageRequestListener
 import moxy.ktx.moxyPresenter
 
-//import java.time.DayOfWeek
-//import java.time.LocalDate
-//import java.time.format.DateTimeFormatter
-//import java.util.Locale
-
-
-//class Main : Application() {
-//    lateinit var appComponent: AppComponent
-//    override fun onCreate() {
-//        super.onCreate()
-//            appComponent = DaggerAppComp
-//    }
-//}
+class Main : Application() {
+    lateinit var appComponent: AppComponent
+    override fun onCreate() {
+        super.onCreate()
+        appComponent = DaggerAppComponent.create()
+    }
+}
 
 class MainActivity : BaseActivity(), MainView,
     RepoAdapter.RepoRecyclerHelper, OnPageRequestListener {

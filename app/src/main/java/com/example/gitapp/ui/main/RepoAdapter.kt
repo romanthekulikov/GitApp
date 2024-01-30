@@ -11,10 +11,9 @@ import com.example.gitapp.databinding.ItemProgressBinding
 import com.example.gitapp.databinding.ItemRepoBinding
 import com.omega_r.libs.omegarecyclerview.OmegaRecyclerView
 import com.omega_r.libs.omegarecyclerview.pagination.PaginationViewCreator
-import javax.inject.Inject
 
 
-class RepoAdapter @Inject constructor(
+class RepoAdapter(
     private val helper: RepoRecyclerHelper
 ) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(), PaginationViewCreator {
     private val repoList = mutableListOf<ApiRepo>()

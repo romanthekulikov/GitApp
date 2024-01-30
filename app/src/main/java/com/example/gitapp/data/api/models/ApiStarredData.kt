@@ -9,7 +9,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 @Parcelize
-data class ApiStarredData @Inject constructor(
+data class ApiStarredData(
     @Json(name = "starred_at")
     override var time: String,
     @Json(name = "user")

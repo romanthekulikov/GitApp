@@ -6,6 +6,9 @@ import com.example.gitapp.data.PeriodType
 import com.example.gitapp.data.api.GitApiClient
 import com.example.gitapp.data.api.models.ApiStarredData
 import com.example.gitapp.ui.base.BasePresenter
+import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
+import com.example.gitapp.ui.base.ERROR_NO_INTERNET
+import com.example.gitapp.ui.base.ERROR_TIMED_OUT
 import com.example.gitapp.ui.diagram.models.Month
 import com.example.gitapp.ui.diagram.models.Week
 import com.example.gitapp.ui.diagram.models.Year
@@ -24,8 +27,10 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import javax.inject.Inject
 
+const val ERROR_FETCH = "Fetch stargazers error"
+
 @InjectViewState
-class DiagramPresenter @Inject constructor(
+class DiagramPresenter (
     private val repositoryName: String,
     private val ownerName: String,
     private val ownerIconUrl: String,
@@ -43,16 +48,16 @@ class DiagramPresenter @Inject constructor(
     private val periodHelper: PeriodHelper = PeriodHelperImpl()
     private val histogramPeriodAdapter: HistogramPeriodAdapter = HistogramPeriodAdapterImpl()
     private var displayedDiagramPage = 0
+    private var nextLoadPageNumber = (stargazersCount / 100) + 1
     private var currentStargazersWeek = Week()
     private var currentStargazersMonth = Month()
     private var currentStargazersYear = Year()
     private var stargazersItemsList: MutableList<ApiStarredData> = mutableListOf()
-    private var nextLoadPageNumber = (stargazersCount / 100) + 1
     private var enoughData = false
     private var toStartPeriodReplaced = false
+    private var diagramMode = PeriodType.WEEK
     private var firstLoadedStargazerDate = LocalDate.now().with(DayOfWeek.MONDAY)
     private var lastDateLoadedStargazer = LocalDate.now().with(DayOfWeek.SUNDAY)
-    private var diagramMode = PeriodType.WEEK
     private var startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)!!
     private var endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)!!
 
@@ -78,13 +83,13 @@ class DiagramPresenter @Inject constructor(
                         loadData()
                     } catch (e: UnknownHostException) {
                         enoughData = true
-                        displayErrorWithDataIfExist(e.message ?: "No internet")
+                        displayErrorWithDataIfExist(e.message ?: ERROR_NO_INTERNET)
                     } catch (e: RuntimeException) {
                         enoughData = true
-                        displayErrorWithDataIfExist(e.message ?: "Timed out")
+                        displayErrorWithDataIfExist(e.message ?: ERROR_TIMED_OUT)
                     } catch (e: SocketTimeoutException) {
                         enoughData = true
-                        displayErrorWithDataIfExist(e.message ?: "Github is shutdown")
+                        displayErrorWithDataIfExist(e.message ?: ERROR_GITHUB_IS_SHUTDOWN)
                     }
                 }
             }
@@ -129,7 +134,7 @@ class DiagramPresenter @Inject constructor(
 
     private suspend fun displayErrorWithDataIfExist(message: String) {
         withContext(Dispatchers.Main) {
-            viewState.showError("Fetch stargazers error")
+            viewState.showError(ERROR_FETCH)
             Log.e("api_retrofit", message)
             if (stargazersItemsList.isNotEmpty()) {
                 displayHistogram()
