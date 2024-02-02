@@ -1,42 +1,45 @@
 package com.example.gitapp.ui.main
 
-import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.gitapp.appComponent
 import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.databinding.ActivityMainBinding
-import com.example.gitapp.injection.AppComponent
-import com.example.gitapp.injection.DaggerAppComponent
+import com.example.gitapp.injection.factories.DiagramIntentFactory
+import com.example.gitapp.injection.factories.RepoAdapterFactory
 import com.example.gitapp.ui.base.BaseActivity
-import com.example.gitapp.ui.diagram.DiagramActivity
 import com.omega_r.libs.omegarecyclerview.pagination.OnPageRequestListener
-import moxy.ktx.moxyPresenter
-
-class Main : Application() {
-    lateinit var appComponent: AppComponent
-    override fun onCreate() {
-        super.onCreate()
-        appComponent = DaggerAppComponent.create()
-    }
-}
+import moxy.presenter.InjectPresenter
+import moxy.presenter.ProvidePresenter
+import javax.inject.Inject
 
 class MainActivity : BaseActivity(), MainView,
     RepoAdapter.RepoRecyclerHelper, OnPageRequestListener {
-    private lateinit var binding: ActivityMainBinding
 
-    //@Inject
+    private lateinit var binding: ActivityMainBinding
     private lateinit var repoAdapter: RepoAdapter
+
+    @Inject
+    lateinit var repoAdapterFactory: RepoAdapterFactory.Factory
+
+    @Inject
+    lateinit var diagramIntent: DiagramIntentFactory.Factory
+
+    @Inject
+    @InjectPresenter
+    lateinit var mainPresenter: MainPresenter
+
+    @ProvidePresenter
+    fun provide(): MainPresenter = mainPresenter
     private var ownerName = ""
     private var pageRepo = 0
 
-    //@Inject
-    private val mainPresenter by moxyPresenter { MainPresenter() }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        appComponent.inject(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -64,7 +67,7 @@ class MainActivity : BaseActivity(), MainView,
     }
 
     private fun initRecyclerView() {
-        val adapter = RepoAdapter(this@MainActivity)
+        val adapter = repoAdapterFactory.create(this).createRepoAdapter()
         repoAdapter = adapter
         binding.repositories.setPaginationCallback(this)
         binding.repositories.adapter = adapter
@@ -90,13 +93,13 @@ class MainActivity : BaseActivity(), MainView,
     }
 
     override fun onRepoClicked(repo: ApiRepo) {
-        val intent = DiagramActivity.createIntent(
+        val intent = diagramIntent.create(
             fromWhomContext = this@MainActivity,
             repositoryName = repo.name,
             ownerName = repo.owner.name,
             ownerIconUrl = repo.owner.avatarUrl,
             stargazersCount = repo.stargazersCount
-        )
+        ).createIntent()
 
         startActivity(intent)
     }

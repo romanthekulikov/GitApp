@@ -1,7 +1,5 @@
 package com.example.gitapp.ui.diagram
 
-import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -9,11 +7,17 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.example.gitapp.appComponent
 import com.example.gitapp.data.PeriodType
 import com.example.gitapp.data.api.models.ApiStarredData
 import com.example.gitapp.databinding.ActivityDiagramBinding
+import com.example.gitapp.injection.factories.DiagramPresenterFactory
+import com.example.gitapp.injection.factories.OWNER_ICON_URL_KEY
+import com.example.gitapp.injection.factories.OWNER_NAME_KAY
+import com.example.gitapp.injection.factories.REPO_NAME_KEY
+import com.example.gitapp.injection.factories.STARGAZERS_COUNT_KEY
+import com.example.gitapp.injection.factories.StargazerIntentFactory
 import com.example.gitapp.ui.base.BaseActivity
-import com.example.gitapp.ui.stargazers.StargazersActivity
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.Entry
@@ -22,47 +26,36 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.google.android.material.tabs.TabLayout
 import moxy.ktx.moxyPresenter
+import javax.inject.Inject
 
 const val MONTH_TAB_POSITION = 1
 const val YEAR_TAB_POSITION = 2
 const val MESSAGE_EMPTY_PART = "Empty part selected"
 
 class DiagramActivity : BaseActivity(), DiagramView {
-    companion object DiagramIntent {
-        const val REPO_NAME_KEY = "repository_name_key"
-        const val OWNER_NAME_KAY = "owner_name_key"
-        const val STARGAZERS_COUNT_KEY = "stargazers_count_key"
-        const val OWNER_ICON_URL_KEY = "repository_owner_icon_url_key"
-        fun createIntent(
-            fromWhomContext: Context,
-            repositoryName: String,
-            ownerName: String,
-            ownerIconUrl: String,
-            stargazersCount: Int
-        ): Intent {
-            val intent = Intent(fromWhomContext, DiagramActivity::class.java)
-            intent.putExtra(REPO_NAME_KEY, repositoryName)
-            intent.putExtra(OWNER_NAME_KAY, ownerName)
-            intent.putExtra(STARGAZERS_COUNT_KEY, stargazersCount)
-            intent.putExtra(OWNER_ICON_URL_KEY, ownerIconUrl)
-
-            return intent
-        }
-    }
 
     private lateinit var binding: ActivityDiagramBinding
     private lateinit var histogramView: BarChart
-    private val diagramPresenter by moxyPresenter {
+
+    @Inject
+    lateinit var stargazerIntentFactory: StargazerIntentFactory.Factory
+
+    @Inject
+    lateinit var diagramPresenterFactory: DiagramPresenterFactory.Factory
+
+    private val diagramPresenter: DiagramPresenter by moxyPresenter {
         val extras = intent.extras!!
-        DiagramPresenter(
+        diagramPresenterFactory.create(
             repositoryName = extras.getString(REPO_NAME_KEY, ""),
             ownerName = extras.getString(OWNER_NAME_KAY, ""),
             ownerIconUrl = extras.getString(OWNER_ICON_URL_KEY, ""),
-            stargazersCount = extras.getInt(STARGAZERS_COUNT_KEY, 0)
-        )
+            stargazersCount = extras.getInt(STARGAZERS_COUNT_KEY, 0),
+            appComponent = appComponent // looks like something bad...
+        ).createPresenter()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        appComponent.inject(this)
         super.onCreate(savedInstanceState)
         binding = ActivityDiagramBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -86,11 +79,12 @@ class DiagramActivity : BaseActivity(), DiagramView {
             override fun onValueSelected(e: Entry?, h: Highlight?) {
                 try {
                     val stargazersData = diagramPresenter.requestPartPeriodData(e!!.x.toInt())
-                    val intent = StargazersActivity.StargazersIntent.createIntent(
+                    val intent = stargazerIntentFactory.create(
                         fromWhomContext = this@DiagramActivity,
                         stargazers = stargazersData.first as ArrayList<ApiStarredData>,
                         period = stargazersData.second
-                    )
+                    ).createIntent()
+
                     startActivity(intent)
                 } catch (e: IndexOutOfBoundsException) {
                     Toast.makeText(this@DiagramActivity, MESSAGE_EMPTY_PART, Toast.LENGTH_LONG).show()

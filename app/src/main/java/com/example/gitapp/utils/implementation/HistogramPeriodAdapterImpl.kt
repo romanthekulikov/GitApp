@@ -9,8 +9,9 @@ import com.example.gitapp.utils.HistogramPeriodAdapter
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
+import javax.inject.Inject
 
-class HistogramPeriodAdapterImpl : HistogramPeriodAdapter {
+class HistogramPeriodAdapterImpl @Inject constructor() : HistogramPeriodAdapter {
     override fun periodToBarData(period: Period, periodType: PeriodType, periodText: String): BarData {
         return when (periodType) {
             PeriodType.WEEK -> weakToBarData(period as Week, periodText)

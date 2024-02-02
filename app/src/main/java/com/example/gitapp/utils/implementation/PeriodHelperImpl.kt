@@ -9,8 +9,9 @@ import com.example.gitapp.ui.diagram.models.Year
 import com.example.gitapp.utils.PeriodHelper
 import java.time.DayOfWeek
 import java.time.LocalDate
+import javax.inject.Inject
 
-class PeriodHelperImpl : PeriodHelper {
+class PeriodHelperImpl @Inject constructor() : PeriodHelper {
     override fun getWeekStargazerByPeriod(
         startPeriod: LocalDate,
         endPeriod: LocalDate,
@@ -81,15 +82,17 @@ class PeriodHelperImpl : PeriodHelper {
     }
 
     override fun getPartStargazersData(part: Int, period: Period, periodType: PeriodType): Pair<List<ApiStarredData>, String> {
-        val partData =  when (periodType) {
+        val partData = when (periodType) {
             PeriodType.WEEK -> {
                 period as Week
                 period.weekDays[part]
             }
+
             PeriodType.MONTH -> {
                 period as Month
                 period.getStargazersFromWeek(weekNumber = part)
             }
+
             PeriodType.YEAR -> {
                 period as Year
                 period.getStargazersFromMonth(monthNumber = part)
@@ -107,11 +110,13 @@ class PeriodHelperImpl : PeriodHelper {
             PeriodType.WEEK -> {
                 startPeriodPart //Just one day
             }
+
             PeriodType.MONTH -> {
                 val endPeriodPartLocalDate = startPeriodPartLocalDate.with(DayOfWeek.SUNDAY)
                 startPeriodPart = endPeriodPartLocalDate.with(DayOfWeek.MONDAY).toString()
                 "$startPeriodPart <-> $endPeriodPartLocalDate"
             }
+
             PeriodType.YEAR -> {
                 val endPeriodPart = startPeriodPartLocalDate.withDayOfMonth(startPeriodPartLocalDate.lengthOfMonth())
                 startPeriodPart = endPeriodPart.withDayOfMonth(1).toString()

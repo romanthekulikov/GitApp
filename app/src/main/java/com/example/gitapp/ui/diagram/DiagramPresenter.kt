@@ -3,8 +3,10 @@ package com.example.gitapp.ui.diagram
 import android.util.Log
 import android.view.View
 import com.example.gitapp.data.PeriodType
-import com.example.gitapp.data.api.GitApiClient
+import com.example.gitapp.data.api.GitApiService
 import com.example.gitapp.data.api.models.ApiStarredData
+import com.example.gitapp.injection.AppComponent
+import com.example.gitapp.injection.factories.IndexAxisValueFormatterFactory
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
 import com.example.gitapp.ui.base.ERROR_NO_INTERNET
@@ -14,9 +16,6 @@ import com.example.gitapp.ui.diagram.models.Week
 import com.example.gitapp.ui.diagram.models.Year
 import com.example.gitapp.utils.HistogramPeriodAdapter
 import com.example.gitapp.utils.PeriodHelper
-import com.example.gitapp.utils.implementation.HistogramPeriodAdapterImpl
-import com.example.gitapp.utils.implementation.PeriodHelperImpl
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,28 +29,47 @@ import javax.inject.Inject
 const val ERROR_FETCH = "Fetch stargazers error"
 
 @InjectViewState
-class DiagramPresenter (
+class DiagramPresenter(
     private val repositoryName: String,
     private val ownerName: String,
     private val ownerIconUrl: String,
-    private val stargazersCount: Int
+    private val stargazersCount: Int,
+    appComponent: AppComponent
 ) : BasePresenter<DiagramView>() {
     init {
+        appComponent.inject(this)
         resetPresenter()
         displayHistogramWithLoadData()
         displayRepo()
         viewState.changePreviousButtonVisibility(View.GONE)
     }
 
-    private val weakDay = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    private val weekDay = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     private val yearMonth = arrayOf("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D")
-    private val periodHelper: PeriodHelper = PeriodHelperImpl()
-    private val histogramPeriodAdapter: HistogramPeriodAdapter = HistogramPeriodAdapterImpl()
+
+    @Inject
+    lateinit var periodHelper: PeriodHelper
+
+    @Inject
+    lateinit var histogramPeriodAdapter: HistogramPeriodAdapter
+
+    @Inject
+    lateinit var currentStargazersWeek: Week
+
+    @Inject
+    lateinit var currentStargazersMonth: Month
+
+    @Inject
+    lateinit var currentStargazersYear: Year
+
+    @Inject
+    lateinit var apiService: GitApiService
+
+    @Inject
+    lateinit var indexAxisValueFormatterFactory: IndexAxisValueFormatterFactory.Factory
+
     private var displayedDiagramPage = 0
     private var nextLoadPageNumber = (stargazersCount / 100) + 1
-    private var currentStargazersWeek = Week()
-    private var currentStargazersMonth = Month()
-    private var currentStargazersYear = Year()
     private var stargazersItemsList: MutableList<ApiStarredData> = mutableListOf()
     private var enoughData = false
     private var toStartPeriodReplaced = false
@@ -113,9 +131,8 @@ class DiagramPresenter (
     }
 
     private suspend fun loadData() {
-        val loadedStargazers = GitApiClient
-            .apiService
-            .fetchRepositoriesStarred(ownerName, repositoryName, 100, nextLoadPageNumber)
+        val loadedStargazers =
+            apiService.fetchRepositoriesStarred(ownerName, repositoryName, 100, nextLoadPageNumber)
         stargazersItemsList = (loadedStargazers + stargazersItemsList).toMutableList()
         lastDateLoadedStargazer = stargazersItemsList[stargazersItemsList.size - 1].getLocalDate()
         firstLoadedStargazerDate = stargazersItemsList[0].getLocalDate()
@@ -245,7 +262,7 @@ class DiagramPresenter (
         currentStargazersWeek = week
         val periodText = "[$startPeriod]  <->  [$endPeriod]"
         val barData = histogramPeriodAdapter.periodToBarData(week, diagramMode, periodText)
-        val valueFormatter = IndexAxisValueFormatter(weakDay)
+        val valueFormatter = indexAxisValueFormatterFactory.create(weekDay).createIndexAxisValueFormatter()
 
         viewState.displayData(barData, valueFormatter)
     }
@@ -255,7 +272,7 @@ class DiagramPresenter (
         currentStargazersMonth = month
         val periodText = "[$startPeriod]  <->  [$endPeriod]"
         val barData = histogramPeriodAdapter.periodToBarData(month, diagramMode, periodText)
-        val valueFormatter = IndexAxisValueFormatter()
+        val valueFormatter = indexAxisValueFormatterFactory.create(arrayOf()).createIndexAxisValueFormatter()
 
         viewState.displayData(barData, valueFormatter)
     }
@@ -265,7 +282,7 @@ class DiagramPresenter (
         currentStargazersYear = year
         val periodText = "[$startPeriod]  <->  [$endPeriod]"
         val barData = histogramPeriodAdapter.periodToBarData(year, diagramMode, periodText)
-        val valueFormatter = IndexAxisValueFormatter(yearMonth)
+        val valueFormatter = indexAxisValueFormatterFactory.create(yearMonth).createIndexAxisValueFormatter()
 
         viewState.displayData(barData, valueFormatter)
     }

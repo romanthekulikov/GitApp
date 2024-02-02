@@ -12,7 +12,6 @@ import com.example.gitapp.databinding.ItemRepoBinding
 import com.omega_r.libs.omegarecyclerview.OmegaRecyclerView
 import com.omega_r.libs.omegarecyclerview.pagination.PaginationViewCreator
 
-
 class RepoAdapter(
     private val helper: RepoRecyclerHelper
 ) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(), PaginationViewCreator {
