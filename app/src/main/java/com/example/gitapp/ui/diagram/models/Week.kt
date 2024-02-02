@@ -1,14 +1,13 @@
 package com.example.gitapp.ui.diagram.models
 
 import com.example.gitapp.data.api.models.ApiStarredData
-import javax.inject.Inject
 
 data class Week(
     val weekDays: MutableList<MutableList<ApiStarredData>> = mutableListOf(mutableListOf())
 ) : Period {
 
     init {
-        for (i in 0..6) {
+        for (i in 0..5) {
             weekDays.add(mutableListOf())
         }
     }
