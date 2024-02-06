@@ -11,5 +11,6 @@ interface DiagramView : BaseView {
     fun changeVisibilityProgressBar(visibility: Int)
     fun displayRepositoryItem(name: String, ownerIconUrl: String)
     fun displayData(data: BarData, valueFormatter: ValueFormatter)
-    fun changePreviousButtonVisibility(visibility: Int)
+    fun setPreviousButtonEnabled(isEnabled: Boolean)
+    fun setNextButtonEnabled(isEnabled: Boolean)
 }

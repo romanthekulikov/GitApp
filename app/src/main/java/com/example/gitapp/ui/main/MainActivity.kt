@@ -106,7 +106,6 @@ class MainActivity : BaseActivity(), MainView,
 
     override fun onRetryClicked() {
         binding.repositories.showProgressPagination()
-        mainPresenter.requestGetRepo(ownerName = ownerName, page = pageRepo)
     }
 
     override fun onPageRequest(page: Int) {

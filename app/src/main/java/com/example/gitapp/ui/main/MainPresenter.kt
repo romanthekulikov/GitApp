@@ -6,7 +6,7 @@ import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
 import com.example.gitapp.ui.base.ERROR_NO_INTERNET
-import com.example.gitapp.ui.base.ERROR_TIMED_OUT
+import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,11 +29,11 @@ class MainPresenter @Inject constructor() : BasePresenter<MainView>() {
                         showList(repoList)
                     }
                 } catch (e: UnknownHostException) {
-                    showLoadError(e.message ?: ERROR_NO_INTERNET)
+                    showLoadError(message = ERROR_NO_INTERNET, logMessage =  e.message)
                 } catch (e: RuntimeException) {
-                    showLoadError(e.message ?: ERROR_TIMED_OUT)
+                    showLoadError(message = ERROR_EXCEEDED_LIMIT, logMessage = e.message)
                 } catch (e: SocketTimeoutException) {
-                    showLoadError(e.message ?: ERROR_GITHUB_IS_SHUTDOWN)
+                    showLoadError(message = ERROR_GITHUB_IS_SHUTDOWN, logMessage = e.message)
                 }
             }
         }
@@ -47,8 +47,9 @@ class MainPresenter @Inject constructor() : BasePresenter<MainView>() {
         }
     }
 
-    private suspend fun showLoadError(message: String) {
-        Log.e("api_retrofit", message)
+    private suspend fun showLoadError(message: String, logMessage: String?) {
+        Log.e("api_retrofit", logMessage ?: message)
+        viewState.showError(message)
         withContext(Dispatchers.Main) {
             viewState.showRecyclerError()
         }

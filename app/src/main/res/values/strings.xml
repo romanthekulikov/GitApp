@@ -13,4 +13,6 @@
     <string name="period_stub_label">period</string>
     <string name="stargazer_name_stub">stargazer name</string>
     <string name="stared_at_stub">Stared at</string>
+    <string name="text_dialog_label_stub">Error text stub</string>
+    <string name="text_dialog_ok">OK</string>
 </resources>

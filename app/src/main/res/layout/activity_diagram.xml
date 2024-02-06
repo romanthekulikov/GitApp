@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.diagram.DiagramActivity">
@@ -21,7 +22,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:rotation="180"
-        android:src="@drawable/ic_right_arrow"
+        android:src="@drawable/ic_arrow_enabled"
         app:layout_constraintBottom_toTopOf="@+id/tab_layout_period"
         app:layout_constraintEnd_toStartOf="@+id/image_previous_button"
         app:layout_constraintHorizontal_bias="0.5"
@@ -42,7 +43,7 @@
         android:id="@+id/image_previous_button"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:src="@drawable/ic_right_arrow"
+        android:src="@drawable/ic_arrow_enabled"
         app:layout_constraintBottom_toTopOf="@+id/tab_layout_period"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -83,14 +84,22 @@
             android:text="@string/year" />
     </com.google.android.material.tabs.TabLayout>
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <FrameLayout
+        android:id="@+id/layout_progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/trans_white"
+        android:clickable="true"
+        android:visibility="gone">
 
+        <ProgressBar
+            android:id="@+id/progressbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

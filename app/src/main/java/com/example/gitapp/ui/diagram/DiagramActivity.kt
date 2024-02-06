@@ -3,10 +3,10 @@ package com.example.gitapp.ui.diagram
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.example.gitapp.R
 import com.example.gitapp.appComponent
 import com.example.gitapp.data.PeriodType
 import com.example.gitapp.data.api.models.ApiStarredData
@@ -30,7 +30,6 @@ import javax.inject.Inject
 
 const val MONTH_TAB_POSITION = 1
 const val YEAR_TAB_POSITION = 2
-const val MESSAGE_EMPTY_PART = "Empty part selected"
 
 class DiagramActivity : BaseActivity(), DiagramView {
 
@@ -60,7 +59,7 @@ class DiagramActivity : BaseActivity(), DiagramView {
         binding = ActivityDiagramBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.progressBar.isActivated = true
+        binding.progressbar.isActivated = true
         binding.imageNextButton.setOnClickListener {
             diagramPresenter.requestMoveToNextHistogramPage()
         }
@@ -87,7 +86,7 @@ class DiagramActivity : BaseActivity(), DiagramView {
 
                     startActivity(intent)
                 } catch (e: IndexOutOfBoundsException) {
-                    Toast.makeText(this@DiagramActivity, MESSAGE_EMPTY_PART, Toast.LENGTH_LONG).show()
+                    // nothing
                 }
             }
 
@@ -133,11 +132,25 @@ class DiagramActivity : BaseActivity(), DiagramView {
         histogramView.isActivated = true
     }
 
-    override fun changePreviousButtonVisibility(visibility: Int) {
-        binding.imagePreviousButton.visibility = visibility
+    override fun setPreviousButtonEnabled(isEnabled: Boolean) {
+        binding.imagePreviousButton.isEnabled = isEnabled
+        if (isEnabled) {
+            binding.imagePreviousButton.setImageResource(R.drawable.ic_arrow_enabled)
+        } else {
+            binding.imagePreviousButton.setImageResource(R.drawable.ic_arrow_disabled)
+        }
+    }
+
+    override fun setNextButtonEnabled(isEnabled: Boolean) {
+        binding.imageNextButton.isEnabled = isEnabled
+        if (isEnabled) {
+            binding.imageNextButton.setImageResource(R.drawable.ic_arrow_enabled)
+        } else {
+            binding.imageNextButton.setImageResource(R.drawable.ic_arrow_disabled)
+        }
     }
 
     override fun changeVisibilityProgressBar(visibility: Int) {
-        binding.progressBar.visibility = visibility
+        binding.layoutProgressbar.visibility = visibility
     }
 }

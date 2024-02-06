@@ -6,7 +6,8 @@ import kotlinx.coroutines.cancelChildren
 import moxy.MvpPresenter
 import kotlin.coroutines.CoroutineContext
 const val ERROR_NO_INTERNET = "No internet"
-const val ERROR_TIMED_OUT = "Timed out"
+const val ERROR_EXCEEDED_LIMIT = "Limit is exceeded"
+const val ERROR_NO_DATA = "This repository has no stars"
 const val ERROR_GITHUB_IS_SHUTDOWN = "Github is shutdown"
 open class BasePresenter<T : BaseView>(override val coroutineContext: CoroutineContext = Job()) : MvpPresenter<T>(),
     CoroutineScope {

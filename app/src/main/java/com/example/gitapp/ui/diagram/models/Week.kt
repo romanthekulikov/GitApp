@@ -11,6 +11,7 @@ data class Week(
             weekDays.add(mutableListOf())
         }
     }
+
     override fun getStargazerCount(): Int {
         var count = 0
         for (day in weekDays) {

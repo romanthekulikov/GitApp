@@ -4,13 +4,15 @@ import android.util.Log
 import android.view.View
 import com.example.gitapp.data.PeriodType
 import com.example.gitapp.data.api.GitApiService
+import com.example.gitapp.data.api.ITEM_PER_STARGAZERS_PAGE
 import com.example.gitapp.data.api.models.ApiStarredData
 import com.example.gitapp.injection.AppComponent
 import com.example.gitapp.injection.factories.IndexAxisValueFormatterFactory
 import com.example.gitapp.ui.base.BasePresenter
+import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
 import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
 import com.example.gitapp.ui.base.ERROR_NO_INTERNET
-import com.example.gitapp.ui.base.ERROR_TIMED_OUT
+import com.example.gitapp.ui.base.ERROR_NO_DATA
 import com.example.gitapp.ui.diagram.models.Month
 import com.example.gitapp.ui.diagram.models.Week
 import com.example.gitapp.ui.diagram.models.Year
@@ -26,8 +28,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import javax.inject.Inject
 
-const val ERROR_FETCH = "Fetch stargazers error"
-
 @InjectViewState
 class DiagramPresenter(
     private val repositoryName: String,
@@ -41,7 +41,7 @@ class DiagramPresenter(
         resetPresenter()
         displayHistogramWithLoadData()
         displayRepo()
-        viewState.changePreviousButtonVisibility(View.GONE)
+        viewState.setPreviousButtonEnabled(false)
     }
 
     private val weekDay = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
@@ -69,7 +69,7 @@ class DiagramPresenter(
     lateinit var indexAxisValueFormatterFactory: IndexAxisValueFormatterFactory.Factory
 
     private var displayedDiagramPage = 0
-    private var nextLoadPageNumber = (stargazersCount / 100) + 1
+    private var nextLoadPageNumber = (stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
     private var stargazersItemsList: MutableList<ApiStarredData> = mutableListOf()
     private var enoughData = false
     private var toStartPeriodReplaced = false
@@ -80,7 +80,7 @@ class DiagramPresenter(
     private var endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)!!
 
     private fun resetPresenter() {
-        nextLoadPageNumber = (stargazersCount / 100) + 1
+        nextLoadPageNumber = (stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
         enoughData = false
         toStartPeriodReplaced = false
         startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)
@@ -100,14 +100,15 @@ class DiagramPresenter(
                     try {
                         loadData()
                     } catch (e: UnknownHostException) {
-                        enoughData = true
-                        displayErrorWithDataIfExist(e.message ?: ERROR_NO_INTERNET)
+                        displayErrorWithDataIfExist(message = ERROR_NO_INTERNET, logMessage = e.message)
                     } catch (e: RuntimeException) {
-                        enoughData = true
-                        displayErrorWithDataIfExist(e.message ?: ERROR_TIMED_OUT)
+                        if (stargazersItemsList.isNotEmpty()) {
+                            displayErrorWithDataIfExist(message = ERROR_EXCEEDED_LIMIT, logMessage = e.message)
+                        } else {
+                            displayErrorWithDataIfExist(message = ERROR_NO_DATA, logMessage = e.message)
+                        }
                     } catch (e: SocketTimeoutException) {
-                        enoughData = true
-                        displayErrorWithDataIfExist(e.message ?: ERROR_GITHUB_IS_SHUTDOWN)
+                        displayErrorWithDataIfExist(message = ERROR_GITHUB_IS_SHUTDOWN, logMessage = e.message)
                     }
                 }
             }
@@ -132,7 +133,7 @@ class DiagramPresenter(
 
     private suspend fun loadData() {
         val loadedStargazers =
-            apiService.fetchRepositoriesStarred(ownerName, repositoryName, 100, nextLoadPageNumber)
+            apiService.fetchRepoStarred(ownerName = ownerName, repository = repositoryName, page = nextLoadPageNumber)
         stargazersItemsList = (loadedStargazers + stargazersItemsList).toMutableList()
         lastDateLoadedStargazer = stargazersItemsList[stargazersItemsList.size - 1].getLocalDate()
         firstLoadedStargazerDate = stargazersItemsList[0].getLocalDate()
@@ -149,10 +150,12 @@ class DiagramPresenter(
         nextLoadPageNumber--
     }
 
-    private suspend fun displayErrorWithDataIfExist(message: String) {
+    private suspend fun displayErrorWithDataIfExist(message: String, logMessage: String?) {
+        enoughData = true
         withContext(Dispatchers.Main) {
-            viewState.showError(ERROR_FETCH)
-            Log.e("api_retrofit", message)
+            viewState.showError(message)
+            viewState.setNextButtonEnabled(false)
+            Log.e("api_retrofit", logMessage ?: message)
             if (stargazersItemsList.isNotEmpty()) {
                 displayHistogram()
             }
@@ -161,7 +164,7 @@ class DiagramPresenter(
 
     private fun displayHistogram() {
         if (nextLoadPageNumber == 0 && startPeriod < firstLoadedStargazerDate) {
-            viewState.changePreviousButtonVisibility(View.GONE)
+            viewState.setNextButtonEnabled(false)
         }
         when (diagramMode) {
             PeriodType.WEEK -> displayWeakDiagram()
@@ -173,7 +176,7 @@ class DiagramPresenter(
     }
 
     fun requestMoveToNextHistogramPage() {
-        viewState.changePreviousButtonVisibility(View.VISIBLE)
+        viewState.setPreviousButtonEnabled(true)
         moveBackPeriod()
         displayHistogramWithLoadData()
         displayedDiagramPage++
@@ -181,8 +184,9 @@ class DiagramPresenter(
 
     fun requestMoveToPreviousHistogramPage() {
         if (displayedDiagramPage == 1) {
-            viewState.changePreviousButtonVisibility(View.GONE)
+            viewState.setPreviousButtonEnabled(false)
         }
+        viewState.setNextButtonEnabled(true)
         moveForwardPeriod()
         displayHistogramWithLoadData()
         displayedDiagramPage--
@@ -207,7 +211,8 @@ class DiagramPresenter(
             }
         }
         displayedDiagramPage = 0
-        viewState.changePreviousButtonVisibility(View.GONE)
+        viewState.setPreviousButtonEnabled(false)
+        viewState.setNextButtonEnabled(true)
         displayHistogramWithLoadData()
     }
 
@@ -229,11 +234,13 @@ class DiagramPresenter(
             PeriodType.MONTH -> {
                 startPeriod = startPeriod.minusMonths(1)
                 endPeriod = endPeriod.minusMonths(1)
+                endPeriod = endPeriod.withDayOfMonth(endPeriod.lengthOfMonth())
             }
 
             PeriodType.YEAR -> {
                 startPeriod = startPeriod.minusYears(1)
                 endPeriod = endPeriod.minusYears(1)
+                endPeriod = endPeriod.withDayOfYear(endPeriod.lengthOfYear())
             }
         }
     }
