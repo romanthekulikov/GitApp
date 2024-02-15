@@ -8,8 +8,6 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.gitapp.R
 import com.example.gitapp.appComponent
-import com.example.gitapp.data.PeriodType
-import com.example.gitapp.data.api.models.ApiStarredData
 import com.example.gitapp.databinding.ActivityDiagramBinding
 import com.example.gitapp.injection.factories.DiagramPresenterFactory
 import com.example.gitapp.injection.factories.OWNER_ICON_URL_KEY
@@ -75,12 +73,12 @@ class DiagramActivity : BaseActivity(), DiagramView {
         histogramView = binding.barChartHistogram
         histogramView.isScaleYEnabled = false
         histogramView.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-            override fun onValueSelected(e: Entry?, h: Highlight?) {
+            override fun onValueSelected(entry: Entry?, h: Highlight?) {
                 try {
-                    val stargazersData = diagramPresenter.requestPartPeriodData(e!!.x.toInt())
+                    val stargazersData = diagramPresenter.requestPartPeriodData(entry!!.x.toInt())
                     val intent = stargazerIntentFactory.create(
                         fromWhomContext = this@DiagramActivity,
-                        stargazers = stargazersData.first as ArrayList<ApiStarredData>,
+                        stargazers = stargazersData.first,
                         period = stargazersData.second
                     ).createIntent()
 
@@ -90,7 +88,7 @@ class DiagramActivity : BaseActivity(), DiagramView {
                 }
             }
 
-            override fun onNothingSelected() {}
+            override fun onNothingSelected() { /**nothing**/ }
         })
     }
 
@@ -98,14 +96,14 @@ class DiagramActivity : BaseActivity(), DiagramView {
         binding.tabLayoutPeriod.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 when (tab?.position) {
-                    MONTH_TAB_POSITION -> diagramPresenter.requestChangeDiagramMode(PeriodType.MONTH)
-                    YEAR_TAB_POSITION -> diagramPresenter.requestChangeDiagramMode(PeriodType.YEAR)
-                    else -> diagramPresenter.requestChangeDiagramMode(PeriodType.WEEK)
+                    MONTH_TAB_POSITION -> diagramPresenter.requestChangeDiagramMode(DiagramMode.MONTH)
+                    YEAR_TAB_POSITION -> diagramPresenter.requestChangeDiagramMode(DiagramMode.YEAR)
+                    else -> diagramPresenter.requestChangeDiagramMode(DiagramMode.WEEK)
                 }
             }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
+            override fun onTabUnselected(tab: TabLayout.Tab?) { /**nothing**/ }
+            override fun onTabReselected(tab: TabLayout.Tab?) { /**nothing**/ }
         })
     }
 
@@ -120,7 +118,7 @@ class DiagramActivity : BaseActivity(), DiagramView {
                     binding.repository.imageOwner.setImageBitmap(resource)
                 }
 
-                override fun onLoadCleared(placeholder: Drawable?) {}
+                override fun onLoadCleared(placeholder: Drawable?) { /**nothing**/ }
             })
     }
 

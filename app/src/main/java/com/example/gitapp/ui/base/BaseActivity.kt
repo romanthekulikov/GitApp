@@ -3,11 +3,13 @@ package com.example.gitapp.ui.base
 import com.example.gitapp.ui.dialogs.ErrorDialog
 import moxy.MvpAppCompatActivity
 
+const val TAG_ERROR_DIALOG = "error"
 open class BaseActivity : MvpAppCompatActivity(), BaseView {
+
     override fun showError(errorMsg: String) {
-        val errorDialog = ErrorDialog.Builder()
+         ErrorDialog.Builder()
             .setMessage(errorMsg)
             .build()
-        errorDialog.show(supportFragmentManager, "")
+            .show(supportFragmentManager, TAG_ERROR_DIALOG)
     }
 }

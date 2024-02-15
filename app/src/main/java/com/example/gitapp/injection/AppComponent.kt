@@ -1,6 +1,7 @@
 package com.example.gitapp.injection
 
 import com.example.gitapp.injection.modules.AppModule
+import com.example.gitapp.ui.base.BaseActivity
 import com.example.gitapp.ui.diagram.DiagramActivity
 import com.example.gitapp.ui.diagram.DiagramPresenter
 import com.example.gitapp.ui.main.MainActivity
@@ -15,4 +16,5 @@ interface AppComponent {
     fun inject(activity: DiagramActivity)
     fun inject(stargazersActivity: StargazersActivity)
     fun inject(diagramPresenter: DiagramPresenter)
+    fun inject(baseActivity: BaseActivity)
 }

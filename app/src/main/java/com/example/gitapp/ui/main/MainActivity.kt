@@ -18,10 +18,7 @@ import moxy.presenter.ProvidePresenter
 import javax.inject.Inject
 
 class MainActivity : BaseActivity(), MainView,
-    RepoAdapter.RepoRecyclerHelper, OnPageRequestListener {
-
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var repoAdapter: RepoAdapter
+    RepoAdapter.RepoRecyclerCallback, OnPageRequestListener {
 
     @Inject
     lateinit var repoAdapterFactory: RepoAdapterFactory.Factory
@@ -32,6 +29,9 @@ class MainActivity : BaseActivity(), MainView,
     @Inject
     @InjectPresenter
     lateinit var mainPresenter: MainPresenter
+
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var repoAdapter: RepoAdapter
 
     @ProvidePresenter
     fun provide(): MainPresenter = mainPresenter
@@ -97,7 +97,7 @@ class MainActivity : BaseActivity(), MainView,
             fromWhomContext = this@MainActivity,
             repositoryName = repo.name,
             ownerName = repo.owner.name,
-            ownerIconUrl = repo.owner.avatarUrl,
+            ownerIconUrl = repo.owner.iconUrl,
             stargazersCount = repo.stargazersCount
         ).createIntent()
 

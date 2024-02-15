@@ -13,7 +13,7 @@ import com.omega_r.libs.omegarecyclerview.OmegaRecyclerView
 import com.omega_r.libs.omegarecyclerview.pagination.PaginationViewCreator
 
 class RepoAdapter(
-    private val helper: RepoRecyclerHelper
+    private val helper: RepoRecyclerCallback
 ) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(), PaginationViewCreator {
     private val repoList = mutableListOf<ApiRepo>()
 
@@ -70,7 +70,7 @@ class RepoAdapter(
         private val binding: ItemRepoBinding
     ) : OmegaRecyclerView.ViewHolder(binding.root) {
         fun bind(item: ApiRepo) {
-            Glide.with(this.itemView).load(item.owner.avatarUrl).circleCrop().into(binding.imageOwner)
+            Glide.with(this.itemView).load(item.owner.iconUrl).circleCrop().into(binding.imageOwner)
             binding.textRepoName.text = item.name
             binding.view.setOnClickListener {
                 helper.onRepoClicked(item)
@@ -78,7 +78,7 @@ class RepoAdapter(
         }
     }
 
-    interface RepoRecyclerHelper {
+    interface RepoRecyclerCallback {
         fun onRepoClicked(repo: ApiRepo)
         fun onRetryClicked()
     }

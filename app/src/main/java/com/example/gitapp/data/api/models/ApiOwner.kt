@@ -1,13 +1,12 @@
 package com.example.gitapp.data.api.models
 
-import com.example.gitapp.entity.Owner
+import com.example.gitapp.entity.User
 import com.squareup.moshi.Json
-import javax.inject.Inject
 
 data class ApiOwner(
     @Json(name = "login")
     override val name: String,
 
     @Json(name = "avatar_url")
-    override val avatarUrl: String
-) : Owner
+    override val iconUrl: String
+) : User

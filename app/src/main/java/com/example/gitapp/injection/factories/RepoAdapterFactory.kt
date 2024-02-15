@@ -6,7 +6,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 class RepoAdapterFactory @AssistedInject constructor(
-    @Assisted("helper") private val helper: RepoAdapter.RepoRecyclerHelper
+    @Assisted("helper") private val helper: RepoAdapter.RepoRecyclerCallback
 ) {
     fun createRepoAdapter(): RepoAdapter {
         return RepoAdapter(helper)
@@ -14,6 +14,6 @@ class RepoAdapterFactory @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(@Assisted("helper") helper: RepoAdapter.RepoRecyclerHelper): RepoAdapterFactory
+        fun create(@Assisted("helper") helper: RepoAdapter.RepoRecyclerCallback): RepoAdapterFactory
     }
 }

@@ -1,8 +1,7 @@
 package com.example.gitapp.data.database
 
 //import androidx.room.Entity
-import com.example.gitapp.entity.Owner
-import com.example.gitapp.entity.Repo
+//import com.example.gitapp.entity.Repo
 
 //@Entity
 //data class DbRepo(

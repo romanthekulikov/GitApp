@@ -3,22 +3,21 @@ package com.example.gitapp.data.api.models
 import android.os.Parcelable
 import com.example.gitapp.entity.StarredData
 import com.squareup.moshi.Json
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import java.io.Serializable
 import java.time.LocalDate
 import javax.inject.Inject
 
 @Parcelize
 data class ApiStarredData @Inject constructor(
     @Json(name = "starred_at")
-    override var time: String,
+    override var timeString: String,
     @Json(name = "user")
     override val user: ApiUser
-): StarredData, Serializable, Parcelable {
+): StarredData, Parcelable {
     init {
-        time = time.substring(0, 10)
+        timeString = timeString.substring(0, 10)
     }
-    override fun getLocalDate(): LocalDate {
-        return LocalDate.parse(time)
-    }
+    @IgnoredOnParcel
+    val time: LocalDate = LocalDate.parse(timeString)
 }

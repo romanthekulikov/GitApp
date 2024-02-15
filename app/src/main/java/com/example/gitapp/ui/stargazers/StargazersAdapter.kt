@@ -12,7 +12,7 @@ class StargazersAdapter(private val stargazersList: ArrayList<ApiStarredData>) :
     inner class StargazerViewHolder(private val binding: ItemStargazerBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(stargazer: ApiStarredData) {
             binding.textStargazerName.text = stargazer.user.name
-            binding.textStaredDate.text = stargazer.time
+            binding.textStaredDate.text = stargazer.timeString
             Glide.with(binding.view).load(stargazer.user.iconUrl).circleCrop().into(binding.imageStargazer)
         }
     }

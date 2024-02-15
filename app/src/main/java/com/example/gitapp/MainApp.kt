@@ -13,6 +13,7 @@ class MainApp : Application() {
     }
 }
 
+@Suppress("RecursivePropertyAccessor")
 val Context.appComponent: AppComponent
     get() = when(this) {
         is MainApp -> appComponent
