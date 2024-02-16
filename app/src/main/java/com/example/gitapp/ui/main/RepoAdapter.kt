@@ -11,10 +11,15 @@ import com.example.gitapp.databinding.ItemProgressBinding
 import com.example.gitapp.databinding.ItemRepoBinding
 import com.omega_r.libs.omegarecyclerview.OmegaRecyclerView
 import com.omega_r.libs.omegarecyclerview.pagination.PaginationViewCreator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlin.coroutines.CoroutineContext
 
 class RepoAdapter(
     private val helper: RepoRecyclerCallback
 ) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(), PaginationViewCreator {
+
     private val repoList = mutableListOf<ApiRepo>()
 
     init {
@@ -40,7 +45,7 @@ class RepoAdapter(
     }
 
     override fun onBindViewHolder(holder: RepoViewHolder, position: Int) {
-        holder.bind(repoList[position])
+        holder.bind(repoList[position], position)
     }
 
     override fun createPaginationView(parent: ViewGroup?, inflater: LayoutInflater?): View {
@@ -60,6 +65,10 @@ class RepoAdapter(
         notifyItemInserted(repoList.size - listNewRepo.size)
     }
 
+    fun changeFavoriteValue(position: Int, isFavorite: Boolean) {
+        repoList[position].isFavorite = isFavorite
+    }
+
     fun clear() {
         val size = repoList.size
         repoList.clear()
@@ -68,18 +77,27 @@ class RepoAdapter(
 
     inner class RepoViewHolder(
         private val binding: ItemRepoBinding
-    ) : OmegaRecyclerView.ViewHolder(binding.root) {
-        fun bind(item: ApiRepo) {
-            Glide.with(this.itemView).load(item.owner.iconUrl).circleCrop().into(binding.imageOwner)
+    ) : OmegaRecyclerView.ViewHolder(binding.root), CoroutineScope {
+        override val coroutineContext: CoroutineContext
+            get() = SupervisorJob() + Dispatchers.Main
+        fun bind(item: ApiRepo, position: Int) {
+            Glide.with(this.itemView).load(item.owner.avatarUrl).circleCrop().into(binding.imageOwner)
             binding.textRepoName.text = item.name
             binding.view.setOnClickListener {
-                helper.onRepoClicked(item)
+                helper.onRepoClicked(item, position)
+            }
+            binding.checkboxStar.setOnCheckedChangeListener(null)
+            binding.checkboxStar.isChecked = item.isFavorite
+            binding.checkboxStar.setOnCheckedChangeListener { _, isFavorite ->
+                helper.onChangeRepoFavorite(item, isFavorite, position)
+                item.isFavorite = isFavorite
             }
         }
     }
 
     interface RepoRecyclerCallback {
-        fun onRepoClicked(repo: ApiRepo)
+        fun onChangeRepoFavorite(repo: ApiRepo, isFavorite: Boolean, position: Int)
+        fun onRepoClicked(repo: ApiRepo, position: Int)
         fun onRetryClicked()
     }
 }

@@ -1,19 +1,21 @@
 package com.example.gitapp.ui.diagram
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.gitapp.R
 import com.example.gitapp.appComponent
+import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.databinding.ActivityDiagramBinding
 import com.example.gitapp.injection.factories.DiagramPresenterFactory
-import com.example.gitapp.injection.factories.OWNER_ICON_URL_KEY
-import com.example.gitapp.injection.factories.OWNER_NAME_KAY
-import com.example.gitapp.injection.factories.REPO_NAME_KEY
-import com.example.gitapp.injection.factories.STARGAZERS_COUNT_KEY
 import com.example.gitapp.injection.factories.StargazerIntentFactory
 import com.example.gitapp.ui.base.BaseActivity
 import com.github.mikephil.charting.charts.BarChart
@@ -29,6 +31,9 @@ import javax.inject.Inject
 const val MONTH_TAB_POSITION = 1
 const val YEAR_TAB_POSITION = 2
 
+const val IS_FAVORITE_INTENT_KEY = "is_favorite"
+const val REPO_KEY = "repo"
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class DiagramActivity : BaseActivity(), DiagramView {
 
     private lateinit var binding: ActivityDiagramBinding
@@ -43,12 +48,18 @@ class DiagramActivity : BaseActivity(), DiagramView {
     private val diagramPresenter: DiagramPresenter by moxyPresenter {
         val extras = intent.extras!!
         diagramPresenterFactory.create(
-            repositoryName = extras.getString(REPO_NAME_KEY, ""),
-            ownerName = extras.getString(OWNER_NAME_KAY, ""),
-            ownerIconUrl = extras.getString(OWNER_ICON_URL_KEY, ""),
-            stargazersCount = extras.getInt(STARGAZERS_COUNT_KEY, 0),
+            repo = extras.getParcelable(REPO_KEY, ApiRepo::class.java)!!,
             appComponent = appComponent // looks like something bad...
         ).createPresenter()
+    }
+
+    private val onBackPressed = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            val intent = Intent()
+            intent.putExtra(IS_FAVORITE_INTENT_KEY, binding.repo.checkboxStar.isChecked)
+            setResult(Activity.RESULT_OK, intent)
+            finish()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +78,8 @@ class DiagramActivity : BaseActivity(), DiagramView {
 
         diagramInit()
         periodTabInit()
+
+        onBackPressedDispatcher.addCallback(onBackPressed)
     }
 
     private fun diagramInit() {
@@ -107,15 +120,16 @@ class DiagramActivity : BaseActivity(), DiagramView {
         })
     }
 
-    override fun displayRepositoryItem(name: String, ownerIconUrl: String) {
-        binding.repository.textRepoName.text = name
+    override fun displayRepositoryItem(name: String, ownerIconUrl: String, isFavorite: Boolean) {
+        binding.repo.textRepoName.text = name
+        binding.repo.checkboxStar.isChecked = isFavorite
         Glide.with(this@DiagramActivity)
             .asBitmap()
             .circleCrop()
             .load(ownerIconUrl)
             .into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    binding.repository.imageOwner.setImageBitmap(resource)
+                    binding.repo.imageOwner.setImageBitmap(resource)
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) { /**nothing**/ }

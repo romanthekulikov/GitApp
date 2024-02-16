@@ -4,7 +4,9 @@ import android.util.Log
 import android.view.View
 import com.example.gitapp.data.api.GitApiService
 import com.example.gitapp.data.api.ITEM_PER_STARGAZERS_PAGE
+import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.data.api.models.ApiStarredData
+import com.example.gitapp.data.repository.Repository
 import com.example.gitapp.injection.AppComponent
 import com.example.gitapp.injection.factories.IndexAxisValueFormatterFactory
 import com.example.gitapp.ui.base.BasePresenter
@@ -24,15 +26,13 @@ import javax.inject.Inject
 
 @InjectViewState
 class DiagramPresenter(
-    private val repositoryName: String,
-    private val ownerName: String,
-    private val ownerIconUrl: String,
-    private val stargazersCount: Int,
+    private val repo: ApiRepo,
     appComponent: AppComponent
 ) : BasePresenter<DiagramView>() {
     init {
         appComponent.inject(this)
         resetPresenter()
+        repository.clearMemorySavedStargazers()
         displayHistogramWithLoadData()
         displayRepo()
         viewState.setPreviousButtonEnabled(false)
@@ -53,9 +53,11 @@ class DiagramPresenter(
     @Inject
     lateinit var indexAxisValueFormatterFactory: IndexAxisValueFormatterFactory.Factory
 
+    @Inject
+    lateinit var repository: Repository
+
     private var displayedDiagramPage = 0
-    private var nextLoadPageNumber = (stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
-    private var stargazersItemsList: MutableList<ApiStarredData> = mutableListOf()
+    private var nextLoadPageNumber = (repo.stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
     private var enoughData = false
     private var toStartPeriodMoved = false
     private var diagramMode = DiagramMode.WEEK
@@ -66,13 +68,12 @@ class DiagramPresenter(
     private var currentDisplayedData = listOf<List<ApiStarredData>>()
 
     private fun resetPresenter() {
-        nextLoadPageNumber = (stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
+        nextLoadPageNumber = (repo.stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
         enoughData = false
         toStartPeriodMoved = false
         startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)
         endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)
         diagramMode = DiagramMode.WEEK
-        stargazersItemsList = mutableListOf()
         firstLoadedStargazerDate = LocalDate.now().with(DayOfWeek.MONDAY)
         displayedDiagramPage = 0
     }
@@ -87,7 +88,7 @@ class DiagramPresenter(
                 } catch (e: UnknownHostException) {
                     displayErrorWithDataIfExist(message = ERROR_NO_INTERNET, logMessage = e.message)
                 } catch (e: RuntimeException) {
-                    if (stargazersItemsList.isNotEmpty()) {
+                    if (repository.getLoadedStargazers().isNotEmpty()) {
                         displayErrorWithDataIfExist(message = ERROR_EXCEEDED_LIMIT, logMessage = e.message)
                     } else {
                         displayErrorWithDataIfExist(message = ERROR_NO_DATA, logMessage = e.message)
@@ -96,12 +97,13 @@ class DiagramPresenter(
                     displayErrorWithDataIfExist(message = ERROR_GITHUB_IS_SHUTDOWN, logMessage = e.message)
                 }
             }
+
             displayHistogram()
         }
     }
 
     private fun displayRepo() {
-        viewState.displayRepositoryItem(name = repositoryName, ownerIconUrl = ownerIconUrl)
+        viewState.displayRepositoryItem(name = repo.name, ownerIconUrl = repo.owner.avatarUrl, isFavorite = repo.isFavorite)
     }
 
     private fun detectDataShortage() {
@@ -114,14 +116,20 @@ class DiagramPresenter(
     }
 
     private suspend fun loadData() {
-        val loadedStargazers = apiService.fetchRepoStarred(
-            ownerName = ownerName,
-            repository = repositoryName,
-            page = nextLoadPageNumber
-        ).sortedBy { it.time }
-        stargazersItemsList = (loadedStargazers + stargazersItemsList).toMutableList()
-        lastDateLoadedStargazer = stargazersItemsList[stargazersItemsList.size - 1].time
-        firstLoadedStargazerDate = stargazersItemsList[0].time
+        try {
+            val loadedStargazers = repository.getStargazersList(repo.owner.nameUser, repo.name, nextLoadPageNumber)
+            fillFields(loadedStargazers)
+            nextLoadPageNumber--
+        } catch (e: UnknownHostException) {
+            val loadedStargazers = repository.getStargazersList(repo.owner.nameUser, repo.name)
+            fillFields(loadedStargazers)
+            throw e
+        }
+    }
+
+    private fun fillFields(loadedStargazers: List<ApiStarredData>) {
+        lastDateLoadedStargazer = repository.getLastDateLoadedStargazer()
+        firstLoadedStargazerDate = repository.getFirstLoadedStargazerDate()
 
         if (startPeriod > lastDateLoadedStargazer || !toStartPeriodMoved) { // If repo don't have a star on the current period
             startPeriod = lastDateLoadedStargazer.with(DayOfWeek.MONDAY) // Use week cause presenter start with week period type
@@ -132,15 +140,13 @@ class DiagramPresenter(
         if (firstLoadedStargazerDate < startPeriod || (loadedStargazers.size < 100 && nextLoadPageNumber == 1)) { //Gradual data loading
             enoughData = true
         }
-        nextLoadPageNumber--
     }
 
     private fun displayErrorWithDataIfExist(message: String, logMessage: String?) {
         enoughData = true
         viewState.showError(message)
-        viewState.setNextButtonEnabled(false)
         Log.e("api_retrofit", logMessage ?: message)
-        if (stargazersItemsList.isNotEmpty()) {
+        if (repository.getLoadedStargazers().isNotEmpty()) {
             displayHistogram()
         }
     }
@@ -149,8 +155,11 @@ class DiagramPresenter(
         if (nextLoadPageNumber == 0 && startPeriod < firstLoadedStargazerDate) {
             viewState.setNextButtonEnabled(false)
         }
-        currentDisplayedData = periodHelper.getDiagramData(startPeriod, endPeriod, diagramMode, stargazersItemsList)
-        val barData = histogramPeriodAdapter.periodToBarData(data = currentDisplayedData, "[$startPeriod]<->[$endPeriod]")
+        currentDisplayedData = repository.getLoadedDataInPeriod(startPeriod, endPeriod, diagramMode)
+        val barData = histogramPeriodAdapter.periodToBarData(
+            periodData = currentDisplayedData,
+            periodText = "[$startPeriod]<->[$endPeriod]"
+        )
         when (diagramMode) {
             DiagramMode.WEEK -> viewState.displayData(
                 barData,

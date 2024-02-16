@@ -6,10 +6,10 @@ import java.time.LocalDate
 
 interface PeriodHelper {
     fun getPeriodString(partData: List<ApiStarredData>, diagramMode: DiagramMode): String
-    fun getDiagramData(
+    fun getDataInPeriod(
         startPeriod: LocalDate,
         endPeriod: LocalDate,
-        diagramMode: DiagramMode,
+        periodType: DiagramMode,
         stargazersItemsList: List<ApiStarredData>
     ): List<List<ApiStarredData>>
 }

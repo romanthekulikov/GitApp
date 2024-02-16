@@ -31,45 +31,42 @@ class PeriodHelperImpl @Inject constructor() : PeriodHelper {
         }
     }
 
-    override fun getDiagramData(
+    override fun getDataInPeriod(
         startPeriod: LocalDate,
         endPeriod: LocalDate,
-        diagramMode: DiagramMode,
+        periodType: DiagramMode,
         stargazersItemsList: List<ApiStarredData>
     ): List<List<ApiStarredData>> {
         val values = mutableListOf<List<ApiStarredData>>()
-        var startMonthDay = startPeriod
+        var startDay = startPeriod
 
-        var endMonthDay = when (diagramMode) {
-            DiagramMode.WEEK -> startMonthDay
-            DiagramMode.MONTH -> startMonthDay.with(DayOfWeek.SUNDAY)
-            DiagramMode.YEAR -> startMonthDay.withDayOfMonth(startMonthDay.lengthOfMonth())
+        var lastDay = when (periodType) {
+            DiagramMode.WEEK -> startDay
+            DiagramMode.MONTH -> startDay.with(DayOfWeek.SUNDAY)
+            DiagramMode.YEAR -> startDay.withDayOfMonth(startDay.lengthOfMonth())
         }
-
-        var weeksPeriodList = emptyArray<String>()
         var monthIndex = 0
-        while (endMonthDay != endPeriod) {
-            if (endMonthDay > endPeriod) {
-                endMonthDay = endPeriod
+        while (lastDay != endPeriod) {
+            if (lastDay > endPeriod) {
+                lastDay = endPeriod
             }
-            val stargazers = stargazersItemsList.filter { it.time in startMonthDay..endMonthDay }.sortedBy { it.time }
+            val stargazers = stargazersItemsList.filter { it.time in startDay..lastDay }.sortedBy { it.time }
             values.add(stargazers)
 
-            when (diagramMode) {
+            when (periodType) {
                 DiagramMode.WEEK -> {
-                    startMonthDay = startMonthDay.plusDays(1)
-                    endMonthDay = startMonthDay
+                    startDay = startDay.plusDays(1)
+                    lastDay = startDay
                 }
 
                 DiagramMode.MONTH -> {
-                    weeksPeriodList = weeksPeriodList.plus("${startMonthDay.dayOfMonth}-${endMonthDay.dayOfMonth}")
-                    startMonthDay = startMonthDay.plusWeeks(1).with(DayOfWeek.MONDAY)
-                    if (endMonthDay != endPeriod) endMonthDay = startMonthDay.with(DayOfWeek.SUNDAY)
+                    startDay = startDay.plusWeeks(1).with(DayOfWeek.MONDAY)
+                    if (lastDay != endPeriod) lastDay = startDay.with(DayOfWeek.SUNDAY)
                 }
 
                 DiagramMode.YEAR -> {
-                    startMonthDay = startMonthDay.plusMonths(1).withDayOfMonth(1)
-                    if (endMonthDay != endPeriod) endMonthDay = startMonthDay.withDayOfMonth(startMonthDay.lengthOfMonth())
+                    startDay = startDay.plusMonths(1).withDayOfMonth(1)
+                    if (lastDay != endPeriod) lastDay = startDay.withDayOfMonth(startDay.lengthOfMonth())
                 }
             }
 

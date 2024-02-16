@@ -8,7 +8,7 @@
     tools:context=".ui.diagram.DiagramActivity">
 
     <include
-        android:id="@+id/repository"
+        android:id="@+id/repo"
         layout="@layout/item_repo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
         app:layout_constraintBottom_toTopOf="@+id/guideline_bottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/repository" />
+        app:layout_constraintTop_toBottomOf="@+id/repo" />
 
     <ImageView
         android:id="@+id/image_previous_button"

@@ -9,7 +9,7 @@ import moxy.viewstate.strategy.StateStrategyType
 @StateStrategyType(value = AddToEndSingleStrategy::class)
 interface DiagramView : BaseView {
     fun changeVisibilityProgressBar(visibility: Int)
-    fun displayRepositoryItem(name: String, ownerIconUrl: String)
+    fun displayRepositoryItem(name: String, ownerIconUrl: String, isFavorite: Boolean)
     fun displayData(data: BarData, valueFormatter: ValueFormatter)
     fun setPreviousButtonEnabled(isEnabled: Boolean)
     fun setNextButtonEnabled(isEnabled: Boolean)

@@ -1,5 +1,7 @@
 package com.example.gitapp.injection.modules
 
+import com.example.gitapp.data.repository.Repository
+import com.example.gitapp.data.repository.RepositoryImpl
 import com.example.gitapp.utils.HistogramPeriodAdapter
 import com.example.gitapp.utils.PeriodHelper
 import com.example.gitapp.utils.implementation.HistogramPeriodAdapterImpl
@@ -17,4 +19,8 @@ interface AppBindModule {
     @Binds
     @Singleton
     fun bindPeriodHelper(periodHelperImpl: PeriodHelperImpl): PeriodHelper
+
+    @Binds
+    @Singleton
+    fun bindRepository(repository: RepositoryImpl): Repository
 }

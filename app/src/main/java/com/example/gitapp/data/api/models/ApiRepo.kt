@@ -1,22 +1,32 @@
 package com.example.gitapp.data.api.models
 
-//import androidx.room.Entity
-//import androidx.room.PrimaryKey
+import android.os.Parcelable
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.example.gitapp.entity.Repo
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+import kotlinx.parcelize.Parcelize
 
-//@Entity
+@Parcelize
+@Entity(tableName = "repo")
+@JsonClass(generateAdapter = true)
 data class ApiRepo(
-    @Json(name = "id")
-    //@PrimaryKey(autoGenerate = true)
-    override val id: Int,
 
     @Json(name = "name")
-    override val name: String,
+    @PrimaryKey
+    override var name: String,
 
     @Json(name = "owner")
-    override val owner: ApiOwner,
+    @Embedded
+    override val owner: ApiUser,
 
     @Json(name = "stargazers_count")
-    override val stargazersCount: Int
-) : Repo
+    @ColumnInfo(name = "stargazers_count")
+    override val stargazersCount: Int,
+
+    @Json(ignore = true)
+    var isFavorite: Boolean = false
+) : Repo, Parcelable

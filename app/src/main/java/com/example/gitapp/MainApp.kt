@@ -2,6 +2,7 @@ package com.example.gitapp
 
 import android.app.Application
 import android.content.Context
+import com.example.gitapp.data.database.AppDatabase
 import com.example.gitapp.injection.AppComponent
 import com.example.gitapp.injection.DaggerAppComponent
 
@@ -9,6 +10,7 @@ class MainApp : Application() {
     lateinit var appComponent: AppComponent
     override fun onCreate() {
         appComponent = DaggerAppComponent.create()
+        AppDatabase.initDb(applicationContext)
         super.onCreate()
     }
 }

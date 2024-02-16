@@ -1,6 +1,6 @@
 package com.example.gitapp.entity
 
 interface User {
-    val name: String
-    val iconUrl: String
+    val nameUser: String
+    val avatarUrl: String
 }
