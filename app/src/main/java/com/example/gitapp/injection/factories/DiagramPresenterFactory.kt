@@ -1,6 +1,6 @@
 package com.example.gitapp.injection.factories
 
-import com.example.gitapp.data.api.models.ApiRepo
+import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.injection.AppComponent
 import com.example.gitapp.ui.diagram.DiagramPresenter
 import dagger.assisted.Assisted
@@ -8,7 +8,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 class DiagramPresenterFactory @AssistedInject constructor(
-    @Assisted("repo") private val repo: ApiRepo,
+    @Assisted("repo") private val repo: RepoEntity,
     @Assisted("appComponent") private val appComponent: AppComponent
 ) {
     fun createPresenter(): DiagramPresenter {
@@ -21,7 +21,7 @@ class DiagramPresenterFactory @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            @Assisted("repo") repo: ApiRepo,
+            @Assisted("repo") repo: RepoEntity,
             @Assisted("appComponent") appComponent: AppComponent
         ): DiagramPresenterFactory
     }

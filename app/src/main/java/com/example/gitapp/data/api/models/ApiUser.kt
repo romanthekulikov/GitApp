@@ -14,5 +14,10 @@ data class ApiUser(
 
     @Json(name = "avatar_url")
     @ColumnInfo(name = "avatar_url")
-    override val avatarUrl: String
-) : User, Parcelable
+    override var avatarUrl: String
+) : User, Parcelable {
+    constructor(user: User) : this(user.nameUser, user.avatarUrl) {
+        this.nameUser = user.nameUser
+        this.avatarUrl = user.avatarUrl
+    }
+}

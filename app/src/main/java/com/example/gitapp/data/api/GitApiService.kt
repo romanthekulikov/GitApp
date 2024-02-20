@@ -1,7 +1,7 @@
 package com.example.gitapp.data.api
 
 import com.example.gitapp.data.api.models.ApiRepo
-import com.example.gitapp.data.api.models.ApiStarredData
+import com.example.gitapp.data.api.models.ApiStargazer
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Path
@@ -25,5 +25,5 @@ interface GitApiService {
         @Path(value = "repos") repository: String,
         @Query(value = "per_page") itemInPageCount: Int = ITEM_PER_STARGAZERS_PAGE,
         @Query(value = "page") page: Int
-    ): List<ApiStarredData>
+    ): List<ApiStargazer>
 }

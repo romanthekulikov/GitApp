@@ -11,7 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gitapp.appComponent
-import com.example.gitapp.data.api.models.ApiRepo
+import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.databinding.ActivityMainBinding
 import com.example.gitapp.injection.factories.DiagramIntentFactory
 import com.example.gitapp.injection.factories.RepoAdapterFactory
@@ -21,6 +21,7 @@ import com.omega_r.libs.omegarecyclerview.pagination.OnPageRequestListener
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import javax.inject.Inject
+
 
 class MainActivity : BaseActivity(), MainView,
     RepoAdapter.RepoRecyclerCallback, OnPageRequestListener {
@@ -37,8 +38,10 @@ class MainActivity : BaseActivity(), MainView,
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var repoAdapter: RepoAdapter
-    private lateinit var selectedRepo: ApiRepo
+    private lateinit var selectedRepo: RepoEntity
     private var selectedRepoPosition = 0
+    private var nextLoadPage = 1
+    private var needNewPage = false
 
     @ProvidePresenter
     fun provide(): MainPresenter = mainPresenter
@@ -81,11 +84,16 @@ class MainActivity : BaseActivity(), MainView,
         binding.textStub.visibility = View.GONE
     }
 
-    override fun showRepositories(listRepo: List<ApiRepo>) {
+    override fun showLoadedRepositories(listRepo: List<RepoEntity>) {
         if (listRepo.size < 100) {
             binding.repositories.hidePagination()
         }
-        repoAdapter.addValues(listRepo)
+        val newPageAddition = repoAdapter.addValue(listRepo)
+        if (!newPageAddition) {
+            mainPresenter.requestGetRepo(ownerName = ownerName, page = nextLoadPage, showErrorOnFailLoad = false)
+        }
+
+        nextLoadPage++
     }
 
     override fun showRecyclerError() {
@@ -98,13 +106,13 @@ class MainActivity : BaseActivity(), MainView,
         binding.repositories.hidePagination()
     }
 
-    override fun onChangeRepoFavorite(repo: ApiRepo, isFavorite: Boolean, position: Int) {
+    override fun onChangeRepoFavorite(repo: RepoEntity, isFavorite: Boolean, position: Int) {
         mainPresenter.requestChangeFavoriteRepo(repo, isFavorite)
         repoAdapter.notifyItemChanged(position)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    override fun onRepoClicked(repo: ApiRepo, position: Int) {
+    override fun onRepoClicked(repo: RepoEntity, position: Int) {
         selectedRepo = repo
         selectedRepoPosition = position
         val intent = diagramIntent.create(
@@ -130,8 +138,14 @@ class MainActivity : BaseActivity(), MainView,
     }
 
     override fun onPageRequest(page: Int) {
-        if (page > 0) { //Zero and first page are equal
-            mainPresenter.requestGetRepo(ownerName = ownerName, page = page)
+        needNewPage = true
+        if (page > 0) { // Zero and first page are equal
+            mainPresenter.requestGetRepo(
+                ownerName = ownerName,
+                page = nextLoadPage,
+                requireNewPage = true,
+                showErrorOnFailLoad = true
+            )
         }
     }
 

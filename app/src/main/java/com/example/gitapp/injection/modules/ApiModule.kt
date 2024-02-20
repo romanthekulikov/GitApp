@@ -1,6 +1,7 @@
 package com.example.gitapp.injection.modules
 
 import com.example.gitapp.data.api.GitApiService
+import com.example.gitapp.data.converters.LocalDateConverter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -16,7 +17,10 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideGitApiService(): GitApiService {
-        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+        val moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .add(LocalDateConverter())
+            .build()
         val retrofit = Retrofit.Builder().addConverterFactory(MoshiConverterFactory.create(moshi)).baseUrl(BASE_URL).build()
         return retrofit.create(GitApiService::class.java)
     }

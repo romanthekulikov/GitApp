@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.gitapp.data.api.models.ApiRepo
+import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.databinding.ItemErrorProgressBinding
 import com.example.gitapp.databinding.ItemProgressBinding
 import com.example.gitapp.databinding.ItemRepoBinding
@@ -20,7 +20,7 @@ class RepoAdapter(
     private val helper: RepoRecyclerCallback
 ) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(), PaginationViewCreator {
 
-    private val repoList = mutableListOf<ApiRepo>()
+    private var repoList = mutableListOf<RepoEntity>()
 
     init {
         setHasStableIds(true)
@@ -60,9 +60,36 @@ class RepoAdapter(
         return binding.root
     }
 
-    fun addValues(listNewRepo: List<ApiRepo>) {
-        repoList.addAll(listNewRepo)
-        notifyItemInserted(repoList.size - listNewRepo.size)
+    fun addValue(listNewRepo: List<RepoEntity>): Boolean {
+        var success = false
+        val newPosition = getNewPosition(listNewRepo)
+        val repoSizeUntilAddition = repoList.size
+        repoList = listNewRepo.toMutableList()
+        newPosition.forEach {
+            if (it <= repoSizeUntilAddition) notifyItemChanged(it)
+            else notifyItemInserted(it)
+            success = true
+        }
+        return success
+    }
+
+    private fun getNewPosition(listNewRepo: List<RepoEntity>): List<Int> {
+        val newPosition = arrayListOf<Int>()
+        var k = 0
+        listNewRepo.forEach {
+            newPosition.add(k)
+            k++
+        }
+        for (repo in repoList) {
+            var i = 0
+            listNewRepo.forEach {
+                if (repo.name == it.name) {
+                    newPosition.remove(i)
+                }
+                i++
+            }
+        }
+        return newPosition
     }
 
     fun changeFavoriteValue(position: Int, isFavorite: Boolean) {
@@ -80,7 +107,7 @@ class RepoAdapter(
     ) : OmegaRecyclerView.ViewHolder(binding.root), CoroutineScope {
         override val coroutineContext: CoroutineContext
             get() = SupervisorJob() + Dispatchers.Main
-        fun bind(item: ApiRepo, position: Int) {
+        fun bind(item: RepoEntity, position: Int) {
             Glide.with(this.itemView).load(item.owner.avatarUrl).circleCrop().into(binding.imageOwner)
             binding.textRepoName.text = item.name
             binding.view.setOnClickListener {
@@ -96,8 +123,8 @@ class RepoAdapter(
     }
 
     interface RepoRecyclerCallback {
-        fun onChangeRepoFavorite(repo: ApiRepo, isFavorite: Boolean, position: Int)
-        fun onRepoClicked(repo: ApiRepo, position: Int)
+        fun onChangeRepoFavorite(repo: RepoEntity, isFavorite: Boolean, position: Int)
+        fun onRepoClicked(repo: RepoEntity, position: Int)
         fun onRetryClicked()
     }
 }

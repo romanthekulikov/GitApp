@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.gitapp.data.api.models.ApiRepo
+import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.ui.diagram.DiagramActivity
 import com.example.gitapp.ui.diagram.REPO_KEY
 import dagger.assisted.Assisted
@@ -13,7 +13,7 @@ import dagger.assisted.AssistedInject
 
 class DiagramIntentFactory @AssistedInject constructor(
     @Assisted("fromWhomContext") private val fromWhomContext: Context,
-    @Assisted("repo") private val repo: ApiRepo
+    @Assisted("repo") private val repo: RepoEntity
 ) {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -28,7 +28,7 @@ class DiagramIntentFactory @AssistedInject constructor(
     interface Factory {
         fun create(
             @Assisted("fromWhomContext") fromWhomContext: Context,
-            @Assisted("repo") repo: ApiRepo
+            @Assisted("repo") repo: RepoEntity
         ): DiagramIntentFactory
     }
 }

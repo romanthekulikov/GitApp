@@ -4,16 +4,16 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.gitapp.data.api.models.ApiStarredData
 import com.example.gitapp.databinding.ItemStargazerBinding
+import com.example.gitapp.entity.Stargazer
 
 class StargazersAdapter(
-    private val stargazersList: ArrayList<ApiStarredData>
+    private val stargazersList: List<Stargazer>
 ) : RecyclerView.Adapter<StargazersAdapter.StargazerViewHolder>() {
     inner class StargazerViewHolder(private val binding: ItemStargazerBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(stargazer: ApiStarredData) {
+        fun bind(stargazer: Stargazer) {
             binding.textStargazerName.text = stargazer.user.nameUser
-            binding.textStaredDate.text = stargazer.timeString
+            binding.textStaredDate.text = stargazer.time.toString()
             Glide.with(binding.view).load(stargazer.user.avatarUrl).circleCrop().into(binding.imageStargazer)
         }
     }

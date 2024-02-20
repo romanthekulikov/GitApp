@@ -5,15 +5,15 @@ import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gitapp.appComponent
-import com.example.gitapp.data.api.models.ApiStarredData
+import com.example.gitapp.data.api.models.StaredModel
 import com.example.gitapp.databinding.ActivityStargazersBinding
+import com.example.gitapp.entity.Stargazer
 import com.example.gitapp.injection.factories.PERIOD_KEY
 import com.example.gitapp.injection.factories.STARGAZERS_KEY
 import com.example.gitapp.injection.factories.StargazersAdapterFactory
 import com.example.gitapp.injection.factories.StargazersPresenterFactory
 import com.example.gitapp.ui.base.BaseActivity
 import moxy.ktx.moxyPresenter
-import java.util.ArrayList
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -26,7 +26,7 @@ class StargazersActivity : BaseActivity(), StargazersView {
 
     private val stargazersPresenter: StargazersPresenter by moxyPresenter {
         val extras = intent.extras!!
-        stargazersPresenterFactory.create(extras.getParcelableArrayList(STARGAZERS_KEY, ApiStarredData::class.java)!!)
+        stargazersPresenterFactory.create(extras.getParcelableArrayList(STARGAZERS_KEY, StaredModel::class.java)!!)
             .createPresenter()
     }
 
@@ -43,7 +43,7 @@ class StargazersActivity : BaseActivity(), StargazersView {
         binding.textPeriod.text = intent.extras?.getString(PERIOD_KEY) ?: ""
     }
 
-    override fun initRecyclerView(stargazers: ArrayList<ApiStarredData>) {
+    override fun initRecyclerView(stargazers: List<Stargazer>) {
         val adapter = stargazersAdapterFactory.create(stargazers).createStargazersAdapter()
         val layoutManager = LinearLayoutManager(this)
         binding.recyclerviewStargazers.layoutManager = layoutManager

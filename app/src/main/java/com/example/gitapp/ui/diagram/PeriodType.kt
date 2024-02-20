@@ -1,5 +1,5 @@
 package com.example.gitapp.ui.diagram
 
-enum class DiagramMode {
+enum class PeriodType {
     WEEK, MONTH, YEAR
 }

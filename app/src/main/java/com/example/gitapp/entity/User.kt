@@ -1,6 +1,8 @@
 package com.example.gitapp.entity
 
-interface User {
+import android.os.Parcelable
+
+interface User : Parcelable {
     val nameUser: String
     val avatarUrl: String
 }

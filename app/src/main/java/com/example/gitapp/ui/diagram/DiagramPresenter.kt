@@ -4,9 +4,10 @@ import android.util.Log
 import android.view.View
 import com.example.gitapp.data.api.GitApiService
 import com.example.gitapp.data.api.ITEM_PER_STARGAZERS_PAGE
-import com.example.gitapp.data.api.models.ApiRepo
-import com.example.gitapp.data.api.models.ApiStarredData
+import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.data.repository.Repository
+import com.example.gitapp.entity.Stared
+import com.example.gitapp.entity.Stargazer
 import com.example.gitapp.injection.AppComponent
 import com.example.gitapp.injection.factories.IndexAxisValueFormatterFactory
 import com.example.gitapp.ui.base.BasePresenter
@@ -26,7 +27,7 @@ import javax.inject.Inject
 
 @InjectViewState
 class DiagramPresenter(
-    private val repo: ApiRepo,
+    private val repo: RepoEntity,
     appComponent: AppComponent
 ) : BasePresenter<DiagramView>() {
     init {
@@ -60,12 +61,11 @@ class DiagramPresenter(
     private var nextLoadPageNumber = (repo.stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
     private var enoughData = false
     private var toStartPeriodMoved = false
-    private var diagramMode = DiagramMode.WEEK
+    private var diagramMode = PeriodType.WEEK
     private var firstLoadedStargazerDate = LocalDate.now().with(DayOfWeek.MONDAY)
     private var lastDateLoadedStargazer = LocalDate.now().with(DayOfWeek.SUNDAY)
     private var startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)!!
     private var endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)!!
-    private var currentDisplayedData = listOf<List<ApiStarredData>>()
 
     private fun resetPresenter() {
         nextLoadPageNumber = (repo.stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
@@ -73,7 +73,7 @@ class DiagramPresenter(
         toStartPeriodMoved = false
         startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)
         endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)
-        diagramMode = DiagramMode.WEEK
+        diagramMode = PeriodType.WEEK
         firstLoadedStargazerDate = LocalDate.now().with(DayOfWeek.MONDAY)
         displayedDiagramPage = 0
     }
@@ -127,7 +127,7 @@ class DiagramPresenter(
         }
     }
 
-    private fun fillFields(loadedStargazers: List<ApiStarredData>) {
+    private fun fillFields(loadedStargazers: List<Stargazer>) {
         lastDateLoadedStargazer = repository.getLastDateLoadedStargazer()
         firstLoadedStargazerDate = repository.getFirstLoadedStargazerDate()
 
@@ -155,23 +155,20 @@ class DiagramPresenter(
         if (nextLoadPageNumber == 0 && startPeriod < firstLoadedStargazerDate) {
             viewState.setNextButtonEnabled(false)
         }
-        currentDisplayedData = repository.getLoadedDataInPeriod(startPeriod, endPeriod, diagramMode)
-        val barData = histogramPeriodAdapter.periodToBarData(
-            periodData = currentDisplayedData,
-            periodText = "[$startPeriod]<->[$endPeriod]"
-        )
+        val loadedData = repository.getLoadedDataInPeriod(startPeriod, endPeriod, diagramMode)
+        val barData = histogramPeriodAdapter.periodToBarData(loadedData, diagramMode, startPeriod, endPeriod)
         when (diagramMode) {
-            DiagramMode.WEEK -> viewState.displayData(
+            PeriodType.WEEK -> viewState.displayData(
                 barData,
                 indexAxisValueFormatterFactory.create(weekDay).createIndexAxisValueFormatter()
             )
 
-            DiagramMode.MONTH -> viewState.displayData(
+            PeriodType.MONTH -> viewState.displayData(
                 barData,
                 indexAxisValueFormatterFactory.create(arrayOf()).createIndexAxisValueFormatter()
             )
 
-            DiagramMode.YEAR -> viewState.displayData(
+            PeriodType.YEAR -> viewState.displayData(
                 barData,
                 indexAxisValueFormatterFactory.create(yearMonth).createIndexAxisValueFormatter()
             )
@@ -196,20 +193,20 @@ class DiagramPresenter(
         displayedDiagramPage--
     }
 
-    fun requestChangeDiagramMode(mode: DiagramMode) {
+    fun requestChangeDiagramMode(mode: PeriodType) {
         diagramMode = mode
         when (diagramMode) {
-            DiagramMode.WEEK -> {
+            PeriodType.WEEK -> {
                 startPeriod = lastDateLoadedStargazer.with(DayOfWeek.MONDAY)
                 endPeriod = lastDateLoadedStargazer.with(DayOfWeek.SUNDAY)
             }
 
-            DiagramMode.MONTH -> {
+            PeriodType.MONTH -> {
                 startPeriod = lastDateLoadedStargazer.withDayOfMonth(1)
                 endPeriod = lastDateLoadedStargazer.withDayOfMonth(lastDateLoadedStargazer.lengthOfMonth())
             }
 
-            DiagramMode.YEAR -> {
+            PeriodType.YEAR -> {
                 startPeriod = lastDateLoadedStargazer.withDayOfYear(1)
                 endPeriod = lastDateLoadedStargazer.withDayOfYear(lastDateLoadedStargazer.lengthOfYear())
             }
@@ -220,26 +217,24 @@ class DiagramPresenter(
         displayHistogramWithLoadData()
     }
 
-    fun requestPartPeriodData(part: Int): Pair<ArrayList<ApiStarredData>, String> {
-        val data = ArrayList(currentDisplayedData[part])
-        val partPeriodString = periodHelper.getPeriodString(data, diagramMode)
-        return Pair(data, partPeriodString)
+    fun requestPeriodDataTime(periodData: List<Stared>): String {
+        return periodHelper.getPeriodString(periodData, diagramMode)
     }
 
     private fun moveBackPeriod() {
         when (diagramMode) {
-            DiagramMode.WEEK -> {
+            PeriodType.WEEK -> {
                 startPeriod = startPeriod.minusWeeks(1)
                 endPeriod = endPeriod.minusWeeks(1)
             }
 
-            DiagramMode.MONTH -> {
+            PeriodType.MONTH -> {
                 startPeriod = startPeriod.minusMonths(1)
                 endPeriod = endPeriod.minusMonths(1)
                 endPeriod = endPeriod.withDayOfMonth(endPeriod.lengthOfMonth())
             }
 
-            DiagramMode.YEAR -> {
+            PeriodType.YEAR -> {
                 startPeriod = startPeriod.minusYears(1)
                 endPeriod = endPeriod.minusYears(1)
                 endPeriod = endPeriod.withDayOfYear(endPeriod.lengthOfYear())
@@ -249,17 +244,17 @@ class DiagramPresenter(
 
     private fun moveForwardPeriod() {
         when (diagramMode) {
-            DiagramMode.WEEK -> {
+            PeriodType.WEEK -> {
                 startPeriod = startPeriod.plusWeeks(1)
                 endPeriod = endPeriod.plusWeeks(1)
             }
 
-            DiagramMode.MONTH -> {
+            PeriodType.MONTH -> {
                 startPeriod = startPeriod.plusMonths(1)
                 endPeriod = endPeriod.plusMonths(1)
             }
 
-            DiagramMode.YEAR -> {
+            PeriodType.YEAR -> {
                 startPeriod = startPeriod.plusYears(1)
                 endPeriod = endPeriod.plusYears(1)
             }

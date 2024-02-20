@@ -1,15 +1,12 @@
 package com.example.gitapp.utils
 
-import com.example.gitapp.ui.diagram.DiagramMode
-import com.example.gitapp.data.api.models.ApiStarredData
+import com.example.gitapp.ui.diagram.PeriodType
+import com.example.gitapp.entity.Stared
+import com.example.gitapp.entity.Stargazer
 import java.time.LocalDate
 
 interface PeriodHelper {
-    fun getPeriodString(partData: List<ApiStarredData>, diagramMode: DiagramMode): String
-    fun getDataInPeriod(
-        startPeriod: LocalDate,
-        endPeriod: LocalDate,
-        periodType: DiagramMode,
-        stargazersItemsList: List<ApiStarredData>
-    ): List<List<ApiStarredData>>
+    fun getPeriodString(partData: List<Stared>, periodType: PeriodType): String
+    fun getStarred(stargazersItemsList: List<Stargazer>): List<Stared>
+    fun getDataInPeriod(startPeriod: LocalDate, endPeriod: LocalDate, staredList: List<Stared>): List<Stared>
 }

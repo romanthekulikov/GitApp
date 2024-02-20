@@ -1,7 +1,10 @@
 package com.example.gitapp.utils.implementation
 
-import com.example.gitapp.ui.diagram.DiagramMode
-import com.example.gitapp.data.api.models.ApiStarredData
+import com.example.gitapp.data.api.models.StaredModel
+import com.example.gitapp.entity.Stared
+import com.example.gitapp.entity.Stargazer
+import com.example.gitapp.entity.User
+import com.example.gitapp.ui.diagram.PeriodType
 import com.example.gitapp.utils.PeriodHelper
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -9,70 +12,44 @@ import javax.inject.Inject
 
 class PeriodHelperImpl @Inject constructor() : PeriodHelper {
 
-    override fun getPeriodString(partData: List<ApiStarredData>, diagramMode: DiagramMode): String {
-        var startPeriodPart = partData[0].timeString
-        val startPeriodPartLocalDate = partData[0].time
-        return when (diagramMode) {
-            DiagramMode.WEEK -> {
-                startPeriodPart //Just one day
+    override fun getPeriodString(partData: List<Stared>, periodType: PeriodType): String {
+        var startPeriodPart = partData[0].time
+        return when (periodType) {
+            PeriodType.WEEK -> {
+                startPeriodPart.toString() //Just one day
             }
 
-            DiagramMode.MONTH -> {
-                val endPeriodPartLocalDate = startPeriodPartLocalDate.with(DayOfWeek.SUNDAY)
-                startPeriodPart = endPeriodPartLocalDate.with(DayOfWeek.MONDAY).toString()
+            PeriodType.MONTH -> {
+                val endPeriodPartLocalDate = startPeriodPart.with(DayOfWeek.SUNDAY)
+                startPeriodPart = endPeriodPartLocalDate.with(DayOfWeek.MONDAY)
                 "$startPeriodPart <-> $endPeriodPartLocalDate"
             }
 
-            DiagramMode.YEAR -> {
-                val endPeriodPart = startPeriodPartLocalDate.withDayOfMonth(startPeriodPartLocalDate.lengthOfMonth())
-                startPeriodPart = endPeriodPart.withDayOfMonth(1).toString()
+            PeriodType.YEAR -> {
+                val endPeriodPart = startPeriodPart.withDayOfMonth(startPeriodPart.lengthOfMonth())
+                startPeriodPart = endPeriodPart.withDayOfMonth(1)
                 "$startPeriodPart <-> $endPeriodPart"
             }
         }
     }
 
-    override fun getDataInPeriod(
-        startPeriod: LocalDate,
-        endPeriod: LocalDate,
-        periodType: DiagramMode,
-        stargazersItemsList: List<ApiStarredData>
-    ): List<List<ApiStarredData>> {
-        val values = mutableListOf<List<ApiStarredData>>()
-        var startDay = startPeriod
+    override fun getStarred(stargazersItemsList: List<Stargazer>): List<Stared> {
+        val starredList = mutableListOf<StaredModel>()
+        val tempStargazersList = stargazersItemsList.toMutableList()
+        var listUser: List<User>
 
-        var lastDay = when (periodType) {
-            DiagramMode.WEEK -> startDay
-            DiagramMode.MONTH -> startDay.with(DayOfWeek.SUNDAY)
-            DiagramMode.YEAR -> startDay.withDayOfMonth(startDay.lengthOfMonth())
-        }
-        var monthIndex = 0
-        while (lastDay != endPeriod) {
-            if (lastDay > endPeriod) {
-                lastDay = endPeriod
-            }
-            val stargazers = stargazersItemsList.filter { it.time in startDay..lastDay }.sortedBy { it.time }
-            values.add(stargazers)
-
-            when (periodType) {
-                DiagramMode.WEEK -> {
-                    startDay = startDay.plusDays(1)
-                    lastDay = startDay
-                }
-
-                DiagramMode.MONTH -> {
-                    startDay = startDay.plusWeeks(1).with(DayOfWeek.MONDAY)
-                    if (lastDay != endPeriod) lastDay = startDay.with(DayOfWeek.SUNDAY)
-                }
-
-                DiagramMode.YEAR -> {
-                    startDay = startDay.plusMonths(1).withDayOfMonth(1)
-                    if (lastDay != endPeriod) lastDay = startDay.withDayOfMonth(startDay.lengthOfMonth())
-                }
-            }
-
-            monthIndex++
+        while (tempStargazersList.size > 0) {
+            val stargazer = tempStargazersList[0]
+            val equalTimeStargazersList = tempStargazersList.filter { it.time == stargazer.time }
+            listUser = equalTimeStargazersList.map { it.user }
+            starredList.add(StaredModel(stargazer.time, listUser))
+            tempStargazersList.removeAll(equalTimeStargazersList)
         }
 
-        return values
+        return starredList
+    }
+
+    override fun getDataInPeriod(startPeriod: LocalDate, endPeriod: LocalDate, staredList: List<Stared>): List<Stared> {
+        return staredList.filter { it.time in startPeriod..endPeriod }
     }
 }

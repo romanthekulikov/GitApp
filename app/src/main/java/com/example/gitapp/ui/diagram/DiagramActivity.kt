@@ -13,8 +13,9 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.gitapp.R
 import com.example.gitapp.appComponent
-import com.example.gitapp.data.api.models.ApiRepo
+import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.databinding.ActivityDiagramBinding
+import com.example.gitapp.entity.Stared
 import com.example.gitapp.injection.factories.DiagramPresenterFactory
 import com.example.gitapp.injection.factories.StargazerIntentFactory
 import com.example.gitapp.ui.base.BaseActivity
@@ -33,6 +34,7 @@ const val YEAR_TAB_POSITION = 2
 
 const val IS_FAVORITE_INTENT_KEY = "is_favorite"
 const val REPO_KEY = "repo"
+@Suppress("UNCHECKED_CAST")
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class DiagramActivity : BaseActivity(), DiagramView {
 
@@ -48,7 +50,7 @@ class DiagramActivity : BaseActivity(), DiagramView {
     private val diagramPresenter: DiagramPresenter by moxyPresenter {
         val extras = intent.extras!!
         diagramPresenterFactory.create(
-            repo = extras.getParcelable(REPO_KEY, ApiRepo::class.java)!!,
+            repo = extras.getParcelable(REPO_KEY, RepoEntity::class.java)!!,
             appComponent = appComponent // looks like something bad...
         ).createPresenter()
     }
@@ -88,11 +90,11 @@ class DiagramActivity : BaseActivity(), DiagramView {
         histogramView.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(entry: Entry?, h: Highlight?) {
                 try {
-                    val stargazersData = diagramPresenter.requestPartPeriodData(entry!!.x.toInt())
+                    val periodDataTime = diagramPresenter.requestPeriodDataTime(entry?.data as List<Stared>)
                     val intent = stargazerIntentFactory.create(
                         fromWhomContext = this@DiagramActivity,
-                        stargazers = stargazersData.first,
-                        period = stargazersData.second
+                        stargazers = entry.data as List<Stared>,
+                        period = periodDataTime
                     ).createIntent()
 
                     startActivity(intent)
@@ -109,9 +111,9 @@ class DiagramActivity : BaseActivity(), DiagramView {
         binding.tabLayoutPeriod.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 when (tab?.position) {
-                    MONTH_TAB_POSITION -> diagramPresenter.requestChangeDiagramMode(DiagramMode.MONTH)
-                    YEAR_TAB_POSITION -> diagramPresenter.requestChangeDiagramMode(DiagramMode.YEAR)
-                    else -> diagramPresenter.requestChangeDiagramMode(DiagramMode.WEEK)
+                    MONTH_TAB_POSITION -> diagramPresenter.requestChangeDiagramMode(PeriodType.MONTH)
+                    YEAR_TAB_POSITION -> diagramPresenter.requestChangeDiagramMode(PeriodType.YEAR)
+                    else -> diagramPresenter.requestChangeDiagramMode(PeriodType.WEEK)
                 }
             }
 
