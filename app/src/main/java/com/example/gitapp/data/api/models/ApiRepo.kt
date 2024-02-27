@@ -5,6 +5,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.gitapp.data.database.entity.RepoEntity
+import com.example.gitapp.data.database.entity.UserEntity
 import com.example.gitapp.entity.Repo
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -29,4 +31,13 @@ data class ApiRepo(
 
     @Json(ignore = true)
     var isFavorite: Boolean = false
-) : Repo, Parcelable
+) : Repo, Parcelable {
+    fun toRepoEntity(isFavorite: Boolean): RepoEntity {
+        return RepoEntity(
+            name = name,
+            owner = UserEntity(nameUser = owner.nameUser, avatarUrl = owner.avatarUrl),
+            stargazersCount = stargazersCount,
+            isFavorite = isFavorite
+        )
+    }
+}

@@ -1,24 +1,24 @@
 package com.example.gitapp.ui.diagram
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.gitapp.R
-import com.example.gitapp.appComponent
 import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.databinding.ActivityDiagramBinding
 import com.example.gitapp.entity.Stared
-import com.example.gitapp.injection.factories.DiagramPresenterFactory
-import com.example.gitapp.injection.factories.StargazerIntentFactory
 import com.example.gitapp.ui.base.BaseActivity
+import com.example.gitapp.ui.stargazers.StargazersActivity
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.Entry
@@ -27,13 +27,12 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.google.android.material.tabs.TabLayout
 import moxy.ktx.moxyPresenter
-import javax.inject.Inject
 
 const val MONTH_TAB_POSITION = 1
 const val YEAR_TAB_POSITION = 2
 
 const val IS_FAVORITE_INTENT_KEY = "is_favorite"
-const val REPO_KEY = "repo"
+
 @Suppress("UNCHECKED_CAST")
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class DiagramActivity : BaseActivity(), DiagramView {
@@ -41,18 +40,9 @@ class DiagramActivity : BaseActivity(), DiagramView {
     private lateinit var binding: ActivityDiagramBinding
     private lateinit var histogramView: BarChart
 
-    @Inject
-    lateinit var stargazerIntentFactory: StargazerIntentFactory.Factory
-
-    @Inject
-    lateinit var diagramPresenterFactory: DiagramPresenterFactory.Factory
-
     private val diagramPresenter: DiagramPresenter by moxyPresenter {
         val extras = intent.extras!!
-        diagramPresenterFactory.create(
-            repo = extras.getParcelable(REPO_KEY, RepoEntity::class.java)!!,
-            appComponent = appComponent // looks like something bad...
-        ).createPresenter()
+        DiagramPresenter(repo = extras.getParcelable(REPO_KEY, RepoEntity::class.java)!!)
     }
 
     private val onBackPressed = object : OnBackPressedCallback(true) {
@@ -65,7 +55,6 @@ class DiagramActivity : BaseActivity(), DiagramView {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        appComponent.inject(this)
         super.onCreate(savedInstanceState)
         binding = ActivityDiagramBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -86,24 +75,29 @@ class DiagramActivity : BaseActivity(), DiagramView {
 
     private fun diagramInit() {
         histogramView = binding.barChartHistogram
+        histogramView.description.text = ""
         histogramView.isScaleYEnabled = false
         histogramView.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(entry: Entry?, h: Highlight?) {
                 try {
                     val periodDataTime = diagramPresenter.requestPeriodDataTime(entry?.data as List<Stared>)
-                    val intent = stargazerIntentFactory.create(
+                    val intent = StargazersActivity.get(
                         fromWhomContext = this@DiagramActivity,
                         stargazers = entry.data as List<Stared>,
                         period = periodDataTime
-                    ).createIntent()
+                    )
 
                     startActivity(intent)
                 } catch (e: IndexOutOfBoundsException) {
                     // nothing
+                } catch (e: ClassCastException) {
+                    // nothing
                 }
             }
 
-            override fun onNothingSelected() { /**nothing**/ }
+            override fun onNothingSelected() {
+                /**nothing**/
+            }
         })
     }
 
@@ -117,8 +111,13 @@ class DiagramActivity : BaseActivity(), DiagramView {
                 }
             }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) { /**nothing**/ }
-            override fun onTabReselected(tab: TabLayout.Tab?) { /**nothing**/ }
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                /**nothing**/
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                /**nothing**/
+            }
         })
     }
 
@@ -134,7 +133,9 @@ class DiagramActivity : BaseActivity(), DiagramView {
                     binding.repo.imageOwner.setImageBitmap(resource)
                 }
 
-                override fun onLoadCleared(placeholder: Drawable?) { /**nothing**/ }
+                override fun onLoadCleared(placeholder: Drawable?) {
+                    /**nothing**/
+                }
             })
     }
 
@@ -148,23 +149,34 @@ class DiagramActivity : BaseActivity(), DiagramView {
 
     override fun setPreviousButtonEnabled(isEnabled: Boolean) {
         binding.imagePreviousButton.isEnabled = isEnabled
-        if (isEnabled) {
-            binding.imagePreviousButton.setImageResource(R.drawable.ic_arrow_enabled)
-        } else {
-            binding.imagePreviousButton.setImageResource(R.drawable.ic_arrow_disabled)
-        }
+        setMoveButtonEnabled(isEnabled, binding.imagePreviousButton)
     }
 
     override fun setNextButtonEnabled(isEnabled: Boolean) {
         binding.imageNextButton.isEnabled = isEnabled
+        setMoveButtonEnabled(isEnabled, binding.imageNextButton)
+    }
+
+    private fun setMoveButtonEnabled(isEnabled: Boolean, button: ImageView) {
+        button.isEnabled = isEnabled
         if (isEnabled) {
-            binding.imageNextButton.setImageResource(R.drawable.ic_arrow_enabled)
+            button.setImageResource(R.drawable.ic_arrow_enabled)
         } else {
-            binding.imageNextButton.setImageResource(R.drawable.ic_arrow_disabled)
+            button.setImageResource(R.drawable.ic_arrow_disabled)
         }
     }
 
     override fun changeVisibilityProgressBar(visibility: Int) {
         binding.layoutProgressbar.visibility = visibility
+    }
+
+    companion object DiagramIntent {
+        const val REPO_KEY = "repo"
+        fun get(fromWhomContext: Context, repo: RepoEntity): Intent {
+            val intent = Intent(fromWhomContext, DiagramActivity::class.java)
+            intent.putExtra(REPO_KEY, repo)
+
+            return intent
+        }
     }
 }

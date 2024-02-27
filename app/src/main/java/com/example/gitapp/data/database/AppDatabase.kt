@@ -11,7 +11,7 @@ import com.example.gitapp.data.database.dao.StargazerDao
 import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.data.database.entity.StargazerEntity
 
-@Database(entities = [RepoEntity::class, StargazerEntity::class], version = 1, exportSchema = false)
+@Database(entities = [RepoEntity::class, StargazerEntity::class], version = 1, exportSchema = true)
 @TypeConverters(value = [LocalDateConverter::class])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun repoDao(): RepoDao

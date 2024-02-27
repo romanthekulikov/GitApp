@@ -18,11 +18,17 @@ interface GitApiService {
         @Query(value = "per_page") numberOfItemInPage: Int = ITEM_PER_REPOS_PAGE
     ): List<ApiRepo>
 
+    @GET("/repos/{owner}/{repo}")
+    suspend fun fetchOwnerRepo(
+        @Path(value = "owner") ownerName: String,
+        @Path(value = "repo") repo: String
+    ): ApiRepo
+
     @Headers("Accept: application/vnd.github.v3.star+json")
-    @GET("repos/{user}/{repos}/stargazers")
+    @GET("repos/{user}/{repo}/stargazers")
     suspend fun fetchRepoStarred(
         @Path(value = "user") ownerName: String,
-        @Path(value = "repos") repository: String,
+        @Path(value = "repo") repository: String,
         @Query(value = "per_page") itemInPageCount: Int = ITEM_PER_STARGAZERS_PAGE,
         @Query(value = "page") page: Int
     ): List<ApiStargazer>

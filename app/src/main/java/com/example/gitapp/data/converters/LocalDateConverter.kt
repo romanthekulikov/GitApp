@@ -15,7 +15,10 @@ class LocalDateConverter {
     }
 
     @FromJson fun fromJson(dateString: String): LocalDate {
-        return LocalDate.parse(dateString.substring(0, 10))
+        if (dateString.length > 10) {
+            return LocalDate.parse(dateString.substring(0, 10))
+        }
+        return LocalDate.now()
     }
 
     @ToJson fun toJson(localDate: LocalDate): String {

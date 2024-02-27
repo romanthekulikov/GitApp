@@ -2,10 +2,10 @@ package com.example.gitapp.injection.modules
 
 import com.example.gitapp.data.repository.Repository
 import com.example.gitapp.data.repository.RepositoryImpl
-import com.example.gitapp.utils.HistogramPeriodAdapter
-import com.example.gitapp.utils.PeriodHelper
-import com.example.gitapp.utils.implementation.HistogramPeriodAdapterImpl
-import com.example.gitapp.utils.implementation.PeriodHelperImpl
+import com.example.gitapp.ui.diagram.utils.HistogramPeriodAdapter
+import com.example.gitapp.ui.diagram.utils.PeriodHelper
+import com.example.gitapp.ui.diagram.utils.implementation.HistogramPeriodAdapterImpl
+import com.example.gitapp.ui.diagram.utils.implementation.PeriodHelperImpl
 import dagger.Binds
 import dagger.Module
 import javax.inject.Singleton

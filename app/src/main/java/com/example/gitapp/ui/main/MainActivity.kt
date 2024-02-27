@@ -10,45 +10,29 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.gitapp.appComponent
 import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.databinding.ActivityMainBinding
-import com.example.gitapp.injection.factories.DiagramIntentFactory
-import com.example.gitapp.injection.factories.RepoAdapterFactory
 import com.example.gitapp.ui.base.BaseActivity
+import com.example.gitapp.ui.diagram.DiagramActivity
 import com.example.gitapp.ui.diagram.IS_FAVORITE_INTENT_KEY
 import com.omega_r.libs.omegarecyclerview.pagination.OnPageRequestListener
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
-import javax.inject.Inject
+import moxy.ktx.moxyPresenter
 
 
 class MainActivity : BaseActivity(), MainView,
     RepoAdapter.RepoRecyclerCallback, OnPageRequestListener {
 
-    @Inject
-    lateinit var repoAdapterFactory: RepoAdapterFactory.Factory
-
-    @Inject
-    lateinit var diagramIntent: DiagramIntentFactory.Factory
-
-    @Inject
-    @InjectPresenter
-    lateinit var mainPresenter: MainPresenter
+    private val mainPresenter: MainPresenter by moxyPresenter { MainPresenter() }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var repoAdapter: RepoAdapter
     private lateinit var selectedRepo: RepoEntity
     private var selectedRepoPosition = 0
-    private var nextLoadPage = 1
+    private var nextLoadPage = 0
     private var needNewPage = false
-
-    @ProvidePresenter
-    fun provide(): MainPresenter = mainPresenter
     private var ownerName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        appComponent.inject(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -76,7 +60,7 @@ class MainActivity : BaseActivity(), MainView,
     }
 
     private fun initRecyclerView() {
-        val adapter = repoAdapterFactory.create(this).createRepoAdapter()
+        val adapter = RepoAdapter(this)
         repoAdapter = adapter
         binding.repositories.setPaginationCallback(this)
         binding.repositories.adapter = adapter
@@ -88,8 +72,8 @@ class MainActivity : BaseActivity(), MainView,
         if (listRepo.size < 100) {
             binding.repositories.hidePagination()
         }
-        val newPageAddition = repoAdapter.addValue(listRepo)
-        if (!newPageAddition) {
+        val pageAdditionSuccess = repoAdapter.addValue(listRepo)
+        if (!pageAdditionSuccess) {
             mainPresenter.requestGetRepo(ownerName = ownerName, page = nextLoadPage, showErrorOnFailLoad = false)
         }
 
@@ -115,10 +99,7 @@ class MainActivity : BaseActivity(), MainView,
     override fun onRepoClicked(repo: RepoEntity, position: Int) {
         selectedRepo = repo
         selectedRepoPosition = position
-        val intent = diagramIntent.create(
-            fromWhomContext = this@MainActivity,
-            selectedRepo
-        ).createIntent()
+        val intent = DiagramActivity.get(fromWhomContext = this, repo = selectedRepo)
 
         startActivityForResult.launch(intent)
     }

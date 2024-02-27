@@ -8,9 +8,9 @@ import com.example.gitapp.data.database.entity.StargazerEntity
 
 @Dao
 interface StargazerDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(stargazers: List<StargazerEntity>)
 
-    @Query("SELECT * FROM stargazer WHERE stared_repo = :repoName AND owner_name = :ownerName")
+    @Query("SELECT * FROM stargazer WHERE stared_repo = :repoName AND LOWER(owner_name) = LOWER(:ownerName)")
     suspend fun getStargazers(repoName: String, ownerName: String): List<StargazerEntity>
 }

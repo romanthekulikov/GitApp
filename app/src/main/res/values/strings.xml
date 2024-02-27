@@ -15,4 +15,5 @@
     <string name="stared_at_stub">Stared at</string>
     <string name="text_dialog_label_stub">Error text stub</string>
     <string name="text_dialog_ok">OK</string>
+    <string name="text_try_again">Try again</string>
 </resources>

@@ -1,23 +1,25 @@
 package com.example.gitapp
 
 import android.app.Application
-import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.gitapp.data.database.AppDatabase
 import com.example.gitapp.injection.AppComponent
 import com.example.gitapp.injection.DaggerAppComponent
+import com.example.gitapp.ui.service_repo.RepoAlarmHelper
+
 
 class MainApp : Application() {
-    lateinit var appComponent: AppComponent
+    companion object {
+        lateinit var appComponent: AppComponent
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate() {
         appComponent = DaggerAppComponent.create()
         AppDatabase.initDb(applicationContext)
         super.onCreate()
+
+        RepoAlarmHelper().setExactAlarm(this, startAfterSec = 120)
     }
 }
-
-@Suppress("RecursivePropertyAccessor")
-val Context.appComponent: AppComponent
-    get() = when(this) {
-        is MainApp -> appComponent
-        else -> this.applicationContext.appComponent
-    }

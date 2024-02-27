@@ -1,6 +1,7 @@
 package com.example.gitapp.ui.main
 
 import android.util.Log
+import com.example.gitapp.MainApp
 import com.example.gitapp.data.api.GitApiService
 import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.data.repository.Repository
@@ -15,7 +16,11 @@ import java.net.UnknownHostException
 import javax.inject.Inject
 
 @InjectViewState
-class MainPresenter @Inject constructor() : BasePresenter<MainView>() {
+class MainPresenter : BasePresenter<MainView>() {
+
+    init {
+        MainApp.appComponent.inject(this)
+    }
 
     @Inject
     lateinit var apiService: GitApiService
@@ -25,12 +30,12 @@ class MainPresenter @Inject constructor() : BasePresenter<MainView>() {
 
     private var needNewPage = true
 
-    private var showError = false
+    private var needShowError = false
 
     fun requestGetRepo(ownerName: String, page: Int, requireNewPage: Boolean = needNewPage, showErrorOnFailLoad: Boolean) {
         launch {
             try {
-                showError = showErrorOnFailLoad
+                needShowError = showErrorOnFailLoad
                 if (requireNewPage) {
                     val repoList = repository.getOwnerRepoList(ownerName = ownerName, pageNumb = page)
                     showList(repoList)
@@ -47,7 +52,7 @@ class MainPresenter @Inject constructor() : BasePresenter<MainView>() {
 
     fun requestChangeFavoriteRepo(repo: RepoEntity, isFavorite: Boolean) {
         launch {
-            repository.updateFavoriteRepo(repo.owner.nameUser, repo.name, isFavorite)
+            repository.updateRepoFavorite(repo.owner.nameUser, repo.name, isFavorite)
         }
     }
 
@@ -62,7 +67,7 @@ class MainPresenter @Inject constructor() : BasePresenter<MainView>() {
     private suspend fun showLoadError(message: String, logMessage: String?, ownerName: String) {
         needNewPage = false
         showList(repository.getOwnerRepoList(ownerName = ownerName))
-        if (showError) {
+        if (needShowError) {
             Log.e("api_retrofit", logMessage ?: message)
             viewState.showError(message)
             viewState.showRecyclerError()

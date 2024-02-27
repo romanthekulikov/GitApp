@@ -1,8 +1,8 @@
-package com.example.gitapp.utils.implementation
+package com.example.gitapp.ui.diagram.utils.implementation
 
 import com.example.gitapp.entity.Stared
 import com.example.gitapp.ui.diagram.PeriodType
-import com.example.gitapp.utils.HistogramPeriodAdapter
+import com.example.gitapp.ui.diagram.utils.HistogramPeriodAdapter
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry

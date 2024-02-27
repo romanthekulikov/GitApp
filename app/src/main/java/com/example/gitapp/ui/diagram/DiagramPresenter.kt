@@ -2,21 +2,20 @@ package com.example.gitapp.ui.diagram
 
 import android.util.Log
 import android.view.View
-import com.example.gitapp.data.api.GitApiService
+import com.example.gitapp.MainApp
 import com.example.gitapp.data.api.ITEM_PER_STARGAZERS_PAGE
 import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.data.repository.Repository
 import com.example.gitapp.entity.Stared
 import com.example.gitapp.entity.Stargazer
-import com.example.gitapp.injection.AppComponent
-import com.example.gitapp.injection.factories.IndexAxisValueFormatterFactory
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
 import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
 import com.example.gitapp.ui.base.ERROR_NO_DATA
 import com.example.gitapp.ui.base.ERROR_NO_INTERNET
-import com.example.gitapp.utils.HistogramPeriodAdapter
-import com.example.gitapp.utils.PeriodHelper
+import com.example.gitapp.ui.diagram.utils.HistogramPeriodAdapter
+import com.example.gitapp.ui.diagram.utils.PeriodHelper
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import kotlinx.coroutines.launch
 import moxy.InjectViewState
 import java.net.SocketTimeoutException
@@ -27,20 +26,20 @@ import javax.inject.Inject
 
 @InjectViewState
 class DiagramPresenter(
-    private val repo: RepoEntity,
-    appComponent: AppComponent
+    private val repo: RepoEntity
 ) : BasePresenter<DiagramView>() {
     init {
-        appComponent.inject(this)
+        MainApp.appComponent.inject(this)
         resetPresenter()
         repository.clearMemorySavedStargazers()
         displayHistogramWithLoadData()
         displayRepo()
         viewState.setPreviousButtonEnabled(false)
+        launch { repository.updateRepoStargazersCount(repo.owner.nameUser, repo.name, repo.stargazersCount) }
     }
 
     private val weekDay = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    private val yearMonth = arrayOf("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D")
+    private val yearMonth = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
     @Inject
     lateinit var periodHelper: PeriodHelper
@@ -49,18 +48,13 @@ class DiagramPresenter(
     lateinit var histogramPeriodAdapter: HistogramPeriodAdapter //pattern
 
     @Inject
-    lateinit var apiService: GitApiService
-
-    @Inject
-    lateinit var indexAxisValueFormatterFactory: IndexAxisValueFormatterFactory.Factory
-
-    @Inject
     lateinit var repository: Repository
 
     private var displayedDiagramPage = 0
     private var nextLoadPageNumber = (repo.stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
     private var enoughData = false
     private var toStartPeriodMoved = false
+    private var errorShowed = false
     private var diagramMode = PeriodType.WEEK
     private var firstLoadedStargazerDate = LocalDate.now().with(DayOfWeek.MONDAY)
     private var lastDateLoadedStargazer = LocalDate.now().with(DayOfWeek.SUNDAY)
@@ -71,6 +65,7 @@ class DiagramPresenter(
         nextLoadPageNumber = (repo.stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
         enoughData = false
         toStartPeriodMoved = false
+        errorShowed = false
         startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)
         endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)
         diagramMode = PeriodType.WEEK
@@ -122,6 +117,9 @@ class DiagramPresenter(
             nextLoadPageNumber--
         } catch (e: UnknownHostException) {
             val loadedStargazers = repository.getStargazersList(repo.owner.nameUser, repo.name)
+            if (loadedStargazers.isEmpty()) {
+                throw e
+            }
             fillFields(loadedStargazers)
             throw e
         }
@@ -144,7 +142,10 @@ class DiagramPresenter(
 
     private fun displayErrorWithDataIfExist(message: String, logMessage: String?) {
         enoughData = true
-        viewState.showError(message)
+        if (!errorShowed) {
+            viewState.showError(message)
+        }
+        errorShowed = true
         Log.e("api_retrofit", logMessage ?: message)
         if (repository.getLoadedStargazers().isNotEmpty()) {
             displayHistogram()
@@ -160,17 +161,17 @@ class DiagramPresenter(
         when (diagramMode) {
             PeriodType.WEEK -> viewState.displayData(
                 barData,
-                indexAxisValueFormatterFactory.create(weekDay).createIndexAxisValueFormatter()
+                IndexAxisValueFormatter(weekDay)
             )
 
             PeriodType.MONTH -> viewState.displayData(
                 barData,
-                indexAxisValueFormatterFactory.create(arrayOf()).createIndexAxisValueFormatter()
+                IndexAxisValueFormatter(periodHelper.getMonthWeekPeriodArray(startPeriod, endPeriod))
             )
 
             PeriodType.YEAR -> viewState.displayData(
                 barData,
-                indexAxisValueFormatterFactory.create(yearMonth).createIndexAxisValueFormatter()
+                IndexAxisValueFormatter(yearMonth)
             )
         }
         viewState.changeVisibilityProgressBar(View.GONE)

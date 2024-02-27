@@ -1,4 +1,4 @@
-package com.example.gitapp.utils
+package com.example.gitapp.ui.diagram.utils
 
 import com.example.gitapp.entity.Stared
 import com.example.gitapp.ui.diagram.PeriodType
