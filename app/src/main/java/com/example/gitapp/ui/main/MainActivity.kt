@@ -1,20 +1,26 @@
 package com.example.gitapp.ui.main
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.databinding.ActivityMainBinding
 import com.example.gitapp.ui.base.BaseActivity
 import com.example.gitapp.ui.diagram.DiagramActivity
 import com.example.gitapp.ui.diagram.IS_FAVORITE_INTENT_KEY
+import com.example.gitapp.ui.service_repo.RepoAlarmHelper
 import com.omega_r.libs.omegarecyclerview.pagination.OnPageRequestListener
 import moxy.ktx.moxyPresenter
 
@@ -44,6 +50,10 @@ class MainActivity : BaseActivity(), MainView,
             showRepo()
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            checkNotificationPermission()
+        }
+
         initRecyclerView()
     }
 
@@ -56,6 +66,21 @@ class MainActivity : BaseActivity(), MainView,
             repoAdapter.clear()
             binding.repositories.resetPagination()
             binding.repositories.showProgressPagination()
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun checkNotificationPermission() {
+        val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        when (it) {
+            true -> RepoAlarmHelper.setExactAlarm(this@MainActivity, startAfterSec = 120)
+            false -> Toast.makeText(this@MainActivity, "Permission denied", Toast.LENGTH_LONG).show()
         }
     }
 

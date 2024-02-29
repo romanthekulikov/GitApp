@@ -19,7 +19,8 @@ class MainApp : Application() {
         appComponent = DaggerAppComponent.create()
         AppDatabase.initDb(applicationContext)
         super.onCreate()
-
-        RepoAlarmHelper().setExactAlarm(this, startAfterSec = 120)
+        if (!RepoAlarmHelper.isAlarmSet(this)) {
+            RepoAlarmHelper.setExactAlarm(this, startAfterSec = 120)
+        }
     }
 }

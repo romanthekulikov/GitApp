@@ -24,7 +24,7 @@ class RepoReceiver : BroadcastReceiver() {
                 context?.startForegroundService(serviceIntent)
             } catch (e: ForegroundServiceStartNotAllowedException) {
                 if (context != null) {
-                    RepoAlarmHelper().setExactAlarm(context, startAfterSec = 60)
+                    RepoAlarmHelper.setExactAlarm(context, startAfterSec = 60)
                 }
             }
         }

@@ -15,9 +15,6 @@ import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.data.repository.Repository
 import com.example.gitapp.ui.NotificationsCreator
 import com.example.gitapp.ui.diagram.DiagramActivity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
@@ -37,14 +34,12 @@ class RepoNotificationsCreator(private val context: Context) : NotificationsCrea
     @Inject
     lateinit var repository: Repository
 
-    override fun createNotifications() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            createNotificationChannel(notificationManager, id = "repo_id", name = "repo_push")
-            val tagToNotificationMap = getTagToFavoriteRepoNewStarsNotificationMap()
-            tagToNotificationMap.forEach { notification ->
-                notificationManager.notify(notification.key, NOTIFICATION_ID, notification.value)
-            }
+    override suspend fun createNotifications() {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        createNotificationChannel(notificationManager, id = "repo_id", name = "repo_push")
+        val tagToNotificationMap = getTagToFavoriteRepoNewStarsNotificationMap()
+        tagToNotificationMap.forEach { notification ->
+            notificationManager.notify(notification.key, NOTIFICATION_ID, notification.value)
         }
     }
 
@@ -63,6 +58,7 @@ class RepoNotificationsCreator(private val context: Context) : NotificationsCrea
                 map[repo.name] = getNewStarsRepoNotification(fetchedRepo!!, newStarsCount)
             }
         }
+
         return map
     }
 
