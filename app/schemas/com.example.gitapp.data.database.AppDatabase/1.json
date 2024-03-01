@@ -1,0 +1,119 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "0989164023522a45b1c15c86fd00c32c",
+    "entities": [
+      {
+        "tableName": "repo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`repo_name` TEXT NOT NULL, `stargazer_count` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `name_user` TEXT NOT NULL, `avatar_url` TEXT NOT NULL, PRIMARY KEY(`repo_name`, `name_user`))",
+        "fields": [
+          {
+            "fieldPath": "name",
+            "columnName": "repo_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stargazersCount",
+            "columnName": "stargazer_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isFavorite",
+            "columnName": "is_favorite",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "owner.nameUser",
+            "columnName": "name_user",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "owner.avatarUrl",
+            "columnName": "avatar_url",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "repo_name",
+            "name_user"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "stargazer",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`time` TEXT NOT NULL, `stared_repo` TEXT NOT NULL, `owner_name` TEXT NOT NULL, `name_user` TEXT NOT NULL, `avatar_url` TEXT NOT NULL, PRIMARY KEY(`stared_repo`, `owner_name`, `name_user`), FOREIGN KEY(`stared_repo`, `owner_name`) REFERENCES `repo`(`repo_name`, `name_user`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "repoName",
+            "columnName": "stared_repo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerName",
+            "columnName": "owner_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "user.nameUser",
+            "columnName": "name_user",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "user.avatarUrl",
+            "columnName": "avatar_url",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "stared_repo",
+            "owner_name",
+            "name_user"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "repo",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "stared_repo",
+              "owner_name"
+            ],
+            "referencedColumns": [
+              "repo_name",
+              "name_user"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0989164023522a45b1c15c86fd00c32c')"
+    ]
+  }
+}

@@ -21,6 +21,6 @@ data class RepoEntity(
     override val stargazersCount: Int,
     @ColumnInfo(name = "is_favorite")
     var isFavorite: Boolean = false,
-    @ColumnInfo(name = "is_private")
+    @ColumnInfo(name = "is_private", defaultValue = "false")
     var isPrivate: Boolean = false
 ) : Repo, Parcelable
