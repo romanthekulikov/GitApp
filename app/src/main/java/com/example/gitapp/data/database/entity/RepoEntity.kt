@@ -20,5 +20,7 @@ data class RepoEntity(
     @ColumnInfo(name = "stargazer_count")
     override val stargazersCount: Int,
     @ColumnInfo(name = "is_favorite")
-    var isFavorite: Boolean = false
+    var isFavorite: Boolean = false,
+    @ColumnInfo(name = "is_private")
+    var isPrivate: Boolean = false
 ) : Repo, Parcelable
