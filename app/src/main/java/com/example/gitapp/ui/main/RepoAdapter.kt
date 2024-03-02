@@ -17,7 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.CoroutineContext
 
 class RepoAdapter(
-    private val helper: RepoRecyclerCallback
+    private val callback: RepoRecyclerCallback
 ) : OmegaRecyclerView.Adapter<RepoAdapter.RepoViewHolder>(), PaginationViewCreator {
 
     private var repoList = mutableListOf<RepoEntity>()
@@ -55,7 +55,7 @@ class RepoAdapter(
     override fun createPaginationErrorView(parent: ViewGroup?, inflater: LayoutInflater?): View {
         val binding = ItemErrorProgressBinding.inflate(inflater!!, parent, false)
         binding.buttonAgain.setOnClickListener {
-            helper.onRetryClicked()
+            callback.onRetryClickListener()
         }
         return binding.root
     }
@@ -76,7 +76,7 @@ class RepoAdapter(
     private fun getNewPosition(listNewRepo: List<RepoEntity>): List<Int> {
         val newPosition = arrayListOf<Int>()
         var k = 0
-        listNewRepo.forEach {
+        listNewRepo.forEach { _ ->
             newPosition.add(k)
             k++
         }
@@ -111,12 +111,12 @@ class RepoAdapter(
             Glide.with(this.itemView).load(item.owner.avatarUrl).circleCrop().into(binding.imageOwner)
             binding.textRepoName.text = item.name
             binding.view.setOnClickListener {
-                helper.onRepoClicked(item, position)
+                callback.onRepoClickListener(item, position)
             }
             binding.checkboxStar.setOnCheckedChangeListener(null)
             binding.checkboxStar.isChecked = item.isFavorite
             binding.checkboxStar.setOnCheckedChangeListener { _, isFavorite ->
-                helper.onChangeRepoFavorite(item, isFavorite, position)
+                callback.onChangeRepoFavorite(item, isFavorite, position)
                 item.isFavorite = isFavorite
             }
         }
@@ -124,7 +124,7 @@ class RepoAdapter(
 
     interface RepoRecyclerCallback {
         fun onChangeRepoFavorite(repo: RepoEntity, isFavorite: Boolean, position: Int)
-        fun onRepoClicked(repo: RepoEntity, position: Int)
-        fun onRetryClicked()
+        fun onRepoClickListener(repo: RepoEntity, position: Int)
+        fun onRetryClickListener()
     }
 }

@@ -38,6 +38,5 @@ class DatabaseMigrationTest {
         while (cursor.moveToNext()) {
             TestCase.assertEquals(0, cursor.getInt(cursor.getColumnIndex("is_private")))
         }
-
     }
 }

@@ -74,6 +74,8 @@ class MainActivity : BaseActivity(), MainView,
         val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
         if (permission != PackageManager.PERMISSION_GRANTED) {
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            RepoAlarmHelper.setExactAlarm(this, startAfterSec = 120)
         }
     }
 
@@ -121,7 +123,7 @@ class MainActivity : BaseActivity(), MainView,
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    override fun onRepoClicked(repo: RepoEntity, position: Int) {
+    override fun onRepoClickListener(repo: RepoEntity, position: Int) {
         selectedRepo = repo
         selectedRepoPosition = position
         val intent = DiagramActivity.get(fromWhomContext = this, repo = selectedRepo)
@@ -138,7 +140,7 @@ class MainActivity : BaseActivity(), MainView,
         }
     }
 
-    override fun onRetryClicked() {
+    override fun onRetryClickListener() {
         binding.textStub.visibility = View.GONE
         binding.repositories.showProgressPagination()
     }

@@ -3,7 +3,7 @@
     <string name="enter_owner_hint">Enter owner</string>
     <string name="list_repositories_text">List of owner repositories</string>
     <string name="repo_stub">No repositories found</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading…</string>
     <string name="loading_error">Oops, something went wrong</string>
     <string name="try_again">Try again</string>
     <string name="stub_name_of_repository">Name of repository</string>
@@ -16,4 +16,5 @@
     <string name="text_dialog_label_stub">Error text stub</string>
     <string name="text_dialog_ok">OK</string>
     <string name="text_try_again">Try again</string>
+    <string name="repo_channel_description">repo_stars</string>
 </resources>

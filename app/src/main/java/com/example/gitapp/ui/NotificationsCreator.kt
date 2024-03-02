@@ -1,15 +1,18 @@
 package com.example.gitapp.ui
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 
-abstract class NotificationsCreator {
-    open suspend fun createNotifications() {}
-    fun createNotificationChannel(notificationManager: NotificationManager, id: String, name: String) {
-        val descriptionText = "channelIdDescription"
+abstract class NotificationsCreator<T> {
+    abstract suspend fun showNotifications(dataList: List<T>)
+
+    protected abstract suspend fun createNotificationMap(dataList: List<T>): Map<String, Notification>
+
+    protected fun createNotificationChannel(notificationManager: NotificationManager, id: String, name: String, description: String) {
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val channel = NotificationChannel(id, name, importance)
-        channel.description = descriptionText
+        channel.description = description
         notificationManager.createNotificationChannel(channel)
     }
 }

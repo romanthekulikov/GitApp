@@ -18,7 +18,7 @@ data class RepoEntity(
     @Embedded
     override val owner: UserEntity,
     @ColumnInfo(name = "stargazer_count")
-    override val stargazersCount: Int,
+    override var stargazersCount: Int,
     @ColumnInfo(name = "is_favorite")
     var isFavorite: Boolean = false,
     @ColumnInfo(name = "is_private", defaultValue = "false")
