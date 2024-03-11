@@ -25,11 +25,9 @@ import com.omega_r.libs.omegarecyclerview.pagination.OnPageRequestListener
 import moxy.ktx.moxyPresenter
 
 
-class MainActivity : BaseActivity(), MainView,
-    RepoAdapter.RepoRecyclerCallback, OnPageRequestListener {
+class MainActivity : BaseActivity(), MainView, RepoAdapter.RepoRecyclerCallback, OnPageRequestListener {
 
     private val mainPresenter: MainPresenter by moxyPresenter { MainPresenter() }
-
     private lateinit var binding: ActivityMainBinding
     private lateinit var repoAdapter: RepoAdapter
     private lateinit var selectedRepo: RepoEntity
@@ -75,13 +73,13 @@ class MainActivity : BaseActivity(), MainView,
         if (permission != PackageManager.PERMISSION_GRANTED) {
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            RepoAlarmHelper.setExactAlarm(this, startAfterSec = 120)
+            RepoAlarmHelper.setAlarm(this, startAfterSec = 120)
         }
     }
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         when (it) {
-            true -> RepoAlarmHelper.setExactAlarm(this@MainActivity, startAfterSec = 120)
+            true -> RepoAlarmHelper.setAlarm(this@MainActivity, startAfterSec = 120)
             false -> Toast.makeText(this@MainActivity, "Permission denied", Toast.LENGTH_LONG).show()
         }
     }
@@ -128,17 +126,18 @@ class MainActivity : BaseActivity(), MainView,
         selectedRepoPosition = position
         val intent = DiagramActivity.get(fromWhomContext = this, repo = selectedRepo)
 
-        startActivityForResult.launch(intent)
+        diagramActivityResultLauncher.launch(intent)
     }
 
-    private val startActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val intent = result.data
-            val repoIsFavorite = intent?.getBooleanExtra(IS_FAVORITE_INTENT_KEY, false)!!
-            onChangeRepoFavorite(selectedRepo, repoIsFavorite, selectedRepoPosition)
-            repoAdapter.changeFavoriteValue(selectedRepoPosition, repoIsFavorite)
+    private val diagramActivityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val intent = result.data
+                val repoIsFavorite = intent?.getBooleanExtra(IS_FAVORITE_INTENT_KEY, false)!!
+                onChangeRepoFavorite(selectedRepo, repoIsFavorite, selectedRepoPosition)
+                repoAdapter.changeFavoriteValue(selectedRepoPosition, repoIsFavorite)
+            }
         }
-    }
 
     override fun onRetryClickListener() {
         binding.textStub.visibility = View.GONE

@@ -16,7 +16,7 @@ interface Repository {
     suspend fun updateRepoFavorite(ownerName: String, repoName: String, isFavorite: Boolean)
     suspend fun isFavoriteRepo(ownerName: String, repoName: String): Boolean
     suspend fun getFavoriteRepoList(): List<Repo>
-    suspend fun getRepoFromApi(ownerName: String, repoName: String): RepoEntity
+    suspend fun getRepoFromApi(ownerName: String, repoName: String): Repo
     suspend fun updateRepoStargazersCount(ownerName: String, repoName: String, stargazersCount: Int)
     fun getLastDateLoadedStargazer(): LocalDate
     fun getFirstLoadedStargazerDate(): LocalDate

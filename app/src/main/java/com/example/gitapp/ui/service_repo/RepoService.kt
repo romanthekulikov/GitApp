@@ -8,9 +8,9 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.gitapp.MainApp
-import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.data.repository.Repository
 import com.example.gitapp.entity.Repo
+import com.example.gitapp.ui.NotificationsCreator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,7 +24,7 @@ class RepoService : Service() {
     lateinit var repository: Repository
 
     @Inject
-    lateinit var repoNotificationCreator: RepoNotificationsCreator
+    lateinit var repoNotificationCreator: NotificationsCreator<Repo>
 
     init {
         MainApp.appComponent.inject(this)
@@ -32,15 +32,16 @@ class RepoService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        startForeground(NOTIFICATION_ID, NotificationCompat.Builder(this@RepoService, CHANNEL_ID).build())
+        val startNotification = NotificationCompat.Builder(this@RepoService, CHANNEL_ID).build()
+        startForeground(NOTIFICATION_ID, startNotification)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         CoroutineScope(Dispatchers.Main).launch {
-            val differenceRepoList = getDifferenceRepoList()
+            val differenceRepoList = getDifferenceRepoList() // has repository with difference stargazersCount
             repoNotificationCreator.showNotifications(differenceRepoList)
-            RepoAlarmHelper.setExactAlarm(this@RepoService, startAfterSec = 120)
+            RepoAlarmHelper.setAlarm(this@RepoService, startAfterSec = 120)
             stopSelf()
         }
 
@@ -61,7 +62,7 @@ class RepoService : Service() {
         return differenceRepoList
     }
 
-    private suspend fun getRepoFromApi(ownerName: String, repoName: String): RepoEntity? {
+    private suspend fun getRepoFromApi(ownerName: String, repoName: String): Repo? {
         try {
             return repository.getRepoFromApi(ownerName, repoName)
         } catch (e: UnknownHostException) {
@@ -71,10 +72,11 @@ class RepoService : Service() {
         } catch (e: SocketTimeoutException) {
             Log.e("service_error", "SocketTimeoutException: ${e.message} \n ${e.stackTrace.map { it.toString() + "\n" }}")
         }
+
         return null
     }
 
-    override fun onBind(p0: Intent?): IBinder? {
+    override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 }

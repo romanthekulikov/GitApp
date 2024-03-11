@@ -9,12 +9,14 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.gitapp.R
+import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.entity.Repo
 import com.example.gitapp.ui.NotificationsCreator
 import com.example.gitapp.ui.diagram.DiagramActivity
 
 const val NOTIFICATION_ID = 33
+private const val CHANNEL_NAME = "repo_push"
 const val CHANNEL_ID = "repo_channel"
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -25,7 +27,7 @@ class RepoNotificationsCreator(private val context: Context) : NotificationsCrea
         createNotificationChannel(
             notificationManager,
             id = CHANNEL_ID,
-            name = "repo_push",
+            name = CHANNEL_NAME,
             description = context.getString(R.string.repo_channel_description)
         )
         val notificationMap = createNotificationMap(dataList)
@@ -38,12 +40,11 @@ class RepoNotificationsCreator(private val context: Context) : NotificationsCrea
         val map = mutableMapOf<String, Notification>()
         dataList.forEach { repo ->
             try {
-                (repo as RepoEntity).isFavorite = true
                 if (repo.stargazersCount > 0) {
-                    map[repo.name] = getNewStarsRepoNotification(repo)
+                    map[repo.name] = getNewStarsRepoNotification((repo as ApiRepo).toRepoEntity(true))
                 }
             } catch (e: ClassCastException) {
-                Log.e("cast_ex", "Cast to RepoEntity error")
+                Log.e("cast_ex", "Cast to ApiRepo error")
             }
         }
 
@@ -53,6 +54,7 @@ class RepoNotificationsCreator(private val context: Context) : NotificationsCrea
     private fun getNewStarsRepoNotification(repo: RepoEntity): Notification {
         val intent = DiagramActivity.get(context, repo)
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher_round)
             .setContentTitle("GitApp: ${repo.owner.nameUser}")

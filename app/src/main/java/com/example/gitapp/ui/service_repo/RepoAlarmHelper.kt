@@ -8,7 +8,7 @@ import android.content.Intent
 import android.os.Build
 
 object RepoAlarmHelper {
-    fun setExactAlarm(context: Context, startAfterSec: Long) {
+    fun setAlarm(context: Context, startAfterSec: Long) {
         val alarmManager = context.getSystemService(Service.ALARM_SERVICE) as AlarmManager
         val receiverIntent = Intent(context, RepoReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
@@ -25,12 +25,5 @@ object RepoAlarmHelper {
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + startAfterSec * 1000, pendingIntent)
         }
-    }
-
-    fun isAlarmSet(context: Context): Boolean {
-        val intent = Intent(context, RepoReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)
-        return pendingIntent != null
     }
 }

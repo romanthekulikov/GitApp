@@ -27,10 +27,7 @@ data class ApiRepo(
 
     @Json(name = "stargazers_count")
     @ColumnInfo(name = "stargazers_count")
-    override val stargazersCount: Int,
-
-    @Json(ignore = true)
-    var isFavorite: Boolean = false
+    override var stargazersCount: Int,
 ) : Repo, Parcelable {
     fun toRepoEntity(isFavorite: Boolean): RepoEntity {
         return RepoEntity(

@@ -121,6 +121,7 @@ class DiagramPresenter(
                 throw e
             }
             fillFields(loadedStargazers)
+
             throw e
         }
     }

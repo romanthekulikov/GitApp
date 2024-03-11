@@ -64,9 +64,8 @@ class RepositoryImpl @Inject constructor(
         return db.repoDao().getFavoriteRepoList()
     }
 
-    override suspend fun getRepoFromApi(ownerName: String, repoName: String): RepoEntity {
-        val repoForUpdate = apiService.fetchOwnerRepo(ownerName = ownerName, repo = repoName)
-        return repoForUpdate.toRepoEntity(isFavorite = true)
+    override suspend fun getRepoFromApi(ownerName: String, repoName: String): Repo {
+        return apiService.fetchOwnerRepo(ownerName = ownerName, repo = repoName)
     }
 
     override suspend fun updateRepoStargazersCount(ownerName: String, repoName: String, stargazersCount: Int) {
