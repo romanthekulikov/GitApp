@@ -18,6 +18,9 @@ interface Repository {
     suspend fun getFavoriteRepoList(): List<Repo>
     suspend fun getRepoFromApi(ownerName: String, repoName: String): Repo
     suspend fun updateRepoStargazersCount(ownerName: String, repoName: String, stargazersCount: Int)
+    suspend fun makeRepoNotified(ownerName: String, repoName: String)
+    suspend fun makeReposNotNotified()
+    suspend fun getGithubResetLimitTime(): Long
     fun getLastDateLoadedStargazer(): LocalDate
     fun getFirstLoadedStargazerDate(): LocalDate
     fun getLoadedStargazers(): List<Stargazer>

@@ -22,5 +22,7 @@ data class RepoEntity(
     @ColumnInfo(name = "is_favorite")
     var isFavorite: Boolean = false,
     @ColumnInfo(name = "is_private", defaultValue = "false")
-    var isPrivate: Boolean = false
+    var isPrivate: Boolean = false,
+    @ColumnInfo(name = "is_notified", defaultValue = "false")
+    var isNotified: Boolean = false
 ) : Repo, Parcelable

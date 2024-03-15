@@ -9,7 +9,7 @@ import com.example.gitapp.injection.DaggerAppComponent
 import com.example.gitapp.injection.modules.ServiceModule
 
 
-class MainApp : Application() {
+class App : Application() {
     companion object {
         lateinit var appComponent: AppComponent
     }

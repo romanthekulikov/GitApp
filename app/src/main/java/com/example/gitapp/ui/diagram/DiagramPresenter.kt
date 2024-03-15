@@ -2,7 +2,7 @@ package com.example.gitapp.ui.diagram
 
 import android.util.Log
 import android.view.View
-import com.example.gitapp.MainApp
+import com.example.gitapp.App
 import com.example.gitapp.data.api.ITEM_PER_STARGAZERS_PAGE
 import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.data.repository.Repository
@@ -13,11 +13,14 @@ import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
 import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
 import com.example.gitapp.ui.base.ERROR_NO_DATA
 import com.example.gitapp.ui.base.ERROR_NO_INTERNET
+import com.example.gitapp.ui.base.ERROR_UNIDENTIFIED
 import com.example.gitapp.ui.diagram.utils.HistogramPeriodAdapter
 import com.example.gitapp.ui.diagram.utils.PeriodHelper
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import kotlinx.coroutines.launch
 import moxy.InjectViewState
+import retrofit2.HttpException
+import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.DayOfWeek
@@ -29,7 +32,7 @@ class DiagramPresenter(
     private val repo: RepoEntity
 ) : BasePresenter<DiagramView>() {
     init {
-        MainApp.appComponent.inject(this)
+        App.appComponent.inject(this)
         resetPresenter()
         repository.clearMemorySavedStargazers()
         displayHistogramWithLoadData()
@@ -82,7 +85,7 @@ class DiagramPresenter(
                     loadData()
                 } catch (e: UnknownHostException) {
                     displayErrorWithDataIfExist(message = ERROR_NO_INTERNET, logMessage = e.message)
-                } catch (e: RuntimeException) {
+                } catch (e: HttpException) {
                     if (repository.getLoadedStargazers().isNotEmpty()) {
                         displayErrorWithDataIfExist(message = ERROR_EXCEEDED_LIMIT, logMessage = e.message)
                     } else {
@@ -90,6 +93,8 @@ class DiagramPresenter(
                     }
                 } catch (e: SocketTimeoutException) {
                     displayErrorWithDataIfExist(message = ERROR_GITHUB_IS_SHUTDOWN, logMessage = e.message)
+                } catch (e: IOException) {
+                    displayErrorWithDataIfExist(message = ERROR_UNIDENTIFIED, logMessage = e.message)
                 }
             }
 

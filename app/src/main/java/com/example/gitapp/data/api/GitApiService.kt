@@ -1,5 +1,6 @@
 package com.example.gitapp.data.api
 
+import com.example.gitapp.data.api.models.ApiRateLimit
 import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.data.api.models.ApiStargazer
 import retrofit2.http.GET
@@ -32,4 +33,7 @@ interface GitApiService {
         @Query(value = "per_page") itemInPageCount: Int = ITEM_PER_STARGAZERS_PAGE,
         @Query(value = "page") page: Int
     ): List<ApiStargazer>
+
+    @GET("/rate_limit")
+    suspend fun getRateLimit(): ApiRateLimit
 }

@@ -9,7 +9,7 @@ abstract class NotificationsCreator<T> {
 
     protected abstract suspend fun createNotificationMap(dataList: List<T>): Map<String, Notification>
 
-    protected fun createNotificationChannel(notificationManager: NotificationManager, id: String, name: String, description: String) {
+    fun createNotificationChannel(notificationManager: NotificationManager, id: String, name: String, description: String) {
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val channel = NotificationChannel(id, name, importance)
         channel.description = description

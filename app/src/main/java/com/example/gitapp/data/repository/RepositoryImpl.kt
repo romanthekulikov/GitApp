@@ -72,6 +72,18 @@ class RepositoryImpl @Inject constructor(
         db.repoDao().updateRepoStargazersCount(stargazersCount = stargazersCount, ownerName = ownerName, repoName = repoName)
     }
 
+    override suspend fun makeRepoNotified(ownerName: String, repoName: String) {
+        db.repoDao().makeRepoNotified(ownerName, repoName)
+    }
+
+    override suspend fun makeReposNotNotified() {
+        db.repoDao().makeReposNotNotified()
+    }
+
+    override suspend fun getGithubResetLimitTime(): Long {
+        return apiService.getRateLimit().limitCore.core.resetTime
+    }
+
     override fun getLastDateLoadedStargazer(): LocalDate {
         return stargazersItemList[stargazersItemList.size - 1].time
     }

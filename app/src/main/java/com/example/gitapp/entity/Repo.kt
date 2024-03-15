@@ -1,6 +1,8 @@
 package com.example.gitapp.entity
 
-interface Repo {
+import android.os.Parcelable
+
+interface Repo : Parcelable {
     val name: String
     val owner: User
     var stargazersCount: Int

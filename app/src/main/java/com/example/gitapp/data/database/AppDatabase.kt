@@ -16,9 +16,9 @@ import com.example.gitapp.data.database.entity.StargazerEntity
 
 @Database(
     entities = [RepoEntity::class, StargazerEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [ AutoMigration(from = 1, to = 2) ]
+    autoMigrations = [ AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3) ]
 )
 
 @TypeConverters(value = [LocalDateConverter::class])

@@ -61,7 +61,7 @@ class RepoNotificationsCreator(private val context: Context) : NotificationsCrea
             .setContentText("${repo.name} has ${repo.stargazersCount} new stars. Check them out now!⭐")
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
     }
 }

@@ -73,13 +73,13 @@ class MainActivity : BaseActivity(), MainView, RepoAdapter.RepoRecyclerCallback,
         if (permission != PackageManager.PERMISSION_GRANTED) {
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            RepoAlarmHelper.setAlarm(this, startAfterSec = 120)
+            RepoAlarmHelper.setAlarm(this, startAfterSec = 5)
         }
     }
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         when (it) {
-            true -> RepoAlarmHelper.setAlarm(this@MainActivity, startAfterSec = 120)
+            true -> RepoAlarmHelper.setAlarm(this@MainActivity, startAfterSec = 5)
             false -> Toast.makeText(this@MainActivity, "Permission denied", Toast.LENGTH_LONG).show()
         }
     }

@@ -26,6 +26,12 @@ interface RepoDao {
     @Query("SELECT is_favorite FROM repo WHERE repo_name = :repoName AND LOWER(name_user) = LOWER(:ownerName)")
     suspend fun isFavoriteRepo(ownerName: String, repoName: String): Boolean
 
-    @Query("SELECT * FROM repo WHERE is_favorite = 1")
+    @Query("SELECT * FROM repo WHERE is_favorite = 1 AND is_notified = 0")
     suspend fun getFavoriteRepoList(): List<RepoEntity>
+
+    @Query("UPDATE repo SET is_notified = 0")
+    suspend fun makeReposNotNotified()
+
+    @Query("UPDATE repo SET is_notified = 1 WHERE repo_name = :repoName AND name_user = :ownerName")
+    suspend fun makeRepoNotified(ownerName: String, repoName: String)
 }

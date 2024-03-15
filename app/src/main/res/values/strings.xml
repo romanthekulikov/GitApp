@@ -17,4 +17,5 @@
     <string name="text_dialog_ok">OK</string>
     <string name="text_try_again">Try again</string>
     <string name="repo_channel_description">repo_stars</string>
+    <string name="start_repo_channel_description">repo_start_channel_name</string>
 </resources>
