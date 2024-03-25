@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -27,21 +28,18 @@ object RepoAlarmHelper {
 
         val millisUntilNextAlarm = getMillisUntilNextAlarm(startAfterSec)
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//            if (alarmManager.canScheduleExactAlarms()) {
-//                alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + millisUntilNextAlarm, pendingIntent)
-//            }
-//        } else {
-//            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + millisUntilNextAlarm, pendingIntent)
-//        }
-
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + millisUntilNextAlarm, pendingIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + millisUntilNextAlarm, pendingIntent)
+            }
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + millisUntilNextAlarm, pendingIntent)
+        }
     }
 
-    fun getMillisUntilNextAlarm(startAfterSec: Long): Long {
+    private fun getMillisUntilNextAlarm(startAfterSec: Long): Long {
         val currentLocalDate = LocalDateTime.now()
         var millisUntilNextAlarm: Long
-        val currentHour = currentLocalDate.hour
         val estimatedTime = if (startAfterSec == 0.toLong()) {
             millisUntilNextAlarm = (periodicity * 60 * 60 * 1000).toLong() // hours to milliseconds
 
@@ -53,7 +51,7 @@ object RepoAlarmHelper {
         }
 
         if ((estimatedTime.hour in backSkipPeriod) || (estimatedTime.hour in frontSkipPeriod)) {
-            val alarmDateTime = if (currentHour in backSkipPeriod) {
+            val alarmDateTime = if (estimatedTime.hour in backSkipPeriod) {
                 // + 1 because frontSkipPeriod and backSkipPeriod ending at one number back
                 currentLocalDate.plusDays(1).withHour(frontSkipPeriod.last + 1).withMinute(0)
             } else {
@@ -61,9 +59,9 @@ object RepoAlarmHelper {
             }
 
             val alarmEpochSecond = alarmDateTime.atZone(ZoneId.systemDefault()).toEpochSecond()
+            val t = currentLocalDate.atZone(ZoneId.systemDefault()).toEpochSecond()
 
-            millisUntilNextAlarm =
-                alarmEpochSecond - currentLocalDate.atZone(ZoneId.systemDefault()).toEpochSecond()
+            millisUntilNextAlarm = (alarmEpochSecond - t) * 1000
         }
 
         return millisUntilNextAlarm

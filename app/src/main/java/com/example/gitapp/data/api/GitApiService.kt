@@ -3,6 +3,7 @@ package com.example.gitapp.data.api
 import com.example.gitapp.data.api.models.ApiRateLimit
 import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.data.api.models.ApiStargazer
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Path
@@ -23,7 +24,7 @@ interface GitApiService {
     suspend fun fetchOwnerRepo(
         @Path(value = "owner") ownerName: String,
         @Path(value = "repo") repo: String
-    ): ApiRepo
+    ): Response<ApiRepo>
 
     @Headers("Accept: application/vnd.github.v3.star+json")
     @GET("repos/{user}/{repo}/stargazers")

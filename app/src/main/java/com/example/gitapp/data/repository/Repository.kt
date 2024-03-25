@@ -1,5 +1,6 @@
 package com.example.gitapp.data.repository
 
+import com.example.gitapp.data.api.models.ApiRepo
 import com.example.gitapp.data.database.entity.RepoEntity
 import com.example.gitapp.data.database.entity.StargazerEntity
 import com.example.gitapp.entity.Repo
@@ -16,7 +17,8 @@ interface Repository {
     suspend fun updateRepoFavorite(ownerName: String, repoName: String, isFavorite: Boolean)
     suspend fun isFavoriteRepo(ownerName: String, repoName: String): Boolean
     suspend fun getFavoriteRepoList(): List<Repo>
-    suspend fun getRepoFromApi(ownerName: String, repoName: String): Repo
+    suspend fun getRepoFromApi(ownerName: String, repoName: String): ApiRepo?
+    fun getLimitResetTimeSec(): Long
     suspend fun updateRepoStargazersCount(ownerName: String, repoName: String, stargazersCount: Int)
     suspend fun makeRepoNotified(ownerName: String, repoName: String)
     suspend fun makeReposNotNotified()

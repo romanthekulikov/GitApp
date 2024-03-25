@@ -27,6 +27,7 @@ import javax.inject.Inject
 const val START_CHANNEL_ID = "start_repo_channel"
 const val START_CHANNEL_NAME = "start_notification_channel"
 const val START_NOTIFICATION_ID = 123
+const val TIME_TO_WAITING_INTERNET_SEC: Long = 600
 
 class RepoService : Service() {
 
@@ -37,6 +38,7 @@ class RepoService : Service() {
 
     @Inject
     lateinit var repoNotificationCreator: NotificationsCreator<Repo>
+
 
     init {
         App.appComponent.inject(this)
@@ -74,27 +76,26 @@ class RepoService : Service() {
     private suspend fun getDifferenceRepoList(): List<Repo> {
         val favoriteRepos = repository.getFavoriteRepoList()
         val differenceRepoList = mutableListOf<Repo>()
-        favoriteRepos.forEach{ repo ->
+        favoriteRepos.forEach { repo ->
             try {
-                val fetchedRepo = getRepoFromApi(repo.owner.nameUser, repo.name)
+                val fetchedRepo = repository.getRepoFromApi(repo.owner.nameUser, repo.name)!!
                 fetchedRepo.stargazersCount = fetchedRepo.stargazersCount - repo.stargazersCount
-                differenceRepoList.add(fetchedRepo)
+                differenceRepoList.add(fetchedRepo.toRepoEntity(true))
                 repository.makeRepoNotified(repo.owner.nameUser, repo.name)
             } catch (e: UnknownHostException) {
-                Log.e("service_error", "UnknownHostException", e)
-                startAlarmWithRepoList()
+                RepoAlarmHelper.setAlarm(this@RepoService, startAfterSec = TIME_TO_WAITING_INTERNET_SEC)
                 return differenceRepoList
             } catch (e: SocketTimeoutException) {
-                Log.e("service_error", "SocketTimeoutException: ", e)
-                startAlarmWithRepoList()
+                RepoAlarmHelper.setAlarm(this@RepoService, startAfterSec = TIME_TO_WAITING_INTERNET_SEC)
                 return differenceRepoList
             } catch (e: IOException) {
-                Log.e("service_error", "IOException: ", e)
-                startAlarmWithRepoList()
+                startAlarmWithRepoList(e)
                 return differenceRepoList
             } catch (e: HttpException) {
-                Log.e("service_error", "HttpException: ", e)
-                startAlarmWithRepoList()
+                startAlarmWithRepoList(e)
+                return differenceRepoList
+            } catch (e: NullPointerException) {
+                startAlarmWithRepoList(e)
                 return differenceRepoList
             }
         }
@@ -102,27 +103,10 @@ class RepoService : Service() {
         return differenceRepoList
     }
 
-    private suspend fun getRepoFromApi(ownerName: String, repoName: String): Repo {
-        return repository.getRepoFromApi(ownerName, repoName)
-    }
-    private suspend fun startAlarmWithRepoList() {
-        try {
-            val limitResetTime = repository.getGithubResetLimitTime()
-            val untilLimitResetTime = limitResetTime - (System.currentTimeMillis() / 1000)
-            RepoAlarmHelper.setAlarm(this@RepoService, startAfterSec = untilLimitResetTime)
-        } catch (e: UnknownHostException) {
-            logErrorAndSetTriggerDefaultAlarm(e)
-        } catch (e: SocketTimeoutException) {
-            logErrorAndSetTriggerDefaultAlarm(e)
-        } catch (e: IOException) {
-            logErrorAndSetTriggerDefaultAlarm(e)
-        } catch (e: HttpException) {
-            logErrorAndSetTriggerDefaultAlarm(e)
-        }
-    }
-    private fun logErrorAndSetTriggerDefaultAlarm(e: Exception) {
-        Log.e("service_error", "On load reset limit: ", e)
-        RepoAlarmHelper.setAlarm(this@RepoService)
+    private fun startAlarmWithRepoList(e: Exception) {
+        Log.e("service_error", "Service Exception: ", e)
+        val untilLimitResetTimeSec = repository.getLimitResetTimeSec() - (System.currentTimeMillis() / 1000)
+        RepoAlarmHelper.setAlarm(this@RepoService, startAfterSec = untilLimitResetTimeSec)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

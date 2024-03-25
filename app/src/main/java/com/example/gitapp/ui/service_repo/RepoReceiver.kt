@@ -15,7 +15,6 @@ class RepoReceiver : BroadcastReceiver() {
     @SuppressLint("MissingPermission")
     override fun onReceive(context: Context, intent: Intent?) {
         Log.i("repo_service", "push")
-
         val serviceIntent = Intent(context, RepoService::class.java)
         try {
             ContextCompat.startForegroundService(context, serviceIntent)

@@ -21,7 +21,7 @@ data class ApiRepo(
     override val owner: ApiUser,
 
     @Json(name = "stargazers_count")
-    override var stargazersCount: Int,
+    override var stargazersCount: Int
 ) : Repo, Parcelable {
     fun toRepoEntity(isFavorite: Boolean): RepoEntity {
         return RepoEntity(

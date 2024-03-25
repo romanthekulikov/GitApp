@@ -21,7 +21,9 @@ object ApiModule {
             .add(KotlinJsonAdapterFactory())
             .add(LocalDateConverter())
             .build()
-        val retrofit = Retrofit.Builder().addConverterFactory(MoshiConverterFactory.create(moshi)).baseUrl(BASE_URL).build()
+        val retrofit = Retrofit.Builder()
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .baseUrl(BASE_URL).build()
         return retrofit.create(GitApiService::class.java)
     }
 }
