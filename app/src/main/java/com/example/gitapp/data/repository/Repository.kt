@@ -8,6 +8,7 @@ import com.example.gitapp.entity.Stared
 import com.example.gitapp.entity.Stargazer
 import com.example.gitapp.ui.diagram.PeriodType
 import java.time.LocalDate
+import kotlin.time.Duration
 
 interface Repository {
     suspend fun getOwnerRepoList(ownerName: String, pageNumb: Int): List<RepoEntity>
@@ -18,14 +19,13 @@ interface Repository {
     suspend fun isFavoriteRepo(ownerName: String, repoName: String): Boolean
     suspend fun getFavoriteRepoList(): List<Repo>
     suspend fun getRepoFromApi(ownerName: String, repoName: String): ApiRepo?
-    fun getLimitResetTimeSec(): Long
+    fun getUntilLimitResetTimeSec(): Duration
     suspend fun updateRepoStargazersCount(ownerName: String, repoName: String, stargazersCount: Int)
-    suspend fun makeRepoNotified(ownerName: String, repoName: String)
-    suspend fun makeReposNotNotified()
     suspend fun getGithubResetLimitTime(): Long
     fun getLastDateLoadedStargazer(): LocalDate
     fun getFirstLoadedStargazerDate(): LocalDate
     fun getLoadedStargazers(): List<Stargazer>
     fun getLoadedDataInPeriod(startPeriod: LocalDate, endPeriod: LocalDate, periodType: PeriodType): List<Stared>
     fun clearMemorySavedStargazers()
+    suspend fun getRepoEntity(ownerName: String, repoName: String): RepoEntity?
 }

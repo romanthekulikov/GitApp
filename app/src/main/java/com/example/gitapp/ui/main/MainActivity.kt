@@ -20,7 +20,7 @@ import com.example.gitapp.databinding.ActivityMainBinding
 import com.example.gitapp.ui.base.BaseActivity
 import com.example.gitapp.ui.diagram.DiagramActivity
 import com.example.gitapp.ui.diagram.IS_FAVORITE_INTENT_KEY
-import com.example.gitapp.ui.service_repo.RepoAlarmHelper
+import com.example.gitapp.ui.service_repo.RepoWorkerHelper
 import com.omega_r.libs.omegarecyclerview.pagination.OnPageRequestListener
 import moxy.ktx.moxyPresenter
 
@@ -73,13 +73,13 @@ class MainActivity : BaseActivity(), MainView, RepoAdapter.RepoRecyclerCallback,
         if (permission != PackageManager.PERMISSION_GRANTED) {
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            RepoAlarmHelper.setAlarm(this, startAfterSec = 5)
+            RepoWorkerHelper.initWorker(this, startAfterSec = 5)
         }
     }
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         when (it) {
-            true -> RepoAlarmHelper.setAlarm(this@MainActivity, startAfterSec = 5)
+            true -> RepoWorkerHelper.initWorker(this@MainActivity, startAfterSec = 5)
             false -> Toast.makeText(this@MainActivity, "Permission denied", Toast.LENGTH_LONG).show()
         }
     }

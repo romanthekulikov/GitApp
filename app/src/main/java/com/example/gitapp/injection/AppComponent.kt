@@ -5,7 +5,7 @@ import com.example.gitapp.injection.modules.ServiceModule
 import com.example.gitapp.ui.service_repo.RepoNotificationsCreator
 import com.example.gitapp.ui.diagram.DiagramPresenter
 import com.example.gitapp.ui.main.MainPresenter
-import com.example.gitapp.ui.service_repo.RepoService
+import com.example.gitapp.ui.service_repo.RepoWorker
 import dagger.Component
 import javax.inject.Singleton
 
@@ -15,5 +15,5 @@ interface AppComponent {
     fun inject(diagramPresenter: DiagramPresenter)
     fun inject(notificationCreator: RepoNotificationsCreator)
     fun inject(mainPresenter: MainPresenter)
-    fun inject(repoService: RepoService)
+    fun inject(repoWorker: RepoWorker)
 }

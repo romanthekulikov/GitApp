@@ -13,13 +13,14 @@ import com.example.gitapp.entity.Stargazer
 import com.example.gitapp.ui.diagram.PeriodType
 import com.example.gitapp.ui.diagram.utils.PeriodHelper
 import retrofit2.HttpException
-import java.io.IOException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
+import retrofit2.Response
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 const val BASE_RESET_LIMIT_PERIOD_MIN: Long = 70
 
@@ -29,7 +30,7 @@ class RepositoryImpl @Inject constructor(
 ) : Repository {
 
     private var stargazersItemList: MutableList<Stargazer> = mutableListOf()
-    private var limitResetTime = LocalDateTime.now().plusMinutes(BASE_RESET_LIMIT_PERIOD_MIN).toEpochSecond(ZoneOffset.UTC)
+    private var untilLimitResetTime = LocalDateTime.now().plusMinutes(BASE_RESET_LIMIT_PERIOD_MIN).toEpochSecond(ZoneOffset.UTC)
     private var db = AppDatabase.db
     override suspend fun getOwnerRepoList(ownerName: String, pageNumb: Int): List<RepoEntity> {
         val repoList = apiService.fetchOwnerRepos(ownerName = ownerName, numberOfPage = pageNumb)
@@ -79,33 +80,30 @@ class RepositoryImpl @Inject constructor(
         if (repoResponse.isSuccessful) {
             return repoResponse.body()
         } else {
-            limitResetTime = repoResponse.headers()["x-ratelimit-reset"]?.toLong() ?: limitResetTime
-            when (repoResponse.code()) {
-                403 -> throw HttpException(repoResponse)
-                404 -> throw UnknownHostException()
-                500 -> throw SocketTimeoutException()
-                505 -> throw SocketTimeoutException()
-                else -> throw IOException()
-            }
+            setUntilResetLimitTime(repoResponse)
+            throw HttpException(repoResponse)
         }
     }
 
-    override fun getLimitResetTimeSec(): Long {
-        return limitResetTime
+    override suspend fun getRepoEntity(ownerName: String, repoName: String): RepoEntity? {
+        return db.repoDao().getRepo(ownerName, repoName)
+    }
+
+    private fun setUntilResetLimitTime(response: Response<ApiRepo>) {
+        val serverDateFormat = DateTimeFormatter.RFC_1123_DATE_TIME
+        val serverDateTime = LocalDateTime.parse(response.headers()["date"], serverDateFormat)
+        val serverEpochSecond = serverDateTime.toEpochSecond(ZoneOffset.UTC)
+        val resetDate = response.headers()["x-ratelimit-reset"]?.toLong() ?: untilLimitResetTime
+        untilLimitResetTime = resetDate - serverEpochSecond
+    }
+
+    override fun getUntilLimitResetTimeSec(): Duration {
+        return untilLimitResetTime.seconds
     }
 
     override suspend fun updateRepoStargazersCount(ownerName: String, repoName: String, stargazersCount: Int) {
         db.repoDao().updateRepoStargazersCount(stargazersCount = stargazersCount, ownerName = ownerName, repoName = repoName)
     }
-
-    override suspend fun makeRepoNotified(ownerName: String, repoName: String) {
-        db.repoDao().makeRepoNotified(ownerName, repoName)
-    }
-
-    override suspend fun makeReposNotNotified() {
-        db.repoDao().makeReposNotNotified()
-    }
-
     override suspend fun getGithubResetLimitTime(): Long {
         return apiService.getRateLimit().limitCore.core.resetTime
     }
