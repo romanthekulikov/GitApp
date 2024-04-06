@@ -6,10 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.gitapp.data.api.models.StaredModel
 import com.example.gitapp.databinding.ActivityStargazersBinding
-import com.example.gitapp.entity.Stared
-import com.example.gitapp.entity.Stargazer
 import com.example.gitapp.ui.base.BaseActivity
 import moxy.ktx.moxyPresenter
 
@@ -20,7 +17,7 @@ class StargazersActivity : BaseActivity(), StargazersView {
 
     private val stargazersPresenter: StargazersPresenter by moxyPresenter {
         val extras = intent.extras!!
-        StargazersPresenter(extras.getParcelableArrayList(STARGAZERS_KEY, StaredModel::class.java)!!)
+        StargazersPresenter(extras.getParcelableArrayList(STARGAZERS_KEY, com.example.data.data.api.models.StaredModel::class.java)!!)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -32,7 +29,7 @@ class StargazersActivity : BaseActivity(), StargazersView {
         binding.textPeriod.text = intent.extras?.getString(PERIOD_KEY) ?: ""
     }
 
-    override fun initRecyclerView(stargazers: List<Stargazer>) {
+    override fun initRecyclerView(stargazers: List<com.example.domain.domain.entity.Stargazer>) {
         val adapter = StargazersAdapter(stargazers)
         val layoutManager = LinearLayoutManager(this)
         binding.recyclerviewStargazers.layoutManager = layoutManager
@@ -43,7 +40,7 @@ class StargazersActivity : BaseActivity(), StargazersView {
 
         const val PERIOD_KEY = "period"
         const val STARGAZERS_KEY = "stargazers"
-        fun get(fromWhomContext: Context, period: String, stargazers: List<Stared>): Intent {
+        fun get(fromWhomContext: Context, period: String, stargazers: List<com.example.domain.domain.entity.Stared>): Intent {
             val intent = Intent(fromWhomContext, StargazersActivity::class.java)
             intent.putExtra(PERIOD_KEY, period)
             intent.putParcelableArrayListExtra(STARGAZERS_KEY, java.util.ArrayList(stargazers))

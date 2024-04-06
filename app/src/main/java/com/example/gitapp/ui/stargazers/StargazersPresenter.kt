@@ -1,14 +1,14 @@
 package com.example.gitapp.ui.stargazers
 
-import com.example.gitapp.data.api.models.ApiStargazer
-import com.example.gitapp.data.api.models.ApiUser
-import com.example.gitapp.entity.Stargazer
-import com.example.gitapp.entity.Stared
+import com.example.data.data.api.models.ApiStargazer
+import com.example.data.data.api.models.ApiUser
+import com.example.domain.domain.entity.Stared
+import com.example.domain.domain.entity.Stargazer
 import com.example.gitapp.ui.base.BasePresenter
 import moxy.InjectViewState
 
 @InjectViewState
-class StargazersPresenter(val stargazers: List<Stared>) : BasePresenter<StargazersView>() {
+class StargazersPresenter(stargazers: List<Stared>) : BasePresenter<StargazersView>() {
     init {
         viewState.initRecyclerView(starredToStargazerList(stargazers))
     }

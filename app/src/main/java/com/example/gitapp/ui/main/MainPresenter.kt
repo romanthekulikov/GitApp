@@ -1,10 +1,9 @@
 package com.example.gitapp.ui.main
 
 import android.util.Log
+import com.example.data.data.database.entity.RepoEntity
+import com.example.data.data.repository.Repository
 import com.example.gitapp.App
-import com.example.gitapp.data.api.GitApiService
-import com.example.gitapp.data.database.entity.RepoEntity
-import com.example.gitapp.data.repository.Repository
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
 import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
@@ -20,9 +19,6 @@ import javax.inject.Inject
 
 @InjectViewState
 class MainPresenter : BasePresenter<MainView>() {
-
-    @Inject
-    lateinit var apiService: GitApiService
 
     @Inject
     lateinit var repository: Repository

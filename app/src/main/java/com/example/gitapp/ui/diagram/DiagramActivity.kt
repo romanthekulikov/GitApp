@@ -14,9 +14,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.gitapp.R
-import com.example.gitapp.data.database.entity.RepoEntity
+import com.example.data.data.database.entity.RepoEntity
 import com.example.gitapp.databinding.ActivityDiagramBinding
-import com.example.gitapp.entity.Stared
+import com.example.domain.domain.entity.Stared
 import com.example.gitapp.ui.base.BaseActivity
 import com.example.gitapp.ui.stargazers.StargazersActivity
 import com.github.mikephil.charting.charts.BarChart

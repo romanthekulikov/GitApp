@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.gitapp.databinding.ItemStargazerBinding
-import com.example.gitapp.entity.Stargazer
+import com.example.domain.domain.entity.Stargazer
 
 class StargazersAdapter(
     private val stargazersList: List<Stargazer>

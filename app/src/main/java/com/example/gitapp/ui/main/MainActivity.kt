@@ -15,7 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.gitapp.data.database.entity.RepoEntity
+import com.example.data.data.database.entity.RepoEntity
 import com.example.gitapp.databinding.ActivityMainBinding
 import com.example.gitapp.ui.base.BaseActivity
 import com.example.gitapp.ui.diagram.DiagramActivity

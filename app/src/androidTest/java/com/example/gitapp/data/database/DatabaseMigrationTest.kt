@@ -18,7 +18,7 @@ class DatabaseMigrationTest {
     @get:Rule
     val helper: MigrationTestHelper = MigrationTestHelper(
         InstrumentationRegistry.getInstrumentation(),
-        AppDatabase::class.java.canonicalName!!,
+        com.example.data.data.database.AppDatabase::class.java.canonicalName!!,
         FrameworkSQLiteOpenHelperFactory()
     )
 
@@ -30,7 +30,7 @@ class DatabaseMigrationTest {
         db.execSQL("INSERT INTO repo (repo_name, name_user, avatar_url, stargazer_count, is_favorite) VALUES ('name repo', 'name user', 'avatar url', 15, 0)")
         db.close()
 
-        db = helper.runMigrationsAndValidate(TEST_DB, 2, true, AppDatabase.MIGRATION_1_2)
+        db = helper.runMigrationsAndValidate(TEST_DB, 2, true, com.example.data.data.database.AppDatabase.MIGRATION_1_2)
 
         val cursor = db.query("SELECT * FROM repo")
         TestCase.assertEquals(1, cursor.count)

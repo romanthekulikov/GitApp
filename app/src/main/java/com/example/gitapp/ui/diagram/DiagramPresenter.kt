@@ -3,19 +3,12 @@ package com.example.gitapp.ui.diagram
 import android.util.Log
 import android.view.View
 import com.example.gitapp.App
-import com.example.gitapp.data.api.ITEM_PER_STARGAZERS_PAGE
-import com.example.gitapp.data.database.entity.RepoEntity
-import com.example.gitapp.data.repository.Repository
-import com.example.gitapp.entity.Stared
-import com.example.gitapp.entity.Stargazer
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
 import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
 import com.example.gitapp.ui.base.ERROR_NO_DATA
 import com.example.gitapp.ui.base.ERROR_NO_INTERNET
 import com.example.gitapp.ui.base.ERROR_UNIDENTIFIED
-import com.example.gitapp.ui.diagram.utils.HistogramPeriodAdapter
-import com.example.gitapp.ui.diagram.utils.PeriodHelper
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import kotlinx.coroutines.launch
 import moxy.InjectViewState
@@ -29,7 +22,7 @@ import javax.inject.Inject
 
 @InjectViewState
 class DiagramPresenter(
-    private val repo: RepoEntity
+    private val repo: com.example.data.data.database.entity.RepoEntity
 ) : BasePresenter<DiagramView>() {
     init {
         App.appComponent.inject(this)
@@ -45,16 +38,16 @@ class DiagramPresenter(
     private val yearMonth = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
     @Inject
-    lateinit var periodHelper: PeriodHelper
+    lateinit var periodHelper: com.example.domain.domain.PeriodHelper
 
     @Inject
-    lateinit var histogramPeriodAdapter: HistogramPeriodAdapter //pattern
+    lateinit var histogramPeriodAdapter: com.example.domain.domain.HistogramPeriodAdapter //pattern
 
     @Inject
-    lateinit var repository: Repository
+    lateinit var repository: com.example.data.data.repository.Repository
 
     private var displayedDiagramPage = 0
-    private var nextLoadPageNumber = (repo.stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
+    private var nextLoadPageNumber = (repo.stargazersCount / com.example.data.data.api.ITEM_PER_STARGAZERS_PAGE) + 1
     private var enoughData = false
     private var toStartPeriodMoved = false
     private var errorShowed = false
@@ -65,7 +58,7 @@ class DiagramPresenter(
     private var endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)!!
 
     private fun resetPresenter() {
-        nextLoadPageNumber = (repo.stargazersCount / ITEM_PER_STARGAZERS_PAGE) + 1
+        nextLoadPageNumber = (repo.stargazersCount / com.example.data.data.api.ITEM_PER_STARGAZERS_PAGE) + 1
         enoughData = false
         toStartPeriodMoved = false
         errorShowed = false
@@ -131,7 +124,7 @@ class DiagramPresenter(
         }
     }
 
-    private fun fillFields(loadedStargazers: List<Stargazer>) {
+    private fun fillFields(loadedStargazers: List<com.example.domain.domain.entity.Stargazer>) {
         lastDateLoadedStargazer = repository.getLastDateLoadedStargazer()
         firstLoadedStargazerDate = repository.getFirstLoadedStargazerDate()
 
@@ -162,8 +155,8 @@ class DiagramPresenter(
         if (nextLoadPageNumber == 0 && startPeriod < firstLoadedStargazerDate) {
             viewState.setNextButtonEnabled(false)
         }
-        val loadedData = repository.getLoadedDataInPeriod(startPeriod, endPeriod, diagramMode)
-        val barData = histogramPeriodAdapter.periodToBarData(loadedData, diagramMode, startPeriod, endPeriod)
+        val loadedData = repository.getLoadedDataInPeriod(startPeriod, endPeriod)
+        val barData = histogramPeriodAdapter.periodToBarData(loadedData, diagramMode.toString(), startPeriod, endPeriod)
         when (diagramMode) {
             PeriodType.WEEK -> viewState.displayData(
                 barData,
@@ -224,8 +217,8 @@ class DiagramPresenter(
         displayHistogramWithLoadData()
     }
 
-    fun requestPeriodDataTime(periodData: List<Stared>): String {
-        return periodHelper.getPeriodString(periodData, diagramMode)
+    fun requestPeriodDataTime(periodData: List<com.example.domain.domain.entity.Stared>): String {
+        return periodHelper.getPeriodString(periodData, diagramMode.toString())
     }
 
     private fun moveBackPeriod() {

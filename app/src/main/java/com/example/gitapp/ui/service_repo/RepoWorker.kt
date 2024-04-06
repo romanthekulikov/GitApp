@@ -9,9 +9,8 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.example.gitapp.App
 import com.example.gitapp.R
-import com.example.gitapp.data.repository.Repository
-import com.example.gitapp.entity.Repo
-import com.example.gitapp.ui.NotificationsCreator
+import com.example.data.data.repository.Repository
+import com.example.domain.domain.entity.Repo
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject

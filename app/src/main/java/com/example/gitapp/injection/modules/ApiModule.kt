@@ -1,7 +1,7 @@
 package com.example.gitapp.injection.modules
 
-import com.example.gitapp.data.api.GitApiService
-import com.example.gitapp.data.converters.LocalDateConverter
+import com.example.data.data.api.GitApiService
+import com.example.data.data.converters.LocalDateConverter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module

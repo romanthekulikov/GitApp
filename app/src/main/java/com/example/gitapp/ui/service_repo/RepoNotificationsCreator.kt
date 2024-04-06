@@ -9,10 +9,9 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.gitapp.R
-import com.example.gitapp.data.api.models.ApiRepo
-import com.example.gitapp.data.database.entity.RepoEntity
-import com.example.gitapp.entity.Repo
-import com.example.gitapp.ui.NotificationsCreator
+import com.example.data.data.api.models.ApiRepo
+import com.example.data.data.database.entity.RepoEntity
+import com.example.domain.domain.entity.Repo
 import com.example.gitapp.ui.diagram.DiagramActivity
 
 const val NOTIFICATION_ID = 33

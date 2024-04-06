@@ -21,6 +21,20 @@ object RepoWorkerHelper {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
+
+        val workRequest = OneTimeWorkRequestBuilder<RepoWorker>()
+            .setInitialDelay(
+                duration = getSecUntilNextAlarm(startAfterSec),
+                timeUnit = TimeUnit.SECONDS
+            )
+            .setConstraints(constraints)
+            .setInputData(getWorkerData(repoForUpdates))
+            .build()
+
+        WorkManager.getInstance(context).enqueue(workRequest)
+    }
+
+    private fun getWorkerData(repoForUpdates: List<String>): Data {
         var arrayRepo = arrayOf<String>()
         repoForUpdates.forEach { repo ->
             arrayRepo = arrayRepo.plus(repo)
@@ -28,21 +42,10 @@ object RepoWorkerHelper {
         val dataBuilder = Data.Builder()
         dataBuilder.putStringArray("repos", arrayRepo)
 
-        val workRequest = OneTimeWorkRequestBuilder<RepoWorker>()
-            .setInitialDelay(
-                getSecUntilNextAlarm(startAfterSec),
-                TimeUnit.SECONDS
-            )
-            .setConstraints(constraints)
-            .setInputData(dataBuilder.build())
-            .build()
-        WorkManager.getInstance(context).enqueue(workRequest)
+        return dataBuilder.build()
     }
 
     private fun getSecUntilNextAlarm(startAfterSec: Long): Long {
-        if (startAfterSec == 0.toLong()) {
-            return 3600
-        }
         val currentLocalDate = LocalDateTime.now()
         var millisUntilNextAlarm: Long
         val estimatedTime = if (startAfterSec == 0.toLong()) {
