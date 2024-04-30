@@ -1,19 +1,18 @@
 package com.example.gitapp
 
-import com.example.data.data.api.models.StaredModel
-import com.example.data.data.database.entity.StargazerEntity
-import com.example.data.data.database.entity.UserEntity
+import com.example.domain.domain.models.StargazerEntity
+import com.example.domain.domain.models.UserEntity
 import com.example.domain.domain.entity.Stared
 import com.example.gitapp.ui.diagram.PeriodType
 import com.example.domain.domain.PeriodHelper
-import com.example.domain.domain.PeriodHelperImpl
+import com.example.domain.domain.models.StaredModel
 import org.junit.Assert
 import org.junit.Test
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class PeriodHelperTest {
-    private val periodHelper: PeriodHelper = PeriodHelperImpl()
+    private val periodHelper: PeriodHelper = PeriodHelper()
     private val testUser1 = UserEntity("Filip", "null")
     private val testUser2 = UserEntity("Joni", "null")
     private val testUser3 = UserEntity("Mark", "null")

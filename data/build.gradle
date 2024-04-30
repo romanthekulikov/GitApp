@@ -49,13 +49,13 @@ android {
 
 def dagger_version = "2.50"
 def room_version = "2.6.1"
-def moshi_version = "1.14.0"
+def moshi_version = "1.15.1"
 def retrofit_version = "2.10.0"
 def okhttp3_version = "4.12.0"
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.core:core-ktx:1.13.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     testImplementation 'junit:junit:4.13.2'

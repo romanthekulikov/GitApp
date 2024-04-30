@@ -4,11 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.data.data.database.entity.RepoEntity
+import com.example.domain.domain.models.RepoEntity
 
 @Dao
 interface RepoDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(repos: List<RepoEntity>)
 
     @Query("SELECT * FROM repo WHERE LOWER(name_user) = LOWER(:ownerName)")

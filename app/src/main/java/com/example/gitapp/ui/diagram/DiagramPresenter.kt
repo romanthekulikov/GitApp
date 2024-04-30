@@ -2,6 +2,15 @@ package com.example.gitapp.ui.diagram
 
 import android.util.Log
 import android.view.View
+import com.example.domain.domain.HistogramPeriodAdapter
+import com.example.domain.domain.PeriodHelper
+import com.example.domain.domain.Repository
+import com.example.domain.domain.models.RepoEntity
+import com.example.domain.domain.use_cases.diagram.ClearMemorySavedStargazersUseCase
+import com.example.domain.domain.use_cases.diagram.GetDateLoadedStargazerUseCase
+import com.example.domain.domain.use_cases.diagram.GetLoadedDataInPeriodUseCase
+import com.example.domain.domain.use_cases.diagram.GetStargazersListUseCase
+import com.example.domain.domain.use_cases.diagram.UpdateRepoStargazersCountUseCase
 import com.example.gitapp.App
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
@@ -22,29 +31,25 @@ import javax.inject.Inject
 
 @InjectViewState
 class DiagramPresenter(
-    private val repo: com.example.data.data.database.entity.RepoEntity
+    private val repo: RepoEntity
 ) : BasePresenter<DiagramView>() {
-    init {
-        App.appComponent.inject(this)
-        resetPresenter()
-        repository.clearMemorySavedStargazers()
-        displayHistogramWithLoadData()
-        displayRepo()
-        viewState.setPreviousButtonEnabled(false)
-        launch { repository.updateRepoStargazersCount(repo.owner.nameUser, repo.name, repo.stargazersCount) }
-    }
-
     private val weekDay = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     private val yearMonth = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
     @Inject
-    lateinit var periodHelper: com.example.domain.domain.PeriodHelper
+    lateinit var periodHelper: PeriodHelper
 
     @Inject
-    lateinit var histogramPeriodAdapter: com.example.domain.domain.HistogramPeriodAdapter //pattern
+    lateinit var histogramPeriodAdapter: HistogramPeriodAdapter //pattern
 
     @Inject
-    lateinit var repository: com.example.data.data.repository.Repository
+    lateinit var repository: Repository
+
+    private val getStargazersListUseCase by lazy { GetStargazersListUseCase(repository) }
+    private val getDateLoadedStargazerUseCase by lazy { GetDateLoadedStargazerUseCase(repository) }
+    private val getLoadedDataInPeriodUseCase by lazy { GetLoadedDataInPeriodUseCase(repository) }
+    private val clearMemorySavedStargazersUseCase by lazy { ClearMemorySavedStargazersUseCase(repository) }
+    private val updateRepoStargazersCountUseCase by lazy { UpdateRepoStargazersCountUseCase(repository) }
 
     private var displayedDiagramPage = 0
     private var nextLoadPageNumber = (repo.stargazersCount / com.example.data.data.api.ITEM_PER_STARGAZERS_PAGE) + 1
@@ -56,6 +61,16 @@ class DiagramPresenter(
     private var lastDateLoadedStargazer = LocalDate.now().with(DayOfWeek.SUNDAY)
     private var startPeriod = LocalDate.now().with(DayOfWeek.MONDAY)!!
     private var endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)!!
+
+    init {
+        App.appComponent.inject(this)
+        resetPresenter()
+        clearMemorySavedStargazersUseCase.execute()
+        displayHistogramWithLoadData()
+        displayRepo()
+        viewState.setPreviousButtonEnabled(false)
+        launch { updateRepoStargazersCountUseCase.execute(repo) }
+    }
 
     private fun resetPresenter() {
         nextLoadPageNumber = (repo.stargazersCount / com.example.data.data.api.ITEM_PER_STARGAZERS_PAGE) + 1
@@ -79,7 +94,7 @@ class DiagramPresenter(
                 } catch (e: UnknownHostException) {
                     displayErrorWithDataIfExist(message = ERROR_NO_INTERNET, logMessage = e.message)
                 } catch (e: HttpException) {
-                    if (repository.getLoadedStargazers().isNotEmpty()) {
+                    if (getStargazersListUseCase.execute().isNotEmpty()) {
                         displayErrorWithDataIfExist(message = ERROR_EXCEEDED_LIMIT, logMessage = e.message)
                     } else {
                         displayErrorWithDataIfExist(message = ERROR_NO_DATA, logMessage = e.message)
@@ -110,11 +125,11 @@ class DiagramPresenter(
 
     private suspend fun loadData() {
         try {
-            val loadedStargazers = repository.getStargazersList(repo.owner.nameUser, repo.name, nextLoadPageNumber)
+            val loadedStargazers = getStargazersListUseCase.execute(repo, nextLoadPageNumber)
             fillFields(loadedStargazers)
             nextLoadPageNumber--
         } catch (e: UnknownHostException) {
-            val loadedStargazers = repository.getStargazersList(repo.owner.nameUser, repo.name)
+            val loadedStargazers = getStargazersListUseCase.execute(repo)
             if (loadedStargazers.isEmpty()) {
                 throw e
             }
@@ -125,8 +140,8 @@ class DiagramPresenter(
     }
 
     private fun fillFields(loadedStargazers: List<com.example.domain.domain.entity.Stargazer>) {
-        lastDateLoadedStargazer = repository.getLastDateLoadedStargazer()
-        firstLoadedStargazerDate = repository.getFirstLoadedStargazerDate()
+        lastDateLoadedStargazer = getDateLoadedStargazerUseCase.executeLast()
+        firstLoadedStargazerDate = getDateLoadedStargazerUseCase.executeFirst()
 
         if (startPeriod > lastDateLoadedStargazer || !toStartPeriodMoved) { // If repo don't have a star on the current period
             startPeriod = lastDateLoadedStargazer.with(DayOfWeek.MONDAY) // Use week cause presenter start with week period type
@@ -146,7 +161,7 @@ class DiagramPresenter(
         }
         errorShowed = true
         Log.e("api_retrofit", logMessage ?: message)
-        if (repository.getLoadedStargazers().isNotEmpty()) {
+        if (getStargazersListUseCase.execute().isNotEmpty()) {
             displayHistogram()
         }
     }
@@ -155,7 +170,7 @@ class DiagramPresenter(
         if (nextLoadPageNumber == 0 && startPeriod < firstLoadedStargazerDate) {
             viewState.setNextButtonEnabled(false)
         }
-        val loadedData = repository.getLoadedDataInPeriod(startPeriod, endPeriod)
+        val loadedData = getLoadedDataInPeriodUseCase.execute(startPeriod, endPeriod)
         val barData = histogramPeriodAdapter.periodToBarData(loadedData, diagramMode.toString(), startPeriod, endPeriod)
         when (diagramMode) {
             PeriodType.WEEK -> viewState.displayData(

@@ -1,4 +1,4 @@
-package com.example.data.data.database.entity
+package com.example.domain.domain.models
 
 import android.os.Parcelable
 import androidx.room.ColumnInfo

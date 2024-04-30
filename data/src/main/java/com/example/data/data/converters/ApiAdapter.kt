@@ -3,9 +3,9 @@ package com.example.data.data.converters
 import com.example.data.data.api.models.ApiRepo
 import com.example.data.data.api.models.ApiStargazer
 import com.example.data.data.database.AppDatabase
-import com.example.data.data.database.entity.RepoEntity
-import com.example.data.data.database.entity.StargazerEntity
-import com.example.data.data.database.entity.UserEntity
+import com.example.domain.domain.models.RepoEntity
+import com.example.domain.domain.models.StargazerEntity
+import com.example.domain.domain.models.UserEntity
 
 internal suspend fun List<ApiRepo>.toRepoEntityList(): List<RepoEntity> {
     val repoEntityList = mutableListOf<RepoEntity>()

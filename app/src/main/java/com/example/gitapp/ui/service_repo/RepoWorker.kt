@@ -7,7 +7,7 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.example.data.data.repository.Repository
+import com.example.domain.domain.Repository
 import com.example.domain.domain.entity.Repo
 import com.example.gitapp.App
 import com.example.gitapp.R

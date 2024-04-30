@@ -15,7 +15,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.data.data.database.entity.RepoEntity
 import com.example.gitapp.databinding.ActivityMainBinding
 import com.example.gitapp.ui.base.BaseActivity
 import com.example.gitapp.ui.diagram.DiagramActivity
@@ -30,7 +29,7 @@ class MainActivity : BaseActivity(), MainView, RepoAdapter.RepoRecyclerCallback,
     private val mainPresenter: MainPresenter by moxyPresenter { MainPresenter() }
     private lateinit var binding: ActivityMainBinding
     private lateinit var repoAdapter: RepoAdapter
-    private lateinit var selectedRepo: RepoEntity
+    private lateinit var selectedRepo: com.example.domain.domain.models.RepoEntity
     private var selectedRepoPosition = 0
     private var nextLoadPage = 0
     private var needNewPage = false
@@ -95,7 +94,7 @@ class MainActivity : BaseActivity(), MainView, RepoAdapter.RepoRecyclerCallback,
         binding.textStub.visibility = View.GONE
     }
 
-    override fun showLoadedRepositories(listRepo: List<RepoEntity>) {
+    override fun showLoadedRepositories(listRepo: List<com.example.domain.domain.models.RepoEntity>) {
         if (listRepo.size < 100) {
             binding.repositories.hidePagination()
         }
@@ -117,13 +116,13 @@ class MainActivity : BaseActivity(), MainView, RepoAdapter.RepoRecyclerCallback,
         binding.repositories.hidePagination()
     }
 
-    override fun onChangeRepoFavorite(repo: RepoEntity, isFavorite: Boolean, position: Int) {
+    override fun onChangeRepoFavorite(repo: com.example.domain.domain.models.RepoEntity, isFavorite: Boolean, position: Int) {
         mainPresenter.requestChangeFavoriteRepo(repo, isFavorite)
         repoAdapter.notifyItemChanged(position)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    override fun onRepoClickListener(repo: RepoEntity, position: Int) {
+    override fun onRepoClickListener(repo: com.example.domain.domain.models.RepoEntity, position: Int) {
         selectedRepo = repo
         selectedRepoPosition = position
         val intent = DiagramActivity.get(fromWhomContext = this, repo = selectedRepo)

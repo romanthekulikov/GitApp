@@ -10,8 +10,8 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.gitapp.R
 import com.example.data.data.api.models.ApiRepo
-import com.example.data.data.database.entity.RepoEntity
-import com.example.data.data.repository.Repository
+import com.example.domain.domain.models.RepoEntity
+import com.example.domain.domain.Repository
 import com.example.domain.domain.entity.Repo
 import com.example.gitapp.App
 import com.example.gitapp.ui.diagram.DiagramActivity

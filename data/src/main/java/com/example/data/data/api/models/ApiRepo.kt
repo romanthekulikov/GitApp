@@ -2,8 +2,8 @@ package com.example.data.data.api.models
 
 import android.os.Parcelable
 import androidx.room.Entity
-import com.example.data.data.database.entity.RepoEntity
-import com.example.data.data.database.entity.UserEntity
+import com.example.domain.domain.models.RepoEntity
+import com.example.domain.domain.models.UserEntity
 import com.example.domain.domain.entity.Repo
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass

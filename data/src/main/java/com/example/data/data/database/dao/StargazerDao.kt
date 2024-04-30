@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.data.data.database.entity.StargazerEntity
+import com.example.domain.domain.models.StargazerEntity
 
 @Dao
 interface StargazerDao {

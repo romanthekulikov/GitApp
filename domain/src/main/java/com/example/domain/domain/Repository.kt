@@ -1,10 +1,10 @@
-package com.example.data.data.repository
+package com.example.domain.domain
 
-import com.example.data.data.database.entity.RepoEntity
-import com.example.data.data.database.entity.StargazerEntity
 import com.example.domain.domain.entity.Repo
 import com.example.domain.domain.entity.Stared
 import com.example.domain.domain.entity.Stargazer
+import com.example.domain.domain.models.RepoEntity
+import com.example.domain.domain.models.StargazerEntity
 import java.time.LocalDate
 import kotlin.time.Duration
 

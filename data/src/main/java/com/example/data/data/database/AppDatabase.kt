@@ -11,8 +11,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.data.data.converters.LocalDateConverter
 import com.example.data.data.database.dao.RepoDao
 import com.example.data.data.database.dao.StargazerDao
-import com.example.data.data.database.entity.RepoEntity
-import com.example.data.data.database.entity.StargazerEntity
+import com.example.domain.domain.models.RepoEntity
+import com.example.domain.domain.models.StargazerEntity
 
 @Database(
     entities = [RepoEntity::class, StargazerEntity::class],

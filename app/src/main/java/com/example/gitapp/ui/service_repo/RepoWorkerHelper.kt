@@ -78,13 +78,13 @@ object RepoWorkerHelper {
 
     private fun getSecUntilNextAlarm(startAfterSec: Long): Long {
         val currentLocalDate = LocalDateTime.now()
-        var millisUntilNextAlarm: Long
+        var secUntilNextAlarm: Long
         val estimatedTime = if (startAfterSec == 0.toLong()) {
-            millisUntilNextAlarm = (periodicity * 60 * 60).toLong() // hours to seconds
+            secUntilNextAlarm = (periodicity * 60 * 60).toLong() // hours to seconds
 
             currentLocalDate.plusHours(periodicity.toLong())
         } else {
-            millisUntilNextAlarm = startAfterSec
+            secUntilNextAlarm = startAfterSec
 
             currentLocalDate.plusSeconds(startAfterSec)
         }
@@ -100,9 +100,9 @@ object RepoWorkerHelper {
             val alarmEpochSecond = alarmDateTime.atZone(ZoneId.systemDefault()).toEpochSecond()
             val t = currentLocalDate.atZone(ZoneId.systemDefault()).toEpochSecond()
 
-            millisUntilNextAlarm = (alarmEpochSecond - t)
+            secUntilNextAlarm = (alarmEpochSecond - t)
         }
 
-        return millisUntilNextAlarm
+        return secUntilNextAlarm
     }
 }

@@ -1,12 +1,13 @@
-package com.example.data.data.repository
+package com.example.data.data
 
 import com.example.data.data.api.GitApiService
 import com.example.data.data.api.models.ApiRepo
 import com.example.data.data.converters.toRepoEntityList
 import com.example.data.data.converters.toStargazerEntityList
 import com.example.data.data.database.AppDatabase
-import com.example.data.data.database.entity.RepoEntity
-import com.example.data.data.database.entity.StargazerEntity
+import com.example.domain.domain.models.RepoEntity
+import com.example.domain.domain.models.StargazerEntity
+import com.example.domain.domain.Repository
 import com.example.domain.domain.entity.Repo
 import com.example.domain.domain.entity.Stared
 import com.example.domain.domain.entity.Stargazer
@@ -30,6 +31,8 @@ class RepositoryImpl @Inject constructor(
     private var untilLimitResetTime =
         LocalDateTime.now().plusMinutes(BASE_RESET_LIMIT_PERIOD_MIN).toEpochSecond(ZoneOffset.UTC) -
                 LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+
+
 
     private var db = AppDatabase.db
     override suspend fun getOwnerRepoList(ownerName: String, pageNumb: Int): List<RepoEntity> {

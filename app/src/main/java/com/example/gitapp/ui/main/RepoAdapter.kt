@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.data.data.database.entity.RepoEntity
+import com.example.domain.domain.models.RepoEntity
 import com.example.gitapp.databinding.ItemErrorProgressBinding
 import com.example.gitapp.databinding.ItemProgressBinding
 import com.example.gitapp.databinding.ItemRepoBinding
