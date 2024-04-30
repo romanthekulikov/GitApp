@@ -7,13 +7,14 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.example.gitapp.App
-import com.example.gitapp.R
 import com.example.data.data.repository.Repository
 import com.example.domain.domain.entity.Repo
+import com.example.gitapp.App
+import com.example.gitapp.R
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
+
 const val REPO_INFO_SEPARATOR = "/"
 const val START_CHANNEL_ID = "start_repo_channel"
 const val START_CHANNEL_NAME = "start_notification_channel"
@@ -73,7 +74,8 @@ class RepoWorker(private val context: Context, workerParams: WorkerParameters) :
                 if (repo != null) {
                     repoList.add(repo)
                 }
-            } catch (_: ArrayIndexOutOfBoundsException) { /*nothing*/ }
+            } catch (_: ArrayIndexOutOfBoundsException) { /*nothing*/
+            }
         }
 
         return if (repoList.isEmpty()) null else repoList
@@ -84,36 +86,35 @@ class RepoWorker(private val context: Context, workerParams: WorkerParameters) :
         val differenceRepoList = mutableListOf<Repo>()
         favoriteRepos.forEachIndexed { index, repo ->
             try {
-                if (differenceRepoList.size > 5) throw NullPointerException()
+                if (differenceRepoList.size > 5) throw IOException()
                 val fetchedRepo = repository.getRepoFromApi(repo.owner.nameUser, repo.name)!!
                 fetchedRepo.stargazersCount = fetchedRepo.stargazersCount - repo.stargazersCount
                 differenceRepoList.add(fetchedRepo)
             } catch (e: IOException) {
-                startAlarmWithRepoList(e, favoriteRepos.subList(index, favoriteRepos.size))
-                workerResult = Result.failure()
+                changeWorkerResultWithData(e, favoriteRepos.subList(index, favoriteRepos.size), Result.failure())
                 return differenceRepoList
             } catch (e: HttpException) {
-                startAlarmWithRepoList(e, favoriteRepos.subList(index, favoriteRepos.size))
-                workerResult = Result.failure()
-                return differenceRepoList
-            } catch (e: NullPointerException) {
-                startAlarmWithRepoList(e, favoriteRepos.subList(index, favoriteRepos.size))
-                workerResult = Result.failure()
+                changeWorkerResultWithData(e, favoriteRepos.subList(index, favoriteRepos.size), Result.failure())
                 return differenceRepoList
             }
         }
 
+        changeWorkerResultWithData(repoForUpdates = listOf(), result = Result.success())
         RepoWorkerHelper.initWorker(context)
         return differenceRepoList
     }
 
-    private fun startAlarmWithRepoList(e: Exception, repoForUpdates: List<Repo>) {
-        Log.e("service_error", "Service Exception: ", e)
-        RepoWorkerHelper.initWorker(
-            context = context,
-            startAfterSec = repository.getUntilLimitResetTimeSec().inWholeSeconds,
-            repoForUpdates = convertRepoListToStringList(repoForUpdates)
-        )
+    private fun changeWorkerResultWithData(e: Exception? = null, repoForUpdates: List<Repo>, result: Result) {
+        val startAfterSec = repository.getUntilLimitResetTimeSec().inWholeSeconds
+        val reposForUpdate = convertRepoListToStringList(repoForUpdates)
+        val data = RepoWorkerHelper.getWorkerData(reposForUpdate, startAfterSec)
+
+        workerResult = if (result == Result.failure()) {
+            Log.e("service_error", "Service Exception: ", e)
+            Result.failure(data)
+        } else {
+            Result.success(data)
+        }
     }
 
     private fun convertRepoListToStringList(repoList: List<Repo>): List<String> {

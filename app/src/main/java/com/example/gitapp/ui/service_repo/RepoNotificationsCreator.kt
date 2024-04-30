@@ -11,8 +11,11 @@ import androidx.core.app.NotificationCompat
 import com.example.gitapp.R
 import com.example.data.data.api.models.ApiRepo
 import com.example.data.data.database.entity.RepoEntity
+import com.example.data.data.repository.Repository
 import com.example.domain.domain.entity.Repo
+import com.example.gitapp.App
 import com.example.gitapp.ui.diagram.DiagramActivity
+import javax.inject.Inject
 
 const val NOTIFICATION_ID = 33
 private const val CHANNEL_NAME = "repo_push"
@@ -20,7 +23,14 @@ const val CHANNEL_ID = "repo_channel"
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class RepoNotificationsCreator(private val context: Context) : NotificationsCreator<Repo>() {
+    @Inject
+    lateinit var repository: Repository
+
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    init {
+        App.appComponent.inject(this)
+    }
 
     override suspend fun showNotifications(dataList: List<Repo>) {
         createNotificationChannel(
@@ -50,7 +60,11 @@ class RepoNotificationsCreator(private val context: Context) : NotificationsCrea
         return map
     }
 
-    private fun getNewStarsRepoNotification(repo: RepoEntity): Notification {
+    private suspend fun getNewStarsRepoNotification(repo: RepoEntity): Notification {
+        val dbRepo = repository.getRepoEntity(repo.owner.nameUser, repo.name)
+        if (dbRepo != null) {
+            repo.stargazersCount += dbRepo.stargazersCount
+        }
         val intent = DiagramActivity.get(context, repo)
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 

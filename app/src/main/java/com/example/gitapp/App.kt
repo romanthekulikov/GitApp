@@ -16,11 +16,7 @@ class App : Application() {
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate() {
-        appComponent = DaggerAppComponent.builder().serviceModule(
-            ServiceModule(
-                applicationContext
-            )
-        ).build()
+        appComponent = DaggerAppComponent.builder().serviceModule(ServiceModule(applicationContext)).build()
         AppDatabase.initDb(applicationContext)
         super.onCreate()
     }

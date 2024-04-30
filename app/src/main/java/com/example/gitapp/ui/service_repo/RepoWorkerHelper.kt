@@ -5,6 +5,7 @@ import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -17,7 +18,7 @@ object RepoWorkerHelper {
     private val periodicity: Int =
         (24 - (backSkipPeriod.last - backSkipPeriod.first + frontSkipPeriod.last - frontSkipPeriod.first)) / 3
 
-    fun initWorker(context: Context, startAfterSec: Long = 0, repoForUpdates: List<String> = listOf()) {
+    fun initWorker(context: Context, startAfterSec: Long = 0, repoForUpdates: Data = Data.Builder().build()) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
@@ -28,19 +29,49 @@ object RepoWorkerHelper {
                 timeUnit = TimeUnit.SECONDS
             )
             .setConstraints(constraints)
-            .setInputData(getWorkerData(repoForUpdates))
+            .setInputData(repoForUpdates)
             .build()
+        val workManager = WorkManager.getInstance(context)
 
-        WorkManager.getInstance(context).enqueue(workRequest)
+        workManager.enqueue(workRequest)
+        workManager.getWorkInfoByIdLiveData(workRequest.id).observeForever {
+            val data = it.outputData
+            val repeatStartAfterSec = data.getLong("start_after_sec", 0)
+            when (it.state) {
+                WorkInfo.State.ENQUEUED -> { /* nothing */
+                }
+
+                WorkInfo.State.RUNNING -> { /* nothing */
+                }
+
+                WorkInfo.State.FAILED -> {
+                    workManager.cancelWorkById(workRequest.id)
+                    val repoForUpdate = data.getStringArray("repos")
+                    if (repoForUpdate != null) {
+                        initWorker(context, repeatStartAfterSec, data)
+                    }
+                }
+
+                WorkInfo.State.SUCCEEDED -> {
+                    workManager.cancelWorkById(workRequest.id)
+                    initWorker(context, repeatStartAfterSec)
+                }
+
+                else -> { /* nothing */
+                }
+            }
+        }
+
     }
 
-    private fun getWorkerData(repoForUpdates: List<String>): Data {
+    fun getWorkerData(repoForUpdates: List<String>, startAfterSec: Long): Data {
         var arrayRepo = arrayOf<String>()
         repoForUpdates.forEach { repo ->
             arrayRepo = arrayRepo.plus(repo)
         }
         val dataBuilder = Data.Builder()
         dataBuilder.putStringArray("repos", arrayRepo)
+        dataBuilder.putLong("start_after_sec", startAfterSec)
 
         return dataBuilder.build()
     }

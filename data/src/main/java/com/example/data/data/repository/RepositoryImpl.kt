@@ -27,7 +27,10 @@ class RepositoryImpl @Inject constructor(
 ) : Repository {
 
     private var stargazersItemList: MutableList<Stargazer> = mutableListOf()
-    private var untilLimitResetTime = LocalDateTime.now().plusMinutes(BASE_RESET_LIMIT_PERIOD_MIN).toEpochSecond(ZoneOffset.UTC)
+    private var untilLimitResetTime =
+        LocalDateTime.now().plusMinutes(BASE_RESET_LIMIT_PERIOD_MIN).toEpochSecond(ZoneOffset.UTC) -
+                LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+
     private var db = AppDatabase.db
     override suspend fun getOwnerRepoList(ownerName: String, pageNumb: Int): List<RepoEntity> {
         val repoList = apiService.fetchOwnerRepos(ownerName = ownerName, numberOfPage = pageNumb)
