@@ -6,9 +6,8 @@ import com.example.domain.domain.entity.User
 import com.example.domain.domain.models.StaredModel
 import java.time.DayOfWeek
 import java.time.LocalDate
-import javax.inject.Inject
 
-class PeriodHelper @Inject constructor() {
+class PeriodHelper() {
 
     /**
      * Return date diapason for starred data. Return string such as "2024-03-29" or

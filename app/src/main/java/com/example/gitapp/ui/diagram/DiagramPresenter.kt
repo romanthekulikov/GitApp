@@ -5,10 +5,13 @@ import android.view.View
 import com.example.domain.domain.HistogramPeriodAdapter
 import com.example.domain.domain.PeriodHelper
 import com.example.domain.domain.Repository
+import com.example.domain.domain.entity.Stared
 import com.example.domain.domain.models.RepoEntity
 import com.example.domain.domain.use_cases.diagram.ClearMemorySavedStargazersUseCase
+import com.example.domain.domain.use_cases.diagram.GetBarDataUseCase
 import com.example.domain.domain.use_cases.diagram.GetDateLoadedStargazerUseCase
 import com.example.domain.domain.use_cases.diagram.GetLoadedDataInPeriodUseCase
+import com.example.domain.domain.use_cases.diagram.GetPeriodStringUseCase
 import com.example.domain.domain.use_cases.diagram.GetStargazersListUseCase
 import com.example.domain.domain.use_cases.diagram.UpdateRepoStargazersCountUseCase
 import com.example.gitapp.App
@@ -33,6 +36,7 @@ import javax.inject.Inject
 class DiagramPresenter(
     private val repo: RepoEntity
 ) : BasePresenter<DiagramView>() {
+
     private val weekDay = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     private val yearMonth = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
@@ -50,6 +54,8 @@ class DiagramPresenter(
     private val getLoadedDataInPeriodUseCase by lazy { GetLoadedDataInPeriodUseCase(repository) }
     private val clearMemorySavedStargazersUseCase by lazy { ClearMemorySavedStargazersUseCase(repository) }
     private val updateRepoStargazersCountUseCase by lazy { UpdateRepoStargazersCountUseCase(repository) }
+    private val getBarDataUseCase by lazy { GetBarDataUseCase(histogramPeriodAdapter) }
+    private val getPeriodStringUseCase by lazy { GetPeriodStringUseCase(periodHelper) }
 
     private var displayedDiagramPage = 0
     private var nextLoadPageNumber = (repo.stargazersCount / com.example.data.data.api.ITEM_PER_STARGAZERS_PAGE) + 1
@@ -171,7 +177,7 @@ class DiagramPresenter(
             viewState.setNextButtonEnabled(false)
         }
         val loadedData = getLoadedDataInPeriodUseCase.execute(startPeriod, endPeriod)
-        val barData = histogramPeriodAdapter.periodToBarData(loadedData, diagramMode.toString(), startPeriod, endPeriod)
+        val barData = getBarDataUseCase.execute(loadedData, diagramMode.toString(), startPeriod, endPeriod)
         when (diagramMode) {
             PeriodType.WEEK -> viewState.displayData(
                 barData,
@@ -232,8 +238,8 @@ class DiagramPresenter(
         displayHistogramWithLoadData()
     }
 
-    fun requestPeriodDataTime(periodData: List<com.example.domain.domain.entity.Stared>): String {
-        return periodHelper.getPeriodString(periodData, diagramMode.toString())
+    fun requestPeriodDataTime(periodData: List<Stared>): String {
+        return getPeriodStringUseCase.execute(periodData, diagramMode.toString())
     }
 
     private fun moveBackPeriod() {

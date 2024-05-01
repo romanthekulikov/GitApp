@@ -6,9 +6,8 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import java.time.DayOfWeek
 import java.time.LocalDate
-import javax.inject.Inject
 
-class HistogramPeriodAdapter @Inject constructor() {
+class HistogramPeriodAdapter() {
 
     fun periodToBarData(
         periodData: List<Stared>,
@@ -30,13 +29,14 @@ class HistogramPeriodAdapter @Inject constructor() {
             if (lastDay > endPeriod) {
                 lastDay = endPeriod
             }
-            val stared = periodData.filter { it.time in startDay..lastDay }.sortedBy { it.time }
-            values.add(BarEntry(entryIndex.toFloat(), stared.sumOf { it.users.size }.toFloat(), stared))
+
+            values.add(getBarEntry(periodData, entryIndex, startDay, lastDay))
 
             when (periodType) {
                 "week" -> {
                     startDay = startDay.plusDays(1)
                     lastDay = startDay
+                    if (lastDay == endPeriod) values.add(getBarEntry(periodData, entryIndex++, startDay, lastDay))
                 }
 
                 "month" -> {
@@ -58,4 +58,10 @@ class HistogramPeriodAdapter @Inject constructor() {
         val set = BarDataSet(values, "[$startPeriod]<->[$endPeriod]")
         return BarData(set)
     }
+
+    private fun getBarEntry(periodData: List<Stared>, entryIndex: Int, startDay: LocalDate, lastDay: LocalDate): BarEntry {
+        val stared = periodData.filter { it.time in startDay..lastDay }.sortedBy { it.time }
+        return BarEntry(entryIndex.toFloat(), stared.sumOf { it.users.size }.toFloat(), stared)
+    }
+
 }
