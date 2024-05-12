@@ -2,8 +2,6 @@ package com.example.gitapp.ui.main
 
 import android.util.Log
 import com.example.domain.domain.Repository
-import com.example.domain.domain.use_cases.main.GetRepoListUseCase
-import com.example.domain.domain.use_cases.main.UpdateRepoFavoriteUseCase
 import com.example.gitapp.App
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
@@ -24,9 +22,6 @@ class MainPresenter : BasePresenter<MainView>() {
     @Inject
     lateinit var repository: Repository
 
-    private val getRepoListUseCase by lazy { GetRepoListUseCase(repository) }
-    private val updateRepoFavoriteUseCase by lazy { UpdateRepoFavoriteUseCase(repository) }
-
     private var needNewPage = true
 
     private var needShowError = false
@@ -40,7 +35,7 @@ class MainPresenter : BasePresenter<MainView>() {
             try {
                 needShowError = showErrorOnFailLoad
                 if (requireNewPage) {
-                    val repoList = getRepoListUseCase.execute(ownerName, page)
+                    val repoList = repository.getOwnerRepoList(ownerName = ownerName, pageNumb = page)
                     showList(repoList)
                 }
             } catch (e: UnknownHostException) {
@@ -57,7 +52,7 @@ class MainPresenter : BasePresenter<MainView>() {
 
     fun requestChangeFavoriteRepo(repo: com.example.domain.domain.models.RepoEntity, isFavorite: Boolean) {
         launch {
-            updateRepoFavoriteUseCase.execute(repo, isFavorite)
+            repository.updateRepoFavorite(repo.owner.nameUser, repo.name, isFavorite)
         }
     }
 
@@ -71,7 +66,7 @@ class MainPresenter : BasePresenter<MainView>() {
 
     private suspend fun showLoadError(message: String, logMessage: String?, ownerName: String) {
         needNewPage = false
-        showList(getRepoListUseCase.execute(ownerName))
+        showList(repository.getOwnerRepoList(ownerName = ownerName))
         if (needShowError) {
             Log.e("api_retrofit", logMessage ?: message)
             viewState.showError(message)

@@ -44,18 +44,23 @@ def moxy_version = "2.2.2"
 def moshi_version = "1.14.0"
 def retrofit_version = "2.10.0"
 def okhttp3_version = "4.12.0"
+def mockkVersion = "1.13.10"
 
 dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
     implementation 'androidx.room:room-testing:2.6.1'
+    implementation 'androidx.test.espresso:espresso-contrib:3.5.1'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.0.0"
+
+    //mockk
+    testImplementation "io.mockk:mockk:$mockkVersion"
 
     //moxy
     implementation "com.github.moxy-community:moxy:$moxy_version"
@@ -90,6 +95,11 @@ dependencies {
     implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
     implementation "com.squareup.moshi:moshi:$moshi_version"
     ksp "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
+
+    //espresso
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
 
     implementation project(path: ':domain')
     implementation project(path: ':data')

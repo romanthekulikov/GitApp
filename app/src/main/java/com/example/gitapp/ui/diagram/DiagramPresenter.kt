@@ -2,18 +2,11 @@ package com.example.gitapp.ui.diagram
 
 import android.util.Log
 import android.view.View
-import com.example.domain.domain.HistogramPeriodAdapter
-import com.example.domain.domain.PeriodHelper
+import com.example.domain.domain.use_cases.diagram.AdaptPeriodUseCase
+import com.example.domain.domain.use_cases.diagram.ConvertPeriodUseCase
 import com.example.domain.domain.Repository
 import com.example.domain.domain.entity.Stared
 import com.example.domain.domain.models.RepoEntity
-import com.example.domain.domain.use_cases.diagram.ClearMemorySavedStargazersUseCase
-import com.example.domain.domain.use_cases.diagram.GetBarDataUseCase
-import com.example.domain.domain.use_cases.diagram.GetDateLoadedStargazerUseCase
-import com.example.domain.domain.use_cases.diagram.GetLoadedDataInPeriodUseCase
-import com.example.domain.domain.use_cases.diagram.GetPeriodStringUseCase
-import com.example.domain.domain.use_cases.diagram.GetStargazersListUseCase
-import com.example.domain.domain.use_cases.diagram.UpdateRepoStargazersCountUseCase
 import com.example.gitapp.App
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
@@ -41,21 +34,13 @@ class DiagramPresenter(
     private val yearMonth = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
     @Inject
-    lateinit var periodHelper: PeriodHelper
+    lateinit var convertPeriodUseCase: ConvertPeriodUseCase
 
     @Inject
-    lateinit var histogramPeriodAdapter: HistogramPeriodAdapter //pattern
+    lateinit var adaptPeriodUseCase: AdaptPeriodUseCase //pattern
 
     @Inject
     lateinit var repository: Repository
-
-    private val getStargazersListUseCase by lazy { GetStargazersListUseCase(repository) }
-    private val getDateLoadedStargazerUseCase by lazy { GetDateLoadedStargazerUseCase(repository) }
-    private val getLoadedDataInPeriodUseCase by lazy { GetLoadedDataInPeriodUseCase(repository) }
-    private val clearMemorySavedStargazersUseCase by lazy { ClearMemorySavedStargazersUseCase(repository) }
-    private val updateRepoStargazersCountUseCase by lazy { UpdateRepoStargazersCountUseCase(repository) }
-    private val getBarDataUseCase by lazy { GetBarDataUseCase(histogramPeriodAdapter) }
-    private val getPeriodStringUseCase by lazy { GetPeriodStringUseCase(periodHelper) }
 
     private var displayedDiagramPage = 0
     private var nextLoadPageNumber = (repo.stargazersCount / com.example.data.data.api.ITEM_PER_STARGAZERS_PAGE) + 1
@@ -71,11 +56,11 @@ class DiagramPresenter(
     init {
         App.appComponent.inject(this)
         resetPresenter()
-        clearMemorySavedStargazersUseCase.execute()
+        repository.clearMemorySavedStargazers()
         displayHistogramWithLoadData()
         displayRepo()
         viewState.setPreviousButtonEnabled(false)
-        launch { updateRepoStargazersCountUseCase.execute(repo) }
+        launch { repository.updateRepoStargazersCount(repo.owner.nameUser, repo.name, repo.stargazersCount) }
     }
 
     private fun resetPresenter() {
@@ -100,7 +85,7 @@ class DiagramPresenter(
                 } catch (e: UnknownHostException) {
                     displayErrorWithDataIfExist(message = ERROR_NO_INTERNET, logMessage = e.message)
                 } catch (e: HttpException) {
-                    if (getStargazersListUseCase.execute().isNotEmpty()) {
+                    if (repository.getLoadedStargazers().isNotEmpty()) {
                         displayErrorWithDataIfExist(message = ERROR_EXCEEDED_LIMIT, logMessage = e.message)
                     } else {
                         displayErrorWithDataIfExist(message = ERROR_NO_DATA, logMessage = e.message)
@@ -131,11 +116,11 @@ class DiagramPresenter(
 
     private suspend fun loadData() {
         try {
-            val loadedStargazers = getStargazersListUseCase.execute(repo, nextLoadPageNumber)
+            val loadedStargazers = repository.getStargazersList(repo.owner.nameUser, repo.name, nextLoadPageNumber)
             fillFields(loadedStargazers)
             nextLoadPageNumber--
         } catch (e: UnknownHostException) {
-            val loadedStargazers = getStargazersListUseCase.execute(repo)
+            val loadedStargazers = repository.getStargazersList(repo.owner.nameUser, repo.name)
             if (loadedStargazers.isEmpty()) {
                 throw e
             }
@@ -146,8 +131,8 @@ class DiagramPresenter(
     }
 
     private fun fillFields(loadedStargazers: List<com.example.domain.domain.entity.Stargazer>) {
-        lastDateLoadedStargazer = getDateLoadedStargazerUseCase.executeLast()
-        firstLoadedStargazerDate = getDateLoadedStargazerUseCase.executeFirst()
+        lastDateLoadedStargazer = repository.getLastDateLoadedStargazer()
+        firstLoadedStargazerDate = repository.getFirstLoadedStargazerDate()
 
         if (startPeriod > lastDateLoadedStargazer || !toStartPeriodMoved) { // If repo don't have a star on the current period
             startPeriod = lastDateLoadedStargazer.with(DayOfWeek.MONDAY) // Use week cause presenter start with week period type
@@ -167,7 +152,7 @@ class DiagramPresenter(
         }
         errorShowed = true
         Log.e("api_retrofit", logMessage ?: message)
-        if (getStargazersListUseCase.execute().isNotEmpty()) {
+        if (repository.getLoadedStargazers().isNotEmpty()) {
             displayHistogram()
         }
     }
@@ -176,8 +161,8 @@ class DiagramPresenter(
         if (nextLoadPageNumber == 0 && startPeriod < firstLoadedStargazerDate) {
             viewState.setNextButtonEnabled(false)
         }
-        val loadedData = getLoadedDataInPeriodUseCase.execute(startPeriod, endPeriod)
-        val barData = getBarDataUseCase.execute(loadedData, diagramMode.toString(), startPeriod, endPeriod)
+        val loadedData = repository.getLoadedDataInPeriod(startPeriod, endPeriod)
+        val barData = adaptPeriodUseCase.periodToBarData(loadedData, diagramMode.toString(), startPeriod, endPeriod)
         when (diagramMode) {
             PeriodType.WEEK -> viewState.displayData(
                 barData,
@@ -186,7 +171,7 @@ class DiagramPresenter(
 
             PeriodType.MONTH -> viewState.displayData(
                 barData,
-                IndexAxisValueFormatter(periodHelper.getMonthWeekPeriodArray(startPeriod, endPeriod))
+                IndexAxisValueFormatter(convertPeriodUseCase.getMonthWeekPeriodArray(startPeriod, endPeriod))
             )
 
             PeriodType.YEAR -> viewState.displayData(
@@ -239,7 +224,7 @@ class DiagramPresenter(
     }
 
     fun requestPeriodDataTime(periodData: List<Stared>): String {
-        return getPeriodStringUseCase.execute(periodData, diagramMode.toString())
+        return convertPeriodUseCase.getPeriodString(periodData, diagramMode.toString())
     }
 
     private fun moveBackPeriod() {

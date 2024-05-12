@@ -11,6 +11,7 @@ import com.example.domain.domain.Repository
 import com.example.domain.domain.entity.Repo
 import com.example.domain.domain.entity.Stared
 import com.example.domain.domain.entity.Stargazer
+import com.example.domain.domain.use_cases.diagram.ConvertPeriodUseCase
 import retrofit2.Response
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,7 +25,7 @@ const val BASE_RESET_LIMIT_PERIOD_MIN: Long = 70
 
 class RepositoryImpl @Inject constructor(
     private val apiService: GitApiService,
-    private val periodHelper: com.example.domain.domain.PeriodHelper
+    private val convertPeriodUseCase: ConvertPeriodUseCase
 ) : Repository {
 
     private var stargazersItemList: MutableList<Stargazer> = mutableListOf()
@@ -124,8 +125,8 @@ class RepositoryImpl @Inject constructor(
         startPeriod: LocalDate,
         endPeriod: LocalDate
     ): List<Stared> {
-        val starredList = periodHelper.getStarred(stargazersItemList)
-        return periodHelper.getDataInPeriod(startPeriod, endPeriod, starredList)
+        val starredList = convertPeriodUseCase.getStarred(stargazersItemList)
+        return convertPeriodUseCase.getDataInPeriod(startPeriod, endPeriod, starredList)
     }
 
     override fun clearMemorySavedStargazers() {

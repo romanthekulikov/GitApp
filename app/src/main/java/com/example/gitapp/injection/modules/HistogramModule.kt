@@ -1,19 +1,19 @@
 package com.example.gitapp.injection.modules
 
-import com.example.domain.domain.HistogramPeriodAdapter
-import com.example.domain.domain.PeriodHelper
+import com.example.domain.domain.use_cases.diagram.AdaptPeriodUseCase
+import com.example.domain.domain.use_cases.diagram.ConvertPeriodUseCase
 import dagger.Module
 import dagger.Provides
 
 @Module
 class HistogramModule {
     @Provides
-    fun getHistogramPeriodAdapter(): HistogramPeriodAdapter {
-        return HistogramPeriodAdapter()
+    fun getHistogramPeriodAdapter(): AdaptPeriodUseCase {
+        return AdaptPeriodUseCase()
     }
 
     @Provides
-    fun getPeriodHelper(): PeriodHelper {
-        return PeriodHelper()
+    fun getPeriodHelper(): ConvertPeriodUseCase {
+        return ConvertPeriodUseCase()
     }
 }

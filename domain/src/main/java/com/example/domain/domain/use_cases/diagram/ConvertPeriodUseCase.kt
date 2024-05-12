@@ -1,4 +1,4 @@
-package com.example.domain.domain
+package com.example.domain.domain.use_cases.diagram
 
 import com.example.domain.domain.entity.Stared
 import com.example.domain.domain.entity.Stargazer
@@ -7,7 +7,7 @@ import com.example.domain.domain.models.StaredModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-class PeriodHelper() {
+class ConvertPeriodUseCase {
 
     /**
      * Return date diapason for starred data. Return string such as "2024-03-29" or
@@ -16,23 +16,23 @@ class PeriodHelper() {
     fun getPeriodString(partData: List<Stared>, periodType: String): String {
         var startPeriodPart = partData[0].time
         return when (periodType) {
-            "week" -> {
+            WEEK -> {
                 startPeriodPart.toString() //Just one day
             }
 
-            "month" -> {
+            MONTH -> {
                 val endPeriodPartLocalDate = startPeriodPart.with(DayOfWeek.SUNDAY)
                 startPeriodPart = endPeriodPartLocalDate.with(DayOfWeek.MONDAY)
                 "$startPeriodPart <-> $endPeriodPartLocalDate"
             }
 
-            "year" -> {
+            YEAR -> {
                 val endPeriodPart = startPeriodPart.withDayOfMonth(startPeriodPart.lengthOfMonth())
                 startPeriodPart = endPeriodPart.withDayOfMonth(1)
                 "$startPeriodPart <-> $endPeriodPart"
             }
 
-            else -> throw IllegalArgumentException("Illegal period type found")
+            else -> throw IllegalArgumentException(EXCEPTION_ILLEGAL_PERIOD)
         }
     }
 

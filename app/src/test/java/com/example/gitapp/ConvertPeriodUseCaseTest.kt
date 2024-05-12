@@ -4,15 +4,15 @@ import com.example.domain.domain.models.StargazerEntity
 import com.example.domain.domain.models.UserEntity
 import com.example.domain.domain.entity.Stared
 import com.example.gitapp.ui.diagram.PeriodType
-import com.example.domain.domain.PeriodHelper
+import com.example.domain.domain.use_cases.diagram.ConvertPeriodUseCase
 import com.example.domain.domain.models.StaredModel
 import org.junit.Assert
 import org.junit.Test
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class PeriodHelperTest {
-    private val periodHelper: PeriodHelper = PeriodHelper()
+class ConvertPeriodUseCaseTest {
+    private val convertPeriodUseCase: ConvertPeriodUseCase = ConvertPeriodUseCase()
     private val testUser1 = UserEntity("Filip", "null")
     private val testUser2 = UserEntity("Joni", "null")
     private val testUser3 = UserEntity("Mark", "null")
@@ -27,9 +27,9 @@ class PeriodHelperTest {
         val partData = mutableListOf<Stared>()
         val usersList = listOf(testUser1, testUser2, testUser3)
         partData.add(StaredModel(testDate1, usersList))
-        val dayPeriod = periodHelper.getPeriodString(partData, PeriodType.WEEK.toString())
-        val weekPeriod = periodHelper.getPeriodString(partData, PeriodType.MONTH.toString())
-        val monthPeriod = periodHelper.getPeriodString(partData, PeriodType.YEAR.toString())
+        val dayPeriod = convertPeriodUseCase.getPeriodString(partData, PeriodType.WEEK.toString())
+        val weekPeriod = convertPeriodUseCase.getPeriodString(partData, PeriodType.MONTH.toString())
+        val monthPeriod = convertPeriodUseCase.getPeriodString(partData, PeriodType.YEAR.toString())
 
         Assert.assertEquals("2024-03-29", dayPeriod)
         Assert.assertEquals("2024-03-25 <-> 2024-03-31", weekPeriod)
@@ -48,7 +48,7 @@ class PeriodHelperTest {
         stargazersList.add(
             StargazerEntity(testDate2, testUser3, "accompanist", "google")
         )
-        val stared = periodHelper.getStarred(stargazersList)
+        val stared = convertPeriodUseCase.getStarred(stargazersList)
         val stared1 = stared[0]
         val stared2 = stared[1]
 
@@ -71,8 +71,8 @@ class PeriodHelperTest {
             StargazerEntity(testDate3, testUser3, "accompanist", "google")
         )
 
-        val stared = periodHelper.getStarred(stargazersList)
-        val partDataStared = periodHelper.getDataInPeriod(testDate3, testDate4, stared)
+        val stared = convertPeriodUseCase.getStarred(stargazersList)
+        val partDataStared = convertPeriodUseCase.getDataInPeriod(testDate3, testDate4, stared)
         Assert.assertEquals(partDataStared.size, 2)
         Assert.assertEquals(partDataStared[0].time, testDate1)
         Assert.assertEquals(partDataStared[1].time, testDate3)
@@ -80,7 +80,7 @@ class PeriodHelperTest {
 
     @Test
     fun getMonthWeekPeriodArrayTest() {
-        val weekPeriod = periodHelper.getMonthWeekPeriodArray(testDate5, testDate4)
+        val weekPeriod = convertPeriodUseCase.getMonthWeekPeriodArray(testDate5, testDate4)
         Assert.assertEquals(5, weekPeriod.size)
         Assert.assertEquals(weekPeriod[0], "26-3")
         Assert.assertEquals(weekPeriod[1], "4-10")

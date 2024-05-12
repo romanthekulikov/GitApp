@@ -1,4 +1,4 @@
-package com.example.domain.domain
+package com.example.domain.domain.use_cases.diagram
 
 import com.example.domain.domain.entity.Stared
 import com.github.mikephil.charting.data.BarData
@@ -7,7 +7,12 @@ import com.github.mikephil.charting.data.BarEntry
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-class HistogramPeriodAdapter() {
+const val EXCEPTION_ILLEGAL_PERIOD = "Illegal period type found"
+const val WEEK = "week"
+const val MONTH = "month"
+const val YEAR = "year"
+
+class AdaptPeriodUseCase {
 
     fun periodToBarData(
         periodData: List<Stared>,
@@ -19,10 +24,10 @@ class HistogramPeriodAdapter() {
         var startDay = startPeriod
 
         var lastDay = when (periodType) {
-            "week" -> startDay
-            "month" -> startDay.with(DayOfWeek.SUNDAY)
-            "year" -> startDay.withDayOfMonth(startDay.lengthOfMonth())
-            else -> throw IllegalArgumentException("Illegal period type found")
+            WEEK -> startDay
+            MONTH -> startDay.with(DayOfWeek.SUNDAY)
+            YEAR -> startDay.withDayOfMonth(startDay.lengthOfMonth())
+            else -> throw IllegalArgumentException(EXCEPTION_ILLEGAL_PERIOD)
         }
         var entryIndex = 0
         while (lastDay != endPeriod) {
@@ -33,23 +38,23 @@ class HistogramPeriodAdapter() {
             values.add(getBarEntry(periodData, entryIndex, startDay, lastDay))
 
             when (periodType) {
-                "week" -> {
+                WEEK -> {
                     startDay = startDay.plusDays(1)
                     lastDay = startDay
                     if (lastDay == endPeriod) values.add(getBarEntry(periodData, entryIndex++, startDay, lastDay))
                 }
 
-                "month" -> {
+                MONTH -> {
                     startDay = startDay.plusWeeks(1).with(DayOfWeek.MONDAY)
                     if (lastDay != endPeriod) lastDay = startDay.with(DayOfWeek.SUNDAY)
                 }
 
-                "year" -> {
+                YEAR -> {
                     startDay = startDay.plusMonths(1).withDayOfMonth(1)
                     if (lastDay != endPeriod) lastDay = startDay.withDayOfMonth(startDay.lengthOfMonth())
                 }
 
-                else -> throw IllegalArgumentException("Illegal period type found")
+                else -> throw IllegalArgumentException(EXCEPTION_ILLEGAL_PERIOD)
             }
 
             entryIndex++
