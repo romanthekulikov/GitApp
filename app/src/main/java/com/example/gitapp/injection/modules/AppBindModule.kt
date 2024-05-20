@@ -3,8 +3,8 @@ package com.example.gitapp.injection.modules
 import com.example.domain.domain.Repository
 import com.example.data.data.RepositoryImpl
 import com.example.domain.domain.entity.Repo
-import com.example.gitapp.ui.service_repo.NotificationsCreator
-import com.example.gitapp.ui.service_repo.RepoNotificationsCreator
+import com.example.gitapp.background.NotificationsCreator
+import com.example.gitapp.background.RepoNotificationsCreator
 import dagger.Binds
 import dagger.Module
 import javax.inject.Singleton

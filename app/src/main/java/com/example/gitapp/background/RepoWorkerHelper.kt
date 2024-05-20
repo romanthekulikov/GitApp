@@ -1,4 +1,4 @@
-package com.example.gitapp.ui.service_repo
+package com.example.gitapp.background
 
 import android.content.Context
 import androidx.work.Constraints

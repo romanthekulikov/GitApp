@@ -2,13 +2,22 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="MainInstrumentedTest">
-        <State />
-      </entry>
       <entry key="app">
         <State />
       </entry>
+      <entry key="diagram_test()">
+        <State />
+      </entry>
+      <entry key="openDiagramActivity_GoogleAccompanist()">
+        <State />
+      </entry>
       <entry key="searchRepo_mainActivity()">
+        <State />
+      </entry>
+      <entry key="searchRepos_disableInternet()">
+        <State />
+      </entry>
+      <entry key="searchRepos_notFoundOwner()">
         <State />
       </entry>
     </value>

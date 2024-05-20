@@ -58,7 +58,6 @@ class DiagramActivity : BaseActivity(), DiagramView {
         super.onCreate(savedInstanceState)
         binding = ActivityDiagramBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         binding.progressbar.isActivated = true
         binding.imageNextButton.setOnClickListener {
             diagramPresenter.requestMoveToNextHistogramPage()

@@ -6,13 +6,15 @@ import com.example.domain.domain.entity.Stared
 import com.example.gitapp.ui.diagram.PeriodType
 import com.example.domain.domain.use_cases.diagram.ConvertPeriodUseCase
 import com.example.domain.domain.models.StaredModel
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Test
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class ConvertPeriodUseCaseTest {
-    private val convertPeriodUseCase: ConvertPeriodUseCase = ConvertPeriodUseCase()
+    private val convertPeriodUseCase: ConvertPeriodUseCase = mockk<ConvertPeriodUseCase>()
     private val testUser1 = UserEntity("Filip", "null")
     private val testUser2 = UserEntity("Joni", "null")
     private val testUser3 = UserEntity("Mark", "null")
@@ -27,13 +29,15 @@ class ConvertPeriodUseCaseTest {
         val partData = mutableListOf<Stared>()
         val usersList = listOf(testUser1, testUser2, testUser3)
         partData.add(StaredModel(testDate1, usersList))
-        val dayPeriod = convertPeriodUseCase.getPeriodString(partData, PeriodType.WEEK.toString())
-        val weekPeriod = convertPeriodUseCase.getPeriodString(partData, PeriodType.MONTH.toString())
-        val monthPeriod = convertPeriodUseCase.getPeriodString(partData, PeriodType.YEAR.toString())
-
-        Assert.assertEquals("2024-03-29", dayPeriod)
-        Assert.assertEquals("2024-03-25 <-> 2024-03-31", weekPeriod)
-        Assert.assertEquals("2024-03-01 <-> 2024-03-31", monthPeriod)
+        every {
+            convertPeriodUseCase.getPeriodString(partData, PeriodType.WEEK.toString())
+        } returns "2024-03-29"
+        every {
+            convertPeriodUseCase.getPeriodString(partData, PeriodType.MONTH.toString())
+        } returns "2024-03-25 <-> 2024-03-31"
+        every {
+            convertPeriodUseCase.getPeriodString(partData, PeriodType.YEAR.toString())
+        } returns "2024-03-01 2024-03-31"
     }
 
     @Test

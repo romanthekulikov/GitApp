@@ -1,4 +1,4 @@
-package com.example.gitapp.ui.service_repo
+package com.example.gitapp.background
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -13,7 +13,7 @@ import com.example.data.data.api.models.ApiRepo
 import com.example.domain.domain.models.RepoEntity
 import com.example.domain.domain.Repository
 import com.example.domain.domain.entity.Repo
-import com.example.gitapp.App
+import com.example.gitapp.GitApp
 import com.example.gitapp.ui.diagram.DiagramActivity
 import javax.inject.Inject
 
@@ -29,7 +29,7 @@ class RepoNotificationsCreator(private val context: Context) : NotificationsCrea
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     init {
-        App.appComponent.inject(this)
+        GitApp.appComponent.inject(this)
     }
 
     override suspend fun showNotifications(dataList: List<Repo>) {

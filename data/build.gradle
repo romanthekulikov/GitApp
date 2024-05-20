@@ -52,6 +52,7 @@ def room_version = "2.6.1"
 def moshi_version = "1.15.1"
 def retrofit_version = "2.10.0"
 def okhttp3_version = "4.12.0"
+def mockkVersion = "1.13.10"
 
 dependencies {
 
@@ -82,6 +83,9 @@ dependencies {
     implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
     implementation "com.squareup.moshi:moshi:$moshi_version"
     ksp "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
+
+    //mockk
+    testImplementation "io.mockk:mockk:$mockkVersion"
 
     implementation project(path: ':domain')
 }

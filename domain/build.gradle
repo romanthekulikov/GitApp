@@ -50,6 +50,9 @@ dependencies {
     //histogram
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
+    //mockk
+    testImplementation "io.mockk:mockk:$mockkVersion"
+
     //room
     implementation "androidx.room:room-runtime:$room_version"
     ksp "androidx.room:room-compiler:$room_version"

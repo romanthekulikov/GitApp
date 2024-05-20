@@ -33,5 +33,4 @@ interface GitApiService {
         @Query(value = "per_page") itemInPageCount: Int = ITEM_PER_STARGAZERS_PAGE,
         @Query(value = "page") page: Int
     ): List<ApiStargazer>
-
 }

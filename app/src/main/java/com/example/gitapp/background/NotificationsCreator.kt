@@ -1,4 +1,4 @@
-package com.example.gitapp.ui.service_repo
+package com.example.gitapp.background
 
 import android.app.Notification
 import android.app.NotificationChannel

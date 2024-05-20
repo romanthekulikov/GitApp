@@ -7,7 +7,7 @@ import com.example.domain.domain.use_cases.diagram.ConvertPeriodUseCase
 import com.example.domain.domain.Repository
 import com.example.domain.domain.entity.Stared
 import com.example.domain.domain.models.RepoEntity
-import com.example.gitapp.App
+import com.example.gitapp.GitApp
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
 import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
@@ -54,7 +54,7 @@ class DiagramPresenter(
     private var endPeriod = LocalDate.now().with(DayOfWeek.SUNDAY)!!
 
     init {
-        App.appComponent.inject(this)
+        GitApp.appComponent.inject(this)
         resetPresenter()
         repository.clearMemorySavedStargazers()
         displayHistogramWithLoadData()
@@ -79,7 +79,7 @@ class DiagramPresenter(
         viewState.changeVisibilityProgressBar(View.VISIBLE)
         launch {
             detectDataShortage()
-            while (!enoughData && nextLoadPageNumber > 0) {
+            while (!enoughData && nextLoadPageNumber > 0 && repo.stargazersCount > 0) {
                 try {
                     loadData()
                 } catch (e: UnknownHostException) {

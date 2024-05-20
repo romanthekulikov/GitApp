@@ -2,7 +2,7 @@ package com.example.gitapp.ui.main
 
 import android.util.Log
 import com.example.domain.domain.Repository
-import com.example.gitapp.App
+import com.example.gitapp.GitApp
 import com.example.gitapp.ui.base.BasePresenter
 import com.example.gitapp.ui.base.ERROR_EXCEEDED_LIMIT
 import com.example.gitapp.ui.base.ERROR_GITHUB_IS_SHUTDOWN
@@ -27,7 +27,7 @@ class MainPresenter : BasePresenter<MainView>() {
     private var needShowError = false
 
     init {
-        App.appComponent.inject(this)
+        GitApp.appComponent.inject(this)
     }
 
     fun requestGetRepo(ownerName: String, page: Int, requireNewPage: Boolean = needNewPage, showErrorOnFailLoad: Boolean) {

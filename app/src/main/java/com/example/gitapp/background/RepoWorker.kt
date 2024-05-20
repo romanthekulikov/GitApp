@@ -1,4 +1,4 @@
-package com.example.gitapp.ui.service_repo
+package com.example.gitapp.background
 
 import android.app.NotificationManager
 import android.content.Context
@@ -9,7 +9,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.example.domain.domain.Repository
 import com.example.domain.domain.entity.Repo
-import com.example.gitapp.App
+import com.example.gitapp.GitApp
 import com.example.gitapp.R
 import retrofit2.HttpException
 import java.io.IOException
@@ -30,7 +30,7 @@ class RepoWorker(private val context: Context, workerParams: WorkerParameters) :
     private var workerResult = Result.success()
 
     init {
-        App.appComponent.inject(this)
+        GitApp.appComponent.inject(this)
     }
 
     override suspend fun doWork(): Result {
