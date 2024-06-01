@@ -33,12 +33,11 @@ class RepositoryImpl @Inject constructor(
         LocalDateTime.now().plusMinutes(BASE_RESET_LIMIT_PERIOD_MIN).toEpochSecond(ZoneOffset.UTC) -
                 LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
 
-
-    private var db = AppDatabase.db
+    var db = AppDatabase.db
     override suspend fun getOwnerRepoList(ownerName: String, pageNumb: Int): List<RepoEntity> {
         val repoList = apiService.fetchOwnerRepos(ownerName = ownerName, numberOfPage = pageNumb)
         val repoEntityList = repoList.toRepoEntityList().toMutableList()
-        db.repoDao().insertAll(repoEntityList)
+        db.repoDao().insertAllRepos(repoEntityList)
 
         return getOwnerRepoList(ownerName)
     }

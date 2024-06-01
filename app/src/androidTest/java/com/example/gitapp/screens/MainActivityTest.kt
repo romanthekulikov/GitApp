@@ -1,7 +1,8 @@
-package com.example.gitapp
+package com.example.gitapp.screens
 
 import android.Manifest
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.typeText
@@ -11,6 +12,7 @@ import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.rule.GrantPermissionRule
+import com.example.gitapp.R
 import com.example.gitapp.ui.main.MainActivity
 import com.example.gitapp.ui.main.RepoAdapter
 import kotlinx.coroutines.delay
@@ -20,10 +22,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val TEST_OWNER = "google"
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class MainInstrumentedTest {
+class MainActivityTest {
 
     @get:Rule
     var activityScenarioRule = activityScenarioRule<MainActivity>()
@@ -35,7 +38,7 @@ class MainInstrumentedTest {
     fun searchRepo_mainActivity() {
         //write google to field
         onView(withId(R.id.input_owner)).perform(click())
-        onView(withId(R.id.input_owner)).perform(typeText("google"), closeSoftKeyboard())
+        onView(withId(R.id.input_owner)).perform(typeText(TEST_OWNER), closeSoftKeyboard())
         //start search repository
         onView(withId(R.id.image_enter)).perform(click())
         runBlocking {
@@ -50,9 +53,38 @@ class MainInstrumentedTest {
     }
 
     @Test
+    fun repos_reachLimit() {
+        var limitReached = false
+        var nextScrollPosition = 99
+        //write google to field
+        onView(withId(R.id.input_owner)).perform(click())
+        onView(withId(R.id.input_owner)).perform(typeText(TEST_OWNER), closeSoftKeyboard())
+        //start search repository
+        onView(withId(R.id.image_enter)).perform(click())
+        runBlocking {
+            while (!limitReached) {
+                delay(15000)
+                try {
+                    onView(withId(R.id.button_ok)).perform(click())
+                    limitReached = true
+                } catch (exception: NoMatchingViewException) {
+                    onView(withId(R.id.repositories)).perform(
+                        RecyclerViewActions.scrollToPosition<RepoAdapter.RepoViewHolder>(
+                            nextScrollPosition
+                        )
+                    )
+                    nextScrollPosition += 100
+                }
+            }
+
+        }
+
+    }
+
+    @Test
     fun searchRepos_disableInternet() {
         onView(withId(R.id.input_owner)).perform(click())
-        onView(withId(R.id.input_owner)).perform(typeText("google"), closeSoftKeyboard())
+        onView(withId(R.id.input_owner)).perform(typeText(TEST_OWNER), closeSoftKeyboard())
         onView(withId(R.id.image_enter)).perform(click())
         runBlocking {
             delay(2000)
@@ -66,7 +98,7 @@ class MainInstrumentedTest {
     fun searchRepos_withScrolling() {
         //write google to field
         onView(withId(R.id.input_owner)).perform(click())
-        onView(withId(R.id.input_owner)).perform(typeText("google"), closeSoftKeyboard())
+        onView(withId(R.id.input_owner)).perform(typeText(TEST_OWNER), closeSoftKeyboard())
         //start search repository
         onView(withId(R.id.image_enter)).perform(click())
         runBlocking {

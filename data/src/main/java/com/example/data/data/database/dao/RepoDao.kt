@@ -9,7 +9,7 @@ import com.example.domain.domain.models.RepoEntity
 @Dao
 interface RepoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(repos: List<RepoEntity>)
+    suspend fun insertAllRepos(repos: List<RepoEntity>)
 
     @Query("SELECT * FROM repo WHERE LOWER(name_user) = LOWER(:ownerName)")
     suspend fun getOwnerRepoList(ownerName: String): List<RepoEntity>
@@ -28,10 +28,4 @@ interface RepoDao {
 
     @Query("SELECT * FROM repo WHERE is_favorite = 1")
     suspend fun getFavoriteRepoList(): List<RepoEntity>
-
-    @Query("UPDATE repo SET is_notified = 0")
-    suspend fun makeReposNotNotified()
-
-    @Query("UPDATE repo SET is_notified = 1 WHERE repo_name = :repoName AND name_user = :ownerName")
-    suspend fun makeRepoNotified(ownerName: String, repoName: String)
 }

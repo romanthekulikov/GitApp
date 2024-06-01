@@ -2,22 +2,22 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="DatabaseTest">
+        <State />
+      </entry>
       <entry key="app">
         <State />
       </entry>
-      <entry key="diagram_test()">
+      <entry key="checkGetRepo()">
         <State />
       </entry>
-      <entry key="openDiagramActivity_GoogleAccompanist()">
+      <entry key="checkInsertRepo()">
         <State />
       </entry>
-      <entry key="searchRepo_mainActivity()">
+      <entry key="checkUpdateRepoFavorite()">
         <State />
       </entry>
-      <entry key="searchRepos_disableInternet()">
-        <State />
-      </entry>
-      <entry key="searchRepos_notFoundOwner()">
+      <entry key="repos_reachLimit()">
         <State />
       </entry>
     </value>

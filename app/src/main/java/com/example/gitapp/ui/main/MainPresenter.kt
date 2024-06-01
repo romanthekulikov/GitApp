@@ -26,6 +26,7 @@ class MainPresenter : BasePresenter<MainView>() {
 
     private var needShowError = false
 
+
     init {
         GitApp.appComponent.inject(this)
     }
