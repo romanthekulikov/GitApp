@@ -131,7 +131,7 @@ class DiagramPresenter(
     }
 
     private fun fillFields(loadedStargazers: List<com.example.domain.domain.entity.Stargazer>) {
-        lastDateLoadedStargazer = repository.getLastDateLoadedStargazer()
+        lastDateLoadedStargazer = repository.getLastLoadedStargazerDate()
         firstLoadedStargazerDate = repository.getFirstLoadedStargazerDate()
 
         if (startPeriod > lastDateLoadedStargazer || !toStartPeriodMoved) { // If repo don't have a star on the current period

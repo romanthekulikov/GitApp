@@ -2,22 +2,7 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="DatabaseTest">
-        <State />
-      </entry>
       <entry key="app">
-        <State />
-      </entry>
-      <entry key="checkGetRepo()">
-        <State />
-      </entry>
-      <entry key="checkInsertRepo()">
-        <State />
-      </entry>
-      <entry key="checkUpdateRepoFavorite()">
-        <State />
-      </entry>
-      <entry key="repos_reachLimit()">
         <State />
       </entry>
     </value>

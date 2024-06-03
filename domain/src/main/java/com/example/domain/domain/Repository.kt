@@ -19,7 +19,7 @@ interface Repository {
     suspend fun getRepoFromApi(ownerName: String, repoName: String): Repo?
     fun getUntilLimitResetTimeSec(): Duration
     suspend fun updateRepoStargazersCount(ownerName: String, repoName: String, stargazersCount: Int)
-    fun getLastDateLoadedStargazer(): LocalDate
+    fun getLastLoadedStargazerDate(): LocalDate
     fun getFirstLoadedStargazerDate(): LocalDate
     fun getLoadedStargazers(): List<Stargazer>
     fun getLoadedDataInPeriod(startPeriod: LocalDate, endPeriod: LocalDate): List<Stared>

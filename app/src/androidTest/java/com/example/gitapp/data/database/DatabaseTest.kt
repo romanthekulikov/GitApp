@@ -8,9 +8,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.data.data.database.AppDatabase
 import com.example.data.data.database.dao.RepoDao
 import com.example.data.data.database.dao.StargazerDao
-import com.example.domain.domain.models.RepoEntity
-import com.example.domain.domain.models.StargazerEntity
-import com.example.domain.domain.models.UserEntity
+import com.example.gitapp.data.database.TestData.Companion.listRepoEntity
+import com.example.gitapp.data.database.TestData.Companion.repoEntity1
+import com.example.gitapp.data.database.TestData.Companion.repoEntity5
+import com.example.gitapp.data.database.TestData.Companion.stargazerList
+import com.example.gitapp.data.database.TestData.Companion.userEntity1
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
@@ -18,32 +20,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
-import java.time.LocalDate
 
 @RunWith(AndroidJUnit4::class)
 class DatabaseTest {
     private lateinit var db: AppDatabase
     private lateinit var repoDao: RepoDao
     private lateinit var stargazerDao: StargazerDao
-
-    private val userEntity1 = UserEntity("google", "https://l.jpg")
-    private val userEntity2 = UserEntity("roman", "https://l.jpg")
-    private val userEntity3 = UserEntity("gleb", "https://l.jpg")
-    private val userEntity4 = UserEntity("sara", "https://l.jpg")
-    private val userEntity5 = UserEntity("love", "https://l.jpg")
-
-    private val repoEntity1 = RepoEntity(name = "accompanist", userEntity1, 200)
-    private val repoEntity2 = RepoEntity(name = "all", userEntity1, 10)
-    private val repoEntity3 = RepoEntity(name = "log", userEntity1, 300)
-    private val repoEntity4 = RepoEntity(name = "full", userEntity1, 0)
-    private val repoEntity5 = RepoEntity(name = "full", userEntity2, 200)
-    private val listRepoEntity: List<RepoEntity> = listOf(repoEntity1, repoEntity2, repoEntity3, repoEntity4)
-
-    private val stargazer1 = StargazerEntity(LocalDate.parse("2024-05-27"), userEntity2, "full", "roman")
-    private val stargazer2 = StargazerEntity(LocalDate.parse("2024-04-20"), userEntity3, "full", "roman")
-    private val stargazer3 = StargazerEntity(LocalDate.parse("2024-04-15"), userEntity4, "full", "roman")
-    private val stargazer4 = StargazerEntity(LocalDate.parse("2024-03-10"), userEntity5, "full", "roman")
-    private val stargazerList = listOf(stargazer1, stargazer2, stargazer3, stargazer4)
 
     @Before
     fun initDB() {

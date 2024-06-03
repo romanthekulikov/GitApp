@@ -107,7 +107,7 @@ class RepositoryImpl @Inject constructor(
         db.repoDao().updateRepoStargazersCount(stargazersCount = stargazersCount, ownerName = ownerName, repoName = repoName)
     }
 
-    override fun getLastDateLoadedStargazer(): LocalDate {
+    override fun getLastLoadedStargazerDate(): LocalDate {
         return stargazersItemList[stargazersItemList.size - 1].time
     }
 
