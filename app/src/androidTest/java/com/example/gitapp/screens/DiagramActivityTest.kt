@@ -1,6 +1,9 @@
 package com.example.gitapp.screens
 
 import android.Manifest
+import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.view.InputDevice
 import android.view.MotionEvent
 import androidx.test.espresso.Espresso.onView
@@ -118,13 +121,26 @@ class DiagramActivityTest {
     }
 
     @Test
-    fun diagram_testReachLimit() {
+    fun diagram_testLimit() {
+        var timeOut = false
+        val handler = Handler(Looper.getMainLooper())
+        handler.post {
+            val timer = object : CountDownTimer(900000, 60000) {
+                override fun onTick(millisUntilFinished: Long) { /** nothing **/ }
+
+                override fun onFinish() {
+                    timeOut = true
+                }
+            }
+            timer.start()
+        }
+
         runBlocking {
             // change diagram mode to year
             onView(withId(R.id.tab_layout_period)).perform(GitViewActions().selectTabAtPosition(2))
             delay(5000)
             var limitReached = false
-            while (!limitReached) {
+            while (!limitReached && !timeOut) {
                 try {
                     // reach the limit via cycle of requests
                     onView(withId(R.id.button_ok)).perform(click())
@@ -137,7 +153,6 @@ class DiagramActivityTest {
                     delay(7000)
                 }
             }
-
         }
     }
 

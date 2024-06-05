@@ -14,7 +14,7 @@ import com.example.gitapp.TestData.Companion.repoEntity2
 import com.example.gitapp.TestData.Companion.stargazer1
 import com.example.gitapp.TestData.Companion.stargazer4
 import com.example.gitapp.TestData.Companion.stargazerEntityList
-import com.example.gitapp.TestData.Companion.stargazersListTest
+import com.example.gitapp.TestData.Companion.stargazersListTest1
 import io.mockk.MockKException
 import io.mockk.every
 import io.mockk.mockk
@@ -116,7 +116,7 @@ class RepositoryUnitTest {
                     page = any()
                 )
             }
-        } returns stargazersListTest
+        } returns stargazersListTest1
 
         every {
             runBlocking {
@@ -129,12 +129,12 @@ class RepositoryUnitTest {
             var loadedStargazers = repository.getLoadedStargazers()
             val firstLoadedStargazerDate = repository.getFirstLoadedStargazerDate()
             val lastLoadedStargazerDate = repository.getLastLoadedStargazerDate()
-            Assert.assertEquals(stargazersList.size, stargazersListTest.size)
-            Assert.assertEquals(stargazersList[0].time, stargazersListTest[3].time)
-            Assert.assertEquals(stargazersList[1].time, stargazersListTest[2].time)
-            Assert.assertEquals(stargazersList[2].time, stargazersListTest[1].time)
-            Assert.assertEquals(stargazersList[3].time, stargazersListTest[0].time)
-            Assert.assertEquals(loadedStargazers.size, stargazersListTest.size)
+            Assert.assertEquals(stargazersList.size, stargazersListTest1.size)
+            Assert.assertEquals(stargazersList[0].time, stargazersListTest1[3].time)
+            Assert.assertEquals(stargazersList[1].time, stargazersListTest1[2].time)
+            Assert.assertEquals(stargazersList[2].time, stargazersListTest1[1].time)
+            Assert.assertEquals(stargazersList[3].time, stargazersListTest1[0].time)
+            Assert.assertEquals(loadedStargazers.size, stargazersListTest1.size)
             Assert.assertEquals(firstLoadedStargazerDate, stargazer4.time)
             Assert.assertEquals(lastLoadedStargazerDate, stargazer1.time)
 

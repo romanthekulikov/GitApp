@@ -5,6 +5,12 @@
       <entry key="app">
         <State />
       </entry>
+      <entry key="diagram_testLimit()">
+        <State />
+      </entry>
+      <entry key="diagram_testReachLimit()">
+        <State />
+      </entry>
     </value>
   </component>
 </project>

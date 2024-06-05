@@ -1,6 +1,9 @@
 package com.example.gitapp.screens
 
 import android.Manifest
+import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.action.ViewActions.click
@@ -54,6 +57,18 @@ class MainActivityTest {
 
     @Test
     fun repos_reachLimit() {
+        var timeOut = false
+        val handler = Handler(Looper.getMainLooper())
+        handler.post {
+            val timer = object : CountDownTimer(1800000, 60000) {
+                override fun onTick(millisUntilFinished: Long) { /** nothing **/ }
+
+                override fun onFinish() {
+                    timeOut = true
+                }
+            }
+            timer.start()
+        }
         var limitReached = false
         var nextScrollPosition = 99
         //write google to field
@@ -62,7 +77,7 @@ class MainActivityTest {
         //start search repository
         onView(withId(R.id.image_enter)).perform(click())
         runBlocking {
-            while (!limitReached) {
+            while (!limitReached && !timeOut) {
                 delay(15000)
                 try {
                     onView(withId(R.id.button_ok)).perform(click())

@@ -30,9 +30,11 @@ class AdaptPeriodUseCase {
             else -> throw IllegalArgumentException(EXCEPTION_ILLEGAL_PERIOD)
         }
         var entryIndex = 0
+        var addLast = false
         while (lastDay != endPeriod) {
             if (lastDay > endPeriod) {
                 lastDay = endPeriod
+                addLast = true
             }
 
             values.add(getBarEntry(periodData, entryIndex, startDay, lastDay))
@@ -60,6 +62,10 @@ class AdaptPeriodUseCase {
             entryIndex++
         }
 
+        if (!addLast) {
+            values.add(getBarEntry(periodData, entryIndex, startDay, lastDay))
+        }
+
         val set = BarDataSet(values, "[$startPeriod]<->[$endPeriod]")
         return BarData(set)
     }
@@ -68,5 +74,4 @@ class AdaptPeriodUseCase {
         val stared = periodData.filter { it.time in startDay..lastDay }.sortedBy { it.time }
         return BarEntry(entryIndex.toFloat(), stared.sumOf { it.users.size }.toFloat(), stared)
     }
-
 }
