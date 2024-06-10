@@ -29,6 +29,7 @@ import com.example.gitapp.ui.main.MainActivity
 import com.example.gitapp.ui.main.RepoAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -152,6 +153,10 @@ class DiagramActivityTest {
                     }
                     delay(7000)
                 }
+            }
+
+            if (timeOut) {
+                Assert.assertEquals(0, 1)
             }
         }
     }

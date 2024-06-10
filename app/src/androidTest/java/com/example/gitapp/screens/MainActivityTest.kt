@@ -67,6 +67,7 @@ class MainActivityTest {
                     timeOut = true
                 }
             }
+
             timer.start()
         }
         var limitReached = false
@@ -92,8 +93,10 @@ class MainActivityTest {
                 }
             }
 
+            if (timeOut) {
+                assertEquals(0, 1)
+            }
         }
-
     }
 
     @Test
