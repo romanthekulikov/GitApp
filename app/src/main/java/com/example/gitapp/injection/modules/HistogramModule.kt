@@ -12,6 +12,9 @@ class HistogramModule {
         return AdaptPeriodUseCase()
     }
 
+
+
+
     @Provides
     fun getPeriodHelper(): ConvertPeriodUseCase {
         return ConvertPeriodUseCase()
